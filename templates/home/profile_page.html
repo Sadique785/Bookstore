@@ -1,0 +1,154 @@
+{% extends 'base/personal_base.html' %}
+
+{% block start %}
+
+<!-- Form 1 -->
+<!-- Form 1 -->
+<div id="personal-info-form" style="width: 100%; box-sizing: border-box; padding: 15px;">
+    <h3 style="display: inline-block; margin-right: 10px;">Personal Information</h3>
+    <button id="edit-btn" type="button" onclick="toggleEdit()" style="display: inline-block; color: blue; background-color: white; border: none; padding: 5px 10px; cursor: pointer;">Edit</button>
+
+    <button type="button" id="cancel-btn" style="display: none; color: blue; background-color: white; border: none; padding: 5px 10px;" onclick="toggleEdit()">Cancel</button>
+
+    <form method="post" action="" style="width: 100%;">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="personal_info">
+        <div class="form-group" style="width: 40%; display: inline-block; margin-top: 20px;">
+            <label for="{{ form_first.first_name.id_for_label }}" style="margin-bottom: 5px;">First Name:</label>
+            <input type="text" name="{{ form_first.first_name.name }}" value="{{ form_first.first_name.value }}" readonly placeholder="{{ form_first.first_name.value }}" class="form-control" />
+        </div>
+
+        <div class="form-group" style="width: 40%; display: inline-block; margin-top: 20px;">
+            <label for="{{ form_first.last_name.id_for_label }}" style="margin-bottom: 5px;">Last Name:</label>
+            <input type="text" name="{{ form_first.last_name.name }}" value="{{ form_first.last_name.value }}" readonly placeholder="{{ form_first.last_name.value }}" class="form-control" />
+        </div>
+        <button type="submit" id="submit-btn" style="display: none; color: blue; background-color: white; border: none; padding: 5px 10px; margin-top: 10px;">Save</button>
+
+    </form>
+</div>
+
+
+<!-- Form 2 -->
+<!-- Form 2 -->
+<div class="other-form" id="email-form" style="width: 100%; box-sizing: border-box; padding: 15px;">
+    <h3 style="display: inline-block; margin-right: 10px;">Email</h3>
+    <button id="edit-btn-email" type="button" onclick="toggleEditEmail()" style="display: inline-block; color: blue; background-color: white; border: none; padding: 5px 10px; cursor: pointer;">Edit</button>
+  
+    <button type="button" id="cancel-btn-email" style="display: none; color: blue; background-color: white; border: none; padding: 5px 10px;" onclick="toggleEditEmail()">Cancel</button>
+  
+    <form method="post" action="" style="width: 100%;">
+      {% csrf_token %}
+      <input type="hidden" name="form_type" value="email">
+      <div class="form-group" style="width: 40%; display: inline-block; margin-top: 20px;">
+        <label for="{{ form_second.email.id_for_label }}" style="margin-bottom: 5px;">Email:</label>
+        <input type="text" name="{{ form_second.email.name }}" id="email-input" value="{{ form_second.email.value }}" readonly placeholder="{{ form_second.email.value }}" class="form-control" />
+      </div>
+      
+      <button type="submit" id="submit-btn-email" style="display: none; color: blue; background-color: white; border: none; padding: 5px 10px; margin-top: 10px;">Save</button>
+    </form>
+</div>
+
+<!-- Form 3 -->
+<div class="other-form" id="form3" style="width: 100%; box-sizing: border-box; padding: 15px;">
+    <h3 style="display: inline-block; margin-right: 10px;">Mobile</h3>
+    <button id="edit-btn-form3" type="button" onclick="toggleEditForm('form3')" style="display: inline-block; color: blue; background-color: white; border: none; padding: 5px 10px; cursor: pointer;">Edit</button>
+
+    <button type="button" id="cancel-btn-form3" style="display: none; color: blue; background-color: white; border: none; padding: 5px 10px;" onclick="toggleEditForm('form3')">Cancel</button>
+
+    <form method="post" action="" style="width: 100%;">
+        {% csrf_token %}
+        <input type="hidden" name="form_type" value="mobile">
+        <div class="form-group" style="width: 40%; display: inline-block; margin-top: 20px;">
+            <label for="{{ form_third.mobile.id_for_label }}" style="margin-bottom: 5px;">Mobile:</label>
+            <input type="text" name="{{ form_third.mobile.name }}" id="mobile-input" value="{{ form_third.mobile.value|default:'' }}" readonly placeholder="{{ form_third.mobile.value|default:'' }}" class="form-control" />
+        </div>
+        <button type="submit" id="submit-btn-form3" style="display: none; color: blue; background-color: white; border: none; padding: 5px 10px; margin-top: 10px;">Save</button>
+    </form>
+</div>
+
+{% include "base/alert.html" %}
+
+{% if form_errors %}
+    <ul class="messages">
+        {% for field, error_list in form_errors.items %}
+            {% for error in error_list %}
+                <li class="error">{{ error }}</li>
+            {% endfor %}
+        {% endfor %}
+    </ul>
+{% endif %}
+
+
+
+  <script>
+    function toggleEditForm(formId) {
+        var form = document.getElementById(formId);
+        var editBtn = document.getElementById('edit-btn-' + formId);
+        var submitBtn = document.getElementById('submit-btn-' + formId);
+        var cancelBtn = document.getElementById('cancel-btn-' + formId);
+
+        var formElements = form.querySelectorAll('input, textarea'); // Select all input and textarea elements inside the form
+
+        for (var i = 0; i < formElements.length; i++) {
+            formElements[i].readOnly = !formElements[i].readOnly;
+        }
+
+        editBtn.style.display = editBtn.style.display === 'none' ? 'inline-block' : 'none';
+        submitBtn.style.display = submitBtn.style.display === 'none' ? 'inline-block' : 'none';
+        cancelBtn.style.display = cancelBtn.style.display === 'none' ? 'inline-block' : 'none';
+    }
+
+
+
+    function toggleEdit() {
+        var form = document.getElementById('personal-info-form');
+        var editBtn = document.getElementById('edit-btn');
+        var submitBtn = document.getElementById('submit-btn');
+        var cancelBtn = document.getElementById('cancel-btn');
+
+        var formElements = form.querySelectorAll('input, textarea'); // Select all input and textarea elements inside the form
+
+        for (var i = 0; i < formElements.length; i++) {
+            formElements[i].readOnly = !formElements[i].readOnly;
+        }
+
+        editBtn.style.display = editBtn.style.display === 'none' ? 'inline-block' : 'none';
+        submitBtn.style.display = submitBtn.style.display === 'none' ? 'inline-block' : 'none';
+        cancelBtn.style.display = cancelBtn.style.display === 'none' ? 'inline-block' : 'none';
+    }
+
+    function toggleEditEmail() {
+        var emailForm = document.getElementById('email-form');
+        var editBtn = document.getElementById('edit-btn-email');
+        var submitBtn = document.getElementById('submit-btn-email');
+        var cancelBtn = document.getElementById('cancel-btn-email');
+        var emailInput = document.getElementById('email-input');
+
+        emailInput.readOnly = !emailInput.readOnly;
+        editBtn.style.display = editBtn.style.display === 'none' ? 'inline-block' : 'none';
+        submitBtn.style.display = submitBtn.style.display === 'none' ? 'inline-block' : 'none';
+        cancelBtn.style.display = cancelBtn.style.display === 'none' ? 'inline-block' : 'none';
+    }
+
+    function toggleEditForm3() {
+    var form = document.getElementById('form3');
+    var editBtn = document.getElementById('edit-btn-form3');
+    var submitBtn = document.getElementById('submit-btn-form3');
+    var cancelBtn = document.getElementById('cancel-btn-form3');
+
+    var formElements = form.querySelectorAll('input, textarea');
+
+    for (var i = 0; i < formElements.length; i++) {
+        formElements[i].readOnly = !formElements[i].readOnly;
+    }
+
+    editBtn.style.display = editBtn.style.display === 'none' ? 'inline-block' : 'none';
+    submitBtn.style.display = submitBtn.style.display === 'none' ? 'inline-block' : 'none';
+    cancelBtn.style.display = cancelBtn.style.display === 'none' ? 'inline-block' : 'none';
+}
+
+</script>
+
+  
+
+{% endblock %}

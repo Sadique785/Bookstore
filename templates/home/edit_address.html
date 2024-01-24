@@ -1,0 +1,125 @@
+{% extends 'base/personal_base.html' %}
+
+{% block start %}
+
+<style>
+    .container {
+        text-align: center;
+    }
+
+    .form-heading {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .manage_address {
+        width: 50%; /* Adjust the width as needed */
+        margin: 20px auto; /* This will center the div and provide separation from the heading */
+    }
+
+    .manage_address .form-group {
+        margin-bottom: 15px;
+    }
+
+    .manage_address .form-group label {
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .manage_address .form-group input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+
+    .manage_address .form-group input::placeholder {
+       
+        font-style: italic;
+        color: #999; 
+    }
+
+    .form-group.form-check {
+        margin-top: 10px; 
+    }
+
+    .form-check-input {
+        width: 20px !important; 
+        height: 20px !important; 
+    }
+
+</style>
+
+<div class="manage_address mt-5">
+    <h2 class="form-heading">EDIT AN ADDRESS</h2>
+    <form action="" method="POST">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="{{ form.name.id_for_label }}">Name</label>
+            <input type="text" name="{{ form.name.name }}" id="{{ form.name.id_for_label }}" class="form-control" placeholder="Enter your name" value="{{ form.instance.name }}">
+        </div>
+        <div class="form-group">
+            <label for="{{ form.mobile.id_for_label }}">Mobile Number</label>
+            <input type="text" name="{{ form.mobile.name }}" id="{{ form.mobile.id_for_label }}" class="form-control" placeholder="Enter your mobile number" value="{{ form.instance.mobile }}">
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.country.id_for_label }}">Country</label>
+            <select name="{{ form.country.name }}" id="{{ form.country.id_for_label }}" class="form-control">
+                {% for country in country_choices %}
+                    <option value="{{ country.0 }}" {% if country.0 == form.instance.country %}selected{% endif %}>
+                        {{ country.1 }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="{{ form.state.id_for_label }}">State</label>
+            <input type="text" name="{{ form.state.name }}" id="{{ form.state.id_for_label }}" class="form-control" placeholder="Enter Your State" value="{{ form.instance.state }}">
+
+        </div>
+        <div class="form-group">
+            <label for="{{ form.postal_code.id_for_label }}">Pincode</label>
+            <input type="text" name="{{ form.postal_code.name }}" id="{{ form.postal_code.id_for_label }}" class="form-control" placeholder="Enter your Pincode" value="{{ form.instance.postal_code }}">
+        </div>
+        <div class="form-group">
+            <label for="{{ form.city.id_for_label }}">City</label>
+            <input type="text" name="{{ form.city.name }}" id="{{ form.city.id_for_label }}" placeholder="Enter your city" value="{{ form.instance.city }}">
+        </div>
+        
+
+        <div class="form-group">
+            <label for="{{ form.street_address.id_for_label }}">Street</label>
+            <input type="text" name="{{ form.street_address.name }}" id="{{ form.street_address.id_for_label }}" class="form-control" placeholder="Enter your Street Address" value="{{ form.instance.street_address }}">
+        </div>
+        <div class="form-group">
+            <label for="{{ form.landmark.id_for_label }}">Landmark</label>
+            <input type="text" name="{{ form.landmark.name }}" id="{{ form.landmark.id_for_label }}" class="form-control" placeholder="eg.  Near Brocamp hostel " value="{{ form.instance.landmark }}">
+        </div>
+      
+
+<div class="form-group form-check">
+    {{ form.is_default }}
+    <label for="{{ form.is_default.id_for_label }}" class="form-check-label ml-3">Make this address the default</label>
+</div>
+
+        
+
+        <input type="submit" class="btn btn-primary" value="Update Address">
+        {% include "base/alert.html" %}
+        {% if form_errors %}
+             <div class="alert alert-danger">
+               <strong>Error:</strong>
+               {% for error in form_errors %}
+                 {{ error }}
+               {% endfor %}
+             </div>
+        {% endif %}
+
+    </form>
+</div>
+
+{% endblock %}

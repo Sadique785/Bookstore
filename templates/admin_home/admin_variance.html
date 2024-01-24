@@ -1,0 +1,97 @@
+{% extends "base/new_base.html" %}
+
+
+{% block content %}
+
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Categories </h2>
+            <p>Add, edit or delete a category</p>
+        </div>
+        <div>
+            <input type="text" placeholder="Search Categories" class="form-control bg-white">
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <form method="POST">
+                        {% csrf_token %}
+                       
+                        <div class="mb-4">
+                            <label for="product_name" class="form-label">Name</label>
+                            <input type="text" placeholder="Type here" name="category" class="form-control" id="product_name">
+                        </div>
+
+
+                        <div class="mb-4">
+                            <label class="form-label">Description</label>
+                            <textarea placeholder="Type here" name="description" class="form-control"></textarea>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary ">Create category</button>
+                        </div>
+                        {% include "base/alert.html" %}
+                    </form>
+                </div>
+                <div class="col-md-9">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="">
+                                        </div>
+                                    </th>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Slug</th>
+                                    <th>Order</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for category in categories %}
+                                <tr>
+                                    <td class="text-center">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="">
+                                        </div>
+                                    </td>
+                                    <td>{{category.order}} </td>
+                                    <td><a href="{% url 'admin_category_detail' category.slug %}"><b>{{ category.category_name }}</b></a></td>
+
+                                    <!-- <td>{{category.}}</td> -->
+                                    <td>{{category.slug}}</td>
+                                    <td>1</td>
+                                    <td class="text-end">
+                                        <div class="dropdown" id="category-{{ category.slug }}" >
+                                            <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm"> <i class="material-icons md-more_horiz"></i> </a>
+                                            <div class="dropdown-menu">
+
+                                            {% if category.is_listed %}
+                                            <button class="dropdown-item btn btn-danger" onclick="list_unlist_category('{{ category.slug }}')">Unlist Category</button>
+                                            {% else %}
+                                                <button class="dropdown-item btn btn-success" onclick="list_unlist_category('{{ category.slug }}')">List Category</button>
+                                            {% endif %}
+                                            </div>
+                                        </div> <!-- dropdown //end -->
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div> <!-- .col// -->
+            </div> <!-- .row // -->
+        </div> <!-- card body .// -->
+    </div> <!-- card .// -->
+</section>
+
+{% endblock %}
+
+

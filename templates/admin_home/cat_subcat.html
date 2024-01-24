@@ -1,0 +1,104 @@
+{% extends "base/new_base.html" %}
+
+
+{% block content %}
+
+
+
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h4>Organization</h4>
+    </div>
+    <div class="card-body">
+        <div class="row gx-2">
+            <div class="col-sm-6 mb-3">
+                <label class="form-label">Category</label>
+                <form  method="GET">
+                    <select class="form-select" name="category" onchange="window.location.href = this.value">
+                        {% if category_option %}
+                            <option name="category"  value="{% url 'get_subcategories_then' category_option.slug %}">
+                                {{ category_option.category_name }}
+                            </option>
+                            <option value="{% url 'get_subcategories' %}">All Categories</option>
+                        {% else %}
+                            <option value="{% url 'get_subcategories' %}">All Categories</option>
+                        {% endif %}
+                        {% for category in categories %}
+                            <option value="{% url 'get_subcategories_then' category.slug %}">
+                                {{ category.category_name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <div class="col-sm-6 mb-3">
+                        <label class="form-label">Sub-category</label>
+                        <select class="form-select" >
+                            {% for subcategory in subcategories %}
+                                <option  name="subcategory" >{{ subcategory.subcategory_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3">Submit</button>
+                </form>
+            </div>
+
+            <div class="mb-4">
+                <label for="product_name" class="form-label">Tags</label>
+                <input type="text" class="form-control">
+            </div>
+        </div> <!-- row.// -->
+    </div>
+</div> <!-- card end// -->
+
+{% endblock %}
+
+
+
+<!-- 
+<div class="card mb-4">
+    <div class="card-header">
+        <h4>Organization</h4>
+    </div>
+    <div class="card-body">
+        <div class="row gx-2">
+            <div class="col-sm-6 mb-3">
+                <label class="form-label">Category</label>
+                <select class="form-select" onchange="window.location.href=this.value;" id="categoryselect" >
+                    {% if category_option %}
+                    <option value="{% url 'get_subcategories_then' category_option.slug %}">
+                        {{ category_option.category_name }}
+                    </option>
+                    <option value="{% url 'get_subcategories' %}">All Categories</option>
+                    {% else %}
+                         <option>All Categories</option>
+
+                    {% endif %}
+                    {% for category in categories %}
+                    
+                        <option  value="{% url 'get_subcategories_then' category_option.slug %}">
+                             {{category.category_name}} 
+                            </option>
+
+                    {% endfor %}
+
+                </select>
+            </div>
+            <div class="col-sm-6 mb-3">
+                <label class="form-label">Sub-category</label>
+                <select class="form-select" id="subcategorySelect">
+
+                </select>
+            </div>
+            <div class="mb-4">
+                <label for="product_name" class="form-label">Tags</label>
+                <input type="text" class="form-control">
+            </div>
+        </div>  row.// -->
+    <!-- </div>
+</div> card end// --> 
+
+
+
+
+
+

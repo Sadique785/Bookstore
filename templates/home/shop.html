@@ -1,0 +1,72 @@
+{% extends 'base/real_base.html' %}
+
+{% block start %}
+<!-- Start Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid ">
+        <form class="d-flex me-auto">
+            <input class="form-control me-2 search-bar" type="search" placeholder="Search by Name, Authors, Categories . . . " aria-label="Search">
+            <button class="btn btn-outline-success search-btn "  type="submit">Search</button>
+        </form>
+        <div class="dropdown me-2">
+            <select class="form-select" onchange="window.location.href=this.value;" style="margin-right: 50px;" aria-label="Select Category">
+                {% if category_option %}
+                    <option value="{% url 'all_products_bycat' category_option.slug %}">
+                        {{ category_option.category_name }}
+                    </option>
+                    <option value="{% url 'all_products' %}" >All Categories</option>
+                {% else %}
+                    <option selected disabled>All Categories</option>
+                {% endif %}
+                
+                {% for category in categories %}
+                    <option value="{% url 'all_products_bycat' category.slug %}">
+                        {{ category.category_name }}
+                    </option>
+                {% endfor %}
+                <!-- Add more categories -->
+            </select>
+            
+        </div>
+        
+        <div class="d-flex align-items-center " >
+            <span class="me-2">Sort by:</span>
+            <div class="dropdown">
+                <select class="form-select" style="margin-right: 100px;" aria-label="Sort By">
+                    <option selected>Price</option>
+                    <option value="lowToHigh">Price Low to High</option>
+                    <option value="highToLow">Price High to Low</option>
+                    <option value="relevance">Relevance</option>
+                </select>
+            </div>
+            
+        </div>
+    </div>
+</nav>
+<!-- End Navigation Bar -->
+<div class="untree_co-section product-section before-footer-section">
+    <div class="container">
+          <div class="row">
+            {% for product in products %}
+              <!-- Start Column 1 -->
+            <div class="col-12 col-md-4 col-lg-3 mb-5">
+                <a class="product-item" href="{% url 'get_product' product.slug %}">
+                    <img src="{{product.product_images.first.image.url}}" class="img-fluid product-thumbnail">
+                    <h3 class="product-title">{{product.product_name}}</h3>
+                    <strong class="product-price">₹ {{product.promotional_price}}-{{product.price}}</strong>
+
+                    <span class="icon-cross">
+                        <img src="/media/images/cross.svg" class="img-fluid">
+                    </span>
+                </a>
+            </div> 
+            <!-- End Column 1 -->
+
+            {% endfor %}
+                
+
+          </div>
+    </div>
+</div>
+
+{% endblock %}

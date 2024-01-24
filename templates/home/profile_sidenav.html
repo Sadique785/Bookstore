@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha384-HNXIfB1ZTS09e5L4ZoJz5W5PRk81BG3qjLDDb6JefFhZc5lDfBsScwPPV/WPMCRr" crossorigin="anonymous">
+    <title>Profile Sidebar</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0; /* Greyish-white background color */
+        }
+
+        .profile-container {
+            display: flex;
+            height: 100%;
+            margin: 20px;
+            margin-left: 100px;
+            background-color: #f0f0f0;; /* White background color */
+            border-radius: 15px; /* Curved edges */
+        }
+
+        .list-group {
+            margin: 20px;
+            flex-grow: 1;
+            height: 95%;
+            overflow-y: auto;
+            background-color: #f0f0f0;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            height: 80px;
+            margin-bottom: 15px;
+        }
+
+        .user-info img {
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .user-info .icon-circle {
+            width: 30px; /* Ensure it's a perfect circle */
+            height: 30px; /* Ensure it's a perfect circle */
+        }
+
+        .user-info .greeting {
+            width: 75%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-left: 30px;
+        }
+
+        .icon-circle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px; /* Equal width and height for a perfect circle */
+            height: 30px; /* Equal width and height for a perfect circle */
+            background-color: #007bff;
+            border-radius: 50%;
+            color: #ffffff;
+        }
+
+        .icon-circle i {
+            font-size: 20px;
+        }
+
+        .account-settings, .payment-heading, .stuff-heading {
+            font-weight: bold;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .total-div {
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+            height: 100%;
+        }
+
+        .sub-options {
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 0;
+            padding: 0;
+            background: none;
+            cursor: pointer;
+        }
+
+        .separation-line {
+            border-top: 1px solid #ccc;
+            margin: 10px 0;
+        }
+
+        .profile-div {
+            margin: 20px;
+            margin-left: 50px;
+            border-radius: 15px 15px 15px 15px;
+            background-color: rgb(255, 255, 255);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .logout-btn i {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="profile-container">
+        <div class="list-group col-md-3">
+            <div class="user-info">
+                <div class="icon-circle">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="greeting">
+                    <p>Hi, username</p>
+                </div>
+            </div>
+
+            <div class="total-div">
+                <!-- Section for "MY ORDERS" -->
+                <div class="stuff-heading">
+                    <i class="fas fa-shopping-bag"></i> MY ORDERS
+                </div>
+                <a href="#" class="list-group-item list-group-item-action sub-options">Order History</a>
+                <a href="#" class="list-group-item list-group-item-action sub-options">Track Orders</a>
+                <a href="#" class="list-group-item list-group-item-action sub-options">Returns</a>
+                <div class="separation-line"></div>
+
+                <!-- Section for "ACCOUNT SETTINGS" -->
+                <div class="account-settings">
+                    <i class="fas fa-cog"></i> Account Settings
+                </div>
+                <a href="#" class="list-group-item list-group-item-action sub-options">Personal Information</a>
+                <a href="#" class="list-group-item list-group-item-action sub-options">Manage Addresses</a>
+                <div class="separation-line"></div>
+
+                <!-- Section for "PAYMENTS" -->
+                <div class="payment-heading">
+                    <i class="fas fa-credit-card"></i> Payment
+                </div>
+                <a href="#" class="list-group-item list-group-item-action sub-options">Gift Cards<span class="PKhkts">₹0</span></a>
+                <a href="#" class="list-group-item list-group-item-action sub-options">Saved UPI</a>
+                <a href="#" class="list-group-item list-group-item-action sub-options">Saved Cards</a>
+                <div class="separation-line"></div>
+
+                <!-- Section for "MY STUFF" -->
+                <div class="stuff-heading">
+                    <i class="fas fa-shopping-bag"></i> My Stuff
+                </div>
+                <a href="#" class="list-group-item list-group-item-action sub-options">My Coupons</a>
+                <a href="#" class="list-group-item list-group-item-action sub-options">My Reviews & Ratings</a>
+                <a href="#" class="list-group-item list-group-item-action sub-options">All Notifications</a>
+                <a href="#" class="list-group-item list-group-item-action sub-options">My Wishlist</a>
+                <div class="separation-line"></div>
+
+                <!-- Logout option -->
+                <div class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </div>
+            </div>
+        </div>
+       
+        <div class="profile-div col-md-7">
+            <h1>This is the profile page contents</h1>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js" integrity="sha384-eMNCOe7tC1doHpGoJtKh7z7lGz7fuP4F8nfdFvAOA6Gg/z6Y5J6XqqyGXYM2ntX8" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.min.js" integrity="sha384-pzjw8f+ua7Kw1TIq0v8FqFjcJ6pajs/rfdfs3SO+kD4Ck5BdPtF+to8xMp9Mvc9D280eXvjcz6eUgGqXvcyDP" crossorigin="anonymous"></script>
+
+</body>
+
+
+</html>

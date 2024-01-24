@@ -1,0 +1,151 @@
+{% extends "base/new_base.html" %}
+
+
+{% block content %}
+
+
+<section class="content-main">
+    <div class="row">
+        <div class="col-9">
+            <div class="content-header">
+                <h2 class="content-title">Add New Product</h2>
+
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Basic</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" onsubmit="return validateProductForm()" enctype="multipart/form-data">
+
+                        {% csrf_token %}
+                        {% include 'base/alert.html ' %}
+                        <div class="mb-4">
+                            <label for="product_name"  class="form-label">Product title</label>
+                            <input name="product_name" type="text" placeholder="Type here" class="form-control" id="product_name">
+                        </div>
+                        <div class="form-group">
+                            <span id="productNameError"></span>
+                        </div>
+                        <div class="mb-4">
+                            <label  class="form-label"  >Full description</label>
+                            <textarea name="product_description" placeholder="Type here" class="form-control" id="product_description" rows="4"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <span id="productDescriptionError"></span>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="mb-4">
+                                    <label class="form-label">Regular price</label>
+                                    <div class="row gx-2">
+                                        <input placeholder="$" name="regular_price" id="regular_price" type="text" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <span id="regularPriceError"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="mb-4">
+                                    <label class="form-label">Promotional price</label>
+                                    <input placeholder="$" name="promotional_price" id="promotional_price" type="text" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <span id="promotionalPriceError"></span>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <label class="form-label">Currency</label>
+                                <select name="currency" class="form-select">
+                                    <option  id="currency"> INR </option>
+                                 
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Tax rate</label>
+                            <input type="text" id="tax_rate" name="tax_rate" placeholder="%" class="form-control" >
+                        </div>
+                        <div class="form-group">
+                            <span id="taxRateError"></span>
+                        </div>
+                        <div class="col-lg-5">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h4>Media</h4>
+                                </div>
+                                <div class="card-body" style="display: flex; flex-direction: column;">
+                                    <div class="input-upload">
+                                        <img src="/media/assets/imgs/theme/upload.svg" alt="">
+                                        <input class="image-input" type="file"  name="images" id="images" accept="image/*" multiple >
+                                    </div>
+                                    <!-- <button type="button" id="addMorePhotos" style="display: inline-block; width: 150px;">Add more photos</button> -->
+                                </div>
+                            </div> <!-- card end// -->
+
+   
+                        </div>
+                            <!-- Category Dropdown -->
+    <div class="mb-4">
+        <label class="form-label">Category</label>
+        <select name="category" id="category" onclick="get_sub_category()" class="form-select">
+            <option selected >Select Category</option>
+            {% for category in categories %}
+                <option name="category" >{{ category.category_name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <!-- Subcategory Dropdown -->
+    <div class="mb-4">
+        <label class="form-label">Subcategory</label>
+        <select name="sub_category" id="sub_category" class="form-select">
+            <option >Select Subcategory</option>
+
+        </select>
+    </div>
+    
+                        <div class="row justify-content-md-center">
+                            <div class="col-md-auto">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div> <!-- card end// -->
+
+        </div>
+
+    </div>
+</section>
+
+
+
+
+{% endblock %}
+
+
+            <!-- <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Organization</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row gx-2">
+                        <div class="col-sm-6 mb-3">
+                            <label class="form-label">Category</label>
+                            
+                        {% if product %}
+                            
+                            <a href="{% url 'get_subcategories' product.slug %}" class="btn btn-primary">Category</a>
+                        {% else %}
+                           
+                            <a href="{% url 'get_subcategories' 0 %}" class="btn btn-primary">Category</a>
+                        {% endif %}
+                        </div>
+
+                    </div> 
+                </div>
+            </div>  -->

@@ -1,0 +1,155 @@
+{% extends 'base/personal_base.html' %}
+
+{% block start %}
+<style>
+    .address-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: space-evenly;
+    }
+
+    .address-card {
+        flex: 1;
+        min-width: 300px;
+        max-width: 400px;
+        padding: 15px; /* Reduced padding for tighter layout */
+        border: 2px dotted #ccc;
+        cursor: pointer;
+        min-height: 200px;
+        max-height: 300px;
+        overflow: hidden;
+    }
+
+    .address-card p {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+
+    .add-address-card {
+        flex: 1;
+        min-width: 300px;
+        max-width: 400px;
+        padding: 15px; /* Reduced padding for tighter layout */
+        border: 2px dashed #aaa;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        overflow: hidden;
+    }
+
+    .add-icon {
+        font-size: 36px;
+        margin-bottom: 5px; /* Reduced margin for tighter layout */
+    }
+
+    .add-text {
+        margin-top: 5px; /* Added margin for spacing */
+    }
+
+    .options-container {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .options-container a,
+    .options-container button {
+        text-decoration: underline;
+        cursor: pointer;
+        color: #000000; /* Black color for links, you can change it */
+        background: none;
+        border: none;
+        padding: 0;
+        font-size: 14px;
+    }
+
+    .options-container button {
+        color: #dc3545; /* Red color for Delete button, you can change it */
+    }
+
+    .make-default-option button {
+        color: #000000; /* Black color for Make Default button, you can change it */
+    }
+</style>
+
+<div class="address-container mt-5">
+    <!-- Add New Address Card -->
+    <div class="add-address-card" onclick="window.location.href='/add_address'">
+        <div class="add-icon">+</div>
+        <div class="add-text">ADD NEW ADDRESS</div>
+    </div>
+
+    {% if default_address %}
+        <div class="address-card main-address">
+            <!-- Display the details of the default address -->
+            <p>{{ default_address.address.name }}</p>
+            <p>{{ default_address.address.postal_code }}</p>
+            <p>{{ default_address.address.street_address }}, {{ default_address.address.city }}, {{ default_address.address.state }}</p>
+            <p>{{ default_address.address.country }}</p>
+            <p>Mobile: {{ default_address.address.mobile }}</p>
+            <p>{{ default_address.address.landmark }}</p>
+
+            <div class="options-container">
+                <a href="{% url 'edit_address' default_address.address.uid %}">Edit</a>
+                <form method="post" action="">
+                    {% csrf_token %}
+                    <a href="#" onclick="showDeleteConfirmation('{{ default_address.address.uid }}')">Delete</a>
+                </form>
+
+            </div>
+        </div>
+    {% endif %}
+
+    {% for address in addresses %}
+        <!-- Display details of other addresses in a loop -->
+        <div class="address-card">
+            <p>{{ address.name }}</p>
+            <p>{{ address.postal_code }}</p>
+            <p>{{ address.street_address }}, {{ address.city }}, {{ address.state }}</p>
+            <p>{{ address.country }}</p>
+            <p>Mobile: {{ address.mobile }}</p>
+            <p>{{ address.landmark }}</p>
+
+            <div class="options-container">
+                <a href="{% url 'edit_address' address.uid %}">Edit</a>
+                <form method="post" action="">
+                    {% csrf_token %}
+                    <a href="#" onclick="showDeleteConfirmation('{{ address.uid }}')">Delete</a>
+                </form>
+                <div class="make-default-option">
+                    <button   type="submit">Make Default</button>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+    
+    function showDeleteConfirmation(uid) {
+        
+        Swal.fire({
+            title: 'Are you sure?',
+            text: 'You will not be able to recover this address!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+           
+            if (result.isConfirmed) {
+                window.location.href = '{% url "delete_address" 0 %}'.replace('0', uid);
+            }
+        });
+    }
+</script>
+
+
+{% include "base/alert.html" %}
+{% endblock %}

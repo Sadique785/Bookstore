@@ -1,0 +1,39 @@
+{% extends "base/new_base.html" %}
+
+
+{% block content %}
+
+
+<section class="content-main">
+    <!-- ... (other content) ... -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <h2 class="content-title card-title">Add New Subcategory</h2>
+            <form method="POST">
+                {% csrf_token %}
+                {% include "base/alert.html" %}
+                <div class="mb-4">
+                    <label for="subcategory_name" class="form-label">Subcategory Name</label>
+                    <input type="text" name="subcategory_name" placeholder="Type here" class="form-control" id="subcategory_name">
+                </div>
+                <div class="mb-4">
+                    <label for="subcategory_description" class="form-label">Description</label>
+                    <textarea name="subcategory_description" placeholder="Type here" class="form-control"  id="subcategory_description"></textarea>
+                </div>
+                <div class="mb-4">
+                    <label for="category_name" class="form-label">Parent Category </label>
+                    <input type="text" name="category_name" value="{{ category.category_name }}" class="form-control" readonly>
+                </div>
+
+                    <button type="submit" class="btn btn-primary btn-sm " style="padding: 10px 20px;width: 200px; ">Add Subcategory</button>
+                    
+                </div>
+            </form>
+        </div> <!-- card-body .// -->
+    </div> <!-- card .// -->
+</section>
+
+
+{% endblock %}
+
+

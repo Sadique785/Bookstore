@@ -1,0 +1,416 @@
+{% extends "base/new_base.html" %}
+
+{% load static %}
+{% block content %}
+
+
+<section class="content-main">
+    <div class="row">
+        <div class="col-9">
+            <div class="content-header">
+                <h2 class="content-title">Edit Product</h2>
+
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Basic</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" onsubmit="return validateProductForm()" enctype="multipart/form-data">
+
+                        {% csrf_token %}
+                        {% include 'base/alert.html ' %}
+                        <div class="mb-4">
+                            <label for="product_name"  class="form-label">Product title</label>
+                            <input name="product_name" type="text" value="{{product.product_name}}" placeholder="Type here" class="form-control" id="product_name">
+                        </div>
+                        <div class="form-group">
+                            <span id="productNameError"></span>
+                        </div>
+                        <div class="mb-4">
+                            <label  class="form-label"  >Full description</label>
+                            <textarea name="product_description"  placeholder="Type here" class="form-control" id="product_description" rows="4">{{product.product_description}}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <span id="productDescriptionError"></span>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="mb-4">
+                                    <label class="form-label">Regular price</label>
+                                    <div class="row gx-2">
+                                        <input placeholder="$" value="{{product.regular_price}}" name="regular_price" id="regular_price" type="text" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <span id="regularPriceError"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="mb-4">
+                                    <label class="form-label">Promotional price</label>
+                                    <input placeholder="$" name="promotional_price" value="{{product.promotional_price}}" id="promotional_price" type="text" class="form-control">
+                                </div>
+                                <div class="form-group">
+                                    <span id="promotionalPriceError"></span>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <label class="form-label">Currency</label>
+                                <select class="form-select" name="currency">
+                                    <option name="currency" value="{{product.currency}}" id="currency"> INR </option>
+                                 
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Tax rate</label>
+                            <input type="text" id="tax_rate" value="{{product.tax_rate}}" name="tax_rate" placeholder="%" class="form-control" >
+                        </div>
+                        <div class="form-group">
+                            <span id="taxRateError"></span>
+                        </div>
+                        <div class="col-lg-5">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h4>Media</h4>
+                                </div>
+                                <div class="card-body" style="display: flex; flex-direction: column;">
+                                    <div class="input-upload">
+                                        <img src="/media/assets/imgs/theme/upload.svg" alt="">
+                                        <input class="image-input" type="file"  name="images" id="images" accept="image/*" multiple >
+                                    </div>
+                                    <div>
+                                        <h5>Current Images:</h5>
+                                        <ul id="currentImagesList">
+                                            <!-- List existing image names here -->
+                                            {% for image in product_images %}
+                                                <!-- <li><img src="{{ image.image }}" ></li> -->
+                                                <li>
+                                                    <a href="#" class="image-link" data-image="/media/{{ image.image }}" data-uid="{{ image.uid }}"> {{ image.image }}-</a> 
+
+
+                                                </li>
+                                            {% endfor %}
+                                            <p>Click for preview and edit the image</p>
+                                    
+                                            
+                                            
+                                        </ul>
+                                    </div>
+                                    <!-- <button type="button" id="addMorePhotos" style="display: inline-block; width: 150px;">Add more photos</button> -->
+                                </div>
+     
+
+   
+                        </div>
+                            <!-- Category Dropdown -->
+    <div class="mb-4">
+        <label class="form-label">Category</label>
+        <select name="category" id="category" onclick="get_sub_category()" class="form-select">
+            <option selected >Select Category</option>
+            {% for category in categories %}
+                <option name="category" value="{{category.slug}}" selected="{{product.category}}" >{{ category.category_name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    
+    <!-- Subcategory Dropdown -->
+    <div class="mb-4">
+        <label class="form-label">Subcategory</label>
+        <select name="sub_category" id="sub_category" class="form-select">
+            <option value="{{ product.sub_category.sub_slug }}" selected>{{ product.sub_category }}</option>
+            {% for subcategory in product.category.category.all %}
+            {% if subcategory.sub_slug != product.sub_category.sub_slug %}
+                <option value="{{ subcategory.sub_slug }}">{{ subcategory.subcategory_name }}</option>
+            {% endif %}
+            {% endfor %}
+        </select>
+    </div>
+    
+                        <div class="row justify-content-md-center">
+                            <div class="col-md-auto">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div> <!-- card end// -->
+
+        </div>
+
+    </div>
+</section>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const imageLinks = document.querySelectorAll(".image-link");
+
+        imageLinks.forEach(function (link) {
+            link.addEventListener("click", function (event) {
+                event.preventDefault();
+
+                const imageUrl = this.getAttribute("data-image");
+                const imageUid = this.getAttribute("data-uid");
+                displayImageModal(imageUrl, imageUid);
+            });
+        });
+
+        function displayImageModal(imageUrl, imageUid) {
+            // Create a new modal element
+            const modal = document.createElement("div");
+            modal.classList.add("modal", "fade");
+            modal.setAttribute("id", "imageModal");
+            modal.setAttribute("tabindex", "-1");
+            modal.setAttribute("role", "dialog");
+            modal.setAttribute("aria-labelledby", "imageModalLabel");
+            modal.setAttribute("aria-hidden", "true");
+
+            modal.innerHTML = `
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="imageModalLabel">Image Details</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <img id="modalImage" src="${imageUrl}" alt="">
+                            <div class="mt-3">
+                                <label for="imageInput" class="form-label">Choose a new image:</label>
+                                <input type="file" class="form-control" id="imageInput">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" id="closeButton" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" id="changeImageBtn">Change Image</button>
+                            <button type="button" class="btn btn-danger" id="deleteImageBtn">Delete Image</button>
+                            <button type="button" class="btn btn-success" id="saveImageBtn" disabled>Save</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Append the modal to the body
+            document.body.appendChild(modal);
+
+            // Show the modal
+            const bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+
+            // Attach click event to the "Change Image" button
+            document.getElementById("changeImageBtn").addEventListener("click", function () {
+                document.getElementById("imageInput").click();
+            });
+
+            // Attach change event to the file input
+            document.getElementById("imageInput").addEventListener("change", function () {
+                // Optionally, you can enable the "Save" button here if needed
+                const saveButton = document.getElementById("saveImageBtn");
+                saveButton.removeAttribute("disabled");
+            });
+
+            // Attach click event to the "Delete Image" button
+            document.getElementById("deleteImageBtn").addEventListener("click", function () {
+                // Add your logic to handle deleting the image
+                alert("Deleting the image with UID: " + imageUid);
+            });
+
+            // Attach click event to the "Save" button
+            document.getElementById("saveImageBtn").addEventListener("click", function () {
+                const newImageFile = document.getElementById("imageInput").files[0];
+                if (newImageFile) {
+                    updateImageOnServer(newImageFile, imageUid);
+                } else {
+                    alert("Please select a new image.");
+                }
+            });
+
+            // Attach hidden.bs.modal event to the modal
+            modal.addEventListener("hidden.bs.modal", function () {
+                // This function will be called when the modal is closed
+                alert("Closing the modal");
+
+                // Refresh the list of images on the page
+                refreshImagesList();
+
+                // Clean up the modal element after it's closed
+                modal.remove();
+            });
+        }
+
+        function updateImageOnServer(newImageFile, imageUid) {
+            const formData = new FormData();
+            formData.append('new_image', newImageFile);
+            formData.append('image_uid', imageUid);
+
+            // Get the CSRF token from the cookie
+            const csrftoken = getCookie('csrftoken');
+
+            fetch('{% url "admin_change_image" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': csrftoken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Image changed successfully');
+
+                    // Update the image on the page with the new source
+                    const modalImage = document.getElementById('modalImage');
+                    modalImage.src = URL.createObjectURL(newImageFile);
+
+                    // Optionally, update other details on the page dynamically
+
+                    // You might also close the modal or perform other actions
+                } else {
+                    alert('Failed to change image: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error changing image:', error);
+            });
+        }
+
+        // Function to get the CSRF token from the cookie
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Check if the cookie name matches the format 'name=value'
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        function refreshImagesList() {
+    // Fetch the updated list of images from the server
+    fetch('{% url "admin_change_image" %}', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Update the DOM with the new list of images
+        updateImagesList(data.images);
+    })
+    .catch(error => {
+        console.error('Error fetching updated images:', error);
+    });
+}
+
+function updateImagesList(images) {
+    const currentImagesList = document.getElementById('currentImagesList');
+
+    // Clear the existing list
+    currentImagesList.innerHTML = '';
+
+    // Append the updated images to the list
+    images.forEach(image => {
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `
+            <a href="#" class="image-link" data-image="${image.image}" data-uid="${image.uid}">${image.image} -</a>
+        `;
+        currentImagesList.appendChild(listItem);
+    });
+
+    // Optionally, you can also update any other parts of the page based on the new data
+}
+
+    });
+</script>
+
+
+
+
+
+
+
+
+
+
+<!-- //     document.addEventListener('DOMContentLoaded',function(){ -->
+    <!-- //         $("#pop").on("click", function() {
+    //    $('#imagepreview').attr('src', $('#imageresource').attr('src')); here asign the image to the modal when the user click the enlarge link
+    // $('#imagemodal').modal('show');
+    //     $('#imagemodal').modal('show'); 
+    // imagemodal is the id attribute assigned to the bootstrap modal, then i use the show function
+    //         });
+    //         })
+         -->
+
+<!-- <script>
+        
+    
+    document.addEventListener("DOMContentLoaded", function () {
+        // Attach click event to image links
+        const imageLinks = document.querySelectorAll(".image-link");
+        imageLinks.forEach(function (link) {
+            link.addEventListener("click", function (event) {
+                event.preventDefault();
+             
+           
+           console.log( $('#modalImage').attr('src', $('.image-link').attr('data-image')))  // here asign the image to the modal when the user click the enlarge link
+                $('#imageModal').modal('show');
+              
+
+ 
+                // const imageUrl = this.getAttribute("data-image");
+                // console.log(imageUrl)
+                // displayImageModal(imageUrl);
+            });
+        });
+
+
+       
+
+        // Function to display image modal
+// Function to display image modal
+function displayImageModal(imageUrl) {
+    const modalImage = document.getElementById("modalImage");
+    const editImageBtn = document.getElementById("editImageBtn");
+    const modals = document.getElementById("imageModal");
+    if (!modals || !modalImage || !editImageBtn) {
+        console.error("Modal elements not found.");
+        return;
+    }
+    // Create a new Image object and set the src attribute
+    const preloadImage = new Image();
+    preloadImage.src = imageUrl;
+
+    // Once the image is loaded, update the modal
+    // preloadImage.onload = function () {
+    //     // Set the image source
+    //     modalImage.src = imageUrl;
+
+    //     // Attach click event to the "Edit Image" button
+    //     editImageBtn.addEventListener("click", function () {
+    //         // Add your logic to handle editing the image
+    //         alert("Editing the image: " + imageUrl);
+    //     });
+
+    //     // Show the modal
+    //     
+    // };
+    // $("#imageModal").modal("show");
+    // Handle errors if the image fails to load
+    preloadImage.onerror = function () {
+        alert("Error loading the image: " + imageUrl);
+    };
+}
+
+    });
+</script> -->
+
+{% endblock %}
