@@ -1,14 +1,18 @@
 import json
-from django.shortcuts import render,redirect
+from django.shortcuts import get_object_or_404, render,redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.contrib.auth import authenticate,login, logout
-from .models import Profile
+from .models import Profile, Cart, CartItem
 from django.contrib.auth.decorators import login_required
 from base.emails import generate_otp, send_otp_email
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.hashers import make_password
+from products.models import Product, EditionVariant, LanguageVariant
+from django.views.decorators.http import require_POST
+
+
 
 def login_page(request):
     
@@ -164,6 +168,72 @@ def activate_email(request, email_token):
         
     except Exception as e:
         return HttpResponse("Invalid Email Token")
+
+
+def add_to_cart(request, uid):
+    variant = request.GET.get('variant')
+
+    
+        
+
+    product = Product.objects.get(uid = uid)
+    user = request.user
+    cart , _ = Cart.objects.get_or_create(user = user, is_paid = False)
+
+    cart_item = CartItem.objects.create(cart = cart, product = product, )
+
+    if variant:
+        variant = request.GET.get('variant')
+        edititon_variant = EditionVariant.objects.get(name = variant)
+        cart_item.edition_variant = edititon_variant
+        cart_item.save()
+
+
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
+
+def remove_cart(request, cart_item_uid):
+    try:    
+        cart_item = CartItem.objects.get(uid = cart_item_uid)
+        cart_item.delete()
+    except Exception as e:
+        print(e) 
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+@require_POST
+def change_quantity(request):
+
+    print('Hlo guys')
+    # Retrieve the CartItem object
+    data  = json.loads(request.body.decode('utf-8'))
+    item_uid = data.get('itemUid')
+    new_quantity = data.get('newQuantity')
+
+    cart_item = get_object_or_404(CartItem, uid = item_uid)
+
+    cart_item.qty = new_quantity
+    cart_item.save()
+
+    new_total = cart_item.get_product_price()
+    cart = Cart.objects.get(user = request.user)
+    grand_total = cart.get_cart_total()
+    return JsonResponse({'success':True, 'newTotal': new_total, 'grand_total':grand_total})
+
+
+
+def cart(request):
+    cart = Cart.objects.filter(is_paid = False, user = request.user).first()
+    cart_items = CartItem.objects.filter(cart = cart)
+    print(cart_items)
+    print(cart.get_cart_total)
+
+    context = {'cart': cart}
+    return render(request, 'accounts/cart.html',context )
+
+
 
 
 

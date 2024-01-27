@@ -54,12 +54,18 @@ class Author(models.Model):
 
 
 class LanguageVariant(BaseModel):
-    language_name = models.CharField(max_length = 100)
+    name = models.CharField(max_length = 100)
     price = models.IntegerField(default=0)
+
+    def __str__(self) -> str:
+        return self.name
     
 class EditionVariant(BaseModel):
-    edition_name = models.CharField(max_length = 100)
+    name = models.CharField(max_length = 100)
     price = models.IntegerField(default=0)
+    
+    def __str__(self) -> str:
+        return self.name
 
 
 class Product(BaseModel):
@@ -77,9 +83,8 @@ class Product(BaseModel):
     author = models.ForeignKey(Author, on_delete=models.CASCADE, related_name='products', null=True, blank=True)
     is_listed = models.BooleanField(default = True)
     is_category_listed = models.BooleanField(default = True)
-    language_variant = models.ManyToManyField(LanguageVariant)
-    edition_variant = models.ManyToManyField(EditionVariant)
-
+    language_variant = models.ManyToManyField(LanguageVariant, blank=True)
+    edition_variant = models.ManyToManyField(EditionVariant, blank=True)
 
 
     def save(self, *args, **kwargs):
@@ -89,6 +94,24 @@ class Product(BaseModel):
 
     def __str__(self) -> str:
         return self.product_name
+    
+
+    def get_product_by_edition(self,edition):
+        try:
+            edition_variant = EditionVariant.objects.get(name=edition)
+            return self.price + edition_variant.price
+        except EditionVariant.DoesNotExist:
+            return self.price
+        
+    
+        
+
+    # def get_product_by_language(self,language):
+    #     try:
+    #         language_variant = LanguageVariant.objects.get(name=language)
+    #         return self.price + language_variant.price
+    #     except EditionVariant.DoesNotExist:
+    #         return self.price
     
 
 

@@ -22,12 +22,12 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(LanguageVariant)
 class LanguageVariantAdminn(admin.ModelAdmin):
-    list_display = ['language_name', 'price']
+    list_display = ['name', 'price']
     model = LanguageVariant
 
 @admin.register(EditionVariant)
 class EditionVariantAdmin(admin.ModelAdmin):
-    list_display = ['edition_name', 'price']
+    list_display = ['name', 'price']
     model = EditionVariant
 
 

@@ -1,11 +1,13 @@
 
 import json
+import re
 from django.db import IntegrityError
 from django.shortcuts import render,redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
 from accounts.models import Profile
-from products.models import Product, Category, SubCategory, ProductImage
+from products.models import Product, Category, SubCategory, ProductImage, LanguageVariant, EditionVariant
+from .forms import LanguageVariantForm, EditionVariantForm
 from django.http import HttpResponseRedirect, HttpResponse
 from django.contrib.auth import authenticate,login, logout
 from django.shortcuts import get_object_or_404
@@ -15,7 +17,7 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 
 # Create your views here.
-
+# ------------------------------------------------ACCOUNTS-------------------------------------------------------------
 def is_superuser(user):
     return user.is_authenticated and user.is_superuser
 
@@ -65,12 +67,12 @@ def admin_logout(request):
     logout(request)
     return redirect('admin_login')
 
-
+# ----------------------------------------------------HOME------------------------------
 @user_passes_test(is_superuser, login_url='admin_login')
 def admin_index(request):
     return render(request, "admin_home/admin_index.html")
 
-
+# -----------------------------------------------USERS-------------------------------
 @user_passes_test(is_superuser, login_url='admin_login')
 def admin_users(request):
     users_with_profiles = User.objects.filter(profile__isnull=False)
@@ -93,7 +95,7 @@ def block_unblock_user(request, block_pk):
     user.is_active = not user.is_active
     user.save()
     return redirect('admin_users')
-
+# ---------------------------------------CATEGORIES-----------------------------------
 @user_passes_test(is_superuser, login_url='admin_login')
 def admin_category(request):
     if request.method == "POST":
@@ -202,7 +204,7 @@ def admin_category_detail(request, slug):
     return render(request, 'admin_home/admin_category_detail.html', context)
 
 # views.py
-
+# --------------------------------------------------SUBCATEGORY-----------------------------
 
 @user_passes_test(is_superuser, login_url='admin_login')
 def admin_subcategory(request, slug):
@@ -249,6 +251,184 @@ def admin_subcategory(request, slug):
 
 
     return render(request, 'admin_home/admin_subcategory.html', context)
+
+# -------------------------------------VARIANCES------------------------------------------------
+def admin_variance(request):
+    if request.method == 'POST':
+        if 'language_name' in request.POST:
+            language_name = request.POST.get('language_name')
+            language_price = request.POST.get('language_price')
+
+            if not re.match(r'^[a-zA-Z\s]+$', language_name):
+                messages.error(request, 'Language name should not be empty and should contain only letters and spaces.')
+                return redirect('admin_variance')
+            
+            if not language_name.strip():  
+                messages.error(request, 'Language name should not be only empty spaces.')
+                return redirect('admin_variance')
+            
+            if not language_price:
+                messages.error(request, 'Price difference should not be empty.')
+                return redirect('admin_variance')
+            
+            if LanguageVariant.objects.filter(name=language_name).exists():
+                messages.error(request, f'Language variant with name {language_name} already exists.')
+                return redirect('admin_variance')
+
+            variant = LanguageVariant.objects.create(name = language_name, price = language_price)
+            variant.save()
+            messages.success(request, 'Created Successfully')
+            
+            return redirect('admin_variance')
+            
+        elif 'edition_name' in request.POST:
+            edition_name = request.POST.get('edition_name')
+            edition_price = request.POST.get('edition_price')
+
+            if not re.match(r'^[a-zA-Z\s]+$', edition_name):
+                messages.error(request, 'Edition name should not be empty and should contain only letters and spaces.')
+                return redirect('admin_variance')
+
+            if not edition_name.strip():  
+                messages.error(request, 'Edition name should not be only empty spaces.')
+                return redirect('admin_variance')
+
+            if not edition_price:
+                messages.error(request, 'Price difference should not be empty.')
+                return redirect('admin_variance')
+
+            
+            if EditionVariant.objects.filter(name=edition_name).exists():
+                messages.error(request, f'Edition variant with name {edition_name} already exists.')
+                return redirect('admin_variance')
+
+            variant = EditionVariant.objects.create(name = edition_name, price = edition_price)
+            variant.save()
+            messages.success(request, 'Created Successfully')
+            
+            return redirect('admin_variance')
+            
+    
+    languages = LanguageVariant.objects.all()
+    editions = EditionVariant.objects.all()
+        
+    
+    context = {
+        'languages':languages,
+        'editions':editions,
+    }
+        
+        
+    return render(request, 'admin_home/admin_variance.html', context)
+
+def admin_variance_detail(request, uid = None):
+    if uid == None:
+        context = {'nothing':True}
+        return render(request, 'admin_home/admin_variance_detail.html', context)
+    else:
+
+        language_variant = LanguageVariant.objects.filter(uid = uid).first()
+        edition_variant = EditionVariant.objects.filter(uid = uid).first()
+
+
+        if language_variant:
+            variant = LanguageVariant.objects.filter(uid = uid).first()
+            context = {'variant':variant}
+
+
+        elif edition_variant:
+            variant = EditionVariant.objects.filter(uid = uid).first()
+            context = {'variant':variant}
+
+        return render(request, 'admin_home/admin_variance_detail.html', context)
+
+
+def admin_edit_variant(request, uid):
+
+    if request.method == "POST":
+        variant_name = request.POST.get('variant_name')
+        price = request.POST.get('price')
+        print(request.POST)
+
+        print(variant_name)
+        print(price)
+        
+        language_variant = LanguageVariant.objects.filter(uid = uid).first()
+        if language_variant:
+            if not re.match(r'^[a-zA-Z\s]+$', variant_name):
+                messages.error(request, 'Edition name should not be empty and should contain only letters and spaces.')
+                return redirect('admin_language_variance_detail', language_uid = uid)
+
+            
+            if not variant_name.strip():  
+                messages.error(request, 'Variant name should not be only empty spaces.')
+                return redirect('admin_language_variance_detail', language_uid = uid)
+
+            if not price:
+                messages.error(request, 'Price difference should not be empty.')
+                return redirect('admin_language_variance_detail', language_uid = uid)
+        
+            language_variant.name = variant_name
+            language_variant.price = price
+
+            language_variant.save()
+            messages.success(request, 'Variant details  Updated Successfully')
+            return redirect('admin_variance_detail', uid = uid)
+        
+
+
+        edition_variant = EditionVariant.objects.filter(uid = uid).first()
+        print(edition_variant)
+        if edition_variant:
+
+            if not re.match(r'^[a-zA-Z\s]+$', variant_name):
+                messages.error(request, 'Edition name should not be empty and should contain only letters and spaces.')
+                return redirect('admin_variance_detail', edition_uid = uid)
+            if not variant_name.strip():  
+                messages.error(request, 'Variant name should not be only empty spaces.')
+                return redirect('admin_variance_detail', edition_uid = uid)
+
+            if not price:
+                messages.error(request, 'Price difference should not be empty.')
+                return redirect('admin_variance_detail', edition_uid = uid)
+
+            edition_variant.name = variant_name
+            edition_variant.price = price
+
+            edition_variant.save()
+            messages.success(request, 'Variant details  Updated Successfully')
+            return redirect('admin_variance_detail', uid = uid)
+    return redirect('admin_variance')
+
+
+
+
+from django.shortcuts import get_object_or_404
+
+def delete_variant(request, uid):
+   
+    language_variant = LanguageVariant.objects.filter(uid = uid).first()
+
+    if language_variant:
+        
+        language_variant.delete()
+        messages.warning(request, 'Language Variant Deleted Successfully')
+        return redirect('admin_variance_detail')
+
+   
+    edition_variant = EditionVariant.objects.filter(uid = uid).first()
+
+    if edition_variant:
+        
+        edition_variant.delete()
+        messages.warning(request, 'Edition Variant Deleted Successfully')
+        return redirect('admin_variance_detail')
+
+
+    messages.error(request, 'Invalid Variant UID')
+    return redirect('admin_variance')
+
+
 
 
 # def admin_product(request):

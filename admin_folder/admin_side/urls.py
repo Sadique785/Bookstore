@@ -21,8 +21,13 @@ urlpatterns = [
     path('unlist_product/<slug:product_slug>',views.unlist_product, name="unlist_product"),
     path('unlist_category/',views.unlist_category, name="unlist_category"),
     path('admin_side/admin_add_product/get_sub_categories/',views.get_sub_categories, name="get_sub_categories"),
-     path('admin_variance/',views.admin_variance, name="admin_variance"),
+    path('admin_variance/',views.admin_variance, name="admin_variance"),
+    path('admin_variance_detail/', views.admin_variance_detail, name="admin_variance_detail"),
     path('admin_variance_detail/<uid>/', views.admin_variance_detail, name="admin_variance_detail"),
+    # path('admin_variance_detail/<uid>/', views.admin_variance_detail, name="admin_edition_variance_detail"),
+    path('admin_edit_variant/<uid>/', views.admin_edit_variant, name="admin_edit_variant"),
+    path('delete_variant/<uid>/', views.delete_variant, name="delete_variant"),
+
 
     
     # path('get_subcategories/<slug:product_slug>/',views.get_subcategories, name="get_subcategories"),

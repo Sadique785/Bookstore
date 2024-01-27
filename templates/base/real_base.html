@@ -140,43 +140,82 @@
 
 	<body> 
 		
-		<nav class="custom-navbar navbar navbar navbar-expand-md navbar-dark bg-dark " arial-label="Furni navigation bar">
 
-			<div class="container">
-				<a class="navbar-brand" href="index.html"><img src="/media/userside/img/logo.png" alt="Historia" style="height: 100px; width: auto;"></a>
+		
+<!-- ... (your existing code) ... -->
 
-				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsFurni" aria-controls="navbarsFurni" aria-expanded="false" aria-label="Toggle navigation">
-					<span class="navbar-toggler-icon"></span>
-				</button>
+<body>
 
-				<div class="collapse navbar-collapse" id="navbarsFurni">
-					<ul class="custom-navbar-nav navbar-nav ms-auto mb-2 mb-md-0">
-						<li>
-							<a class="nav-link" href="{% url 'index' %}">Home</a>
-						</li>
-						<li class=""><a class="nav-link" href="{% url 'all_products' %}">Shop</a></li>
-						<li><a class="nav-link" href="about.html">About us</a></li>
-						<li><a class="nav-link" href="services.html">Services</a></li>
-						<li><a class="nav-link" href="blog.html">Blog</a></li>
-						<li><a class="nav-link" href="contact.html">Contact us</a></li>
-						<li class="nav-item">
-							<a class="nav-link" href="{% url 'login' %}">Sign In</a>
-						</li>
-						<!-- Sign-up -->
-						<li class="nav-item">
-							<a class="nav-link" href="{% url 'register' %}">Sign Up</a>
-						</li>
-					</ul>
+  <nav class="custom-navbar navbar navbar-expand-md navbar-dark bg-dark" aria-label="Furni navigation bar">
 
-					<ul class="custom-navbar-cta navbar-nav mb-2 mb-md-0 ms-5">
-						<li><a class="nav-link" href="{% url 'profile' %}"><img src="/media/home/images/user.svg"></a></li>
-						<li><a class="nav-link" href="cart.html"><img src="/media/home/images/cart.svg"></a></li>
+    <div class="container">
+      <a class="navbar-brand" href="{% url 'index' %}">
+        <img src="/media/userside/img/logo.png" alt="Historia" style="height: 100px; width: auto;">
+      </a>
 
-					</ul>
-				</div>
-			</div>
-				
-		</nav>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarsFurni" aria-controls="navbarsFurni" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarsFurni">
+        <ul class="custom-navbar-nav navbar-nav ms-auto mb-2 mb-md-0">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'index' %}">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'all_products' %}">Shop</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="about.html">About us</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="services.html">Services</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="blog.html">Blog</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="contact.html">Contact us</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'login' %}">Sign In</a>
+          </li>
+          <!-- Sign-up -->
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'register' %}">Sign Up</a>
+          </li>
+        </ul>
+		<ul class="custom-navbar-cta navbar-nav mb-2 mb-md-0 ms-5 d-flex align-items-center">
+			<li class="nav-item">
+				<a class="nav-link" href="{% url 'profile' %}">
+					<img src="/media/home/images/user.svg" style="width: 20px; height: 20px; border-radius: 50%; margin-top: 5px;">
+				</a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" href="cart.html">
+					<div class="widget-header d-flex align-items-center">
+						<a href="{% url 'cart' %}" class="icon icon-sm rounded-circle border" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;"> <!-- Adjust the width and height as needed -->
+							<img src="/media/home/images/cart.svg" style="width: 20px; height: 20px;"> <!-- Adjust the width and height as needed -->
+						</a>
+						<span class="badge badge-pill badge-danger notify ml-1">{{request.user.profile.get_cart_count}} </span> <!-- Adjust ml-1 for left margin -->
+					</div>
+				</a>
+			</li>
+		</ul>
+		
+		
+		
+      </div>
+    </div>
+
+  </nav>
+
+  <!-- ... (your existing code) ... -->
+
+</body>
+
+<!-- ... (your existing code) ... -->
+
 		
         {% block start %}
 

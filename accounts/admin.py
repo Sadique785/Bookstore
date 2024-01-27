@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Profile
+from .models import Profile, Cart, CartItem
 # Register your models here.
 
 
@@ -12,3 +12,15 @@ class ProfileAdmin(admin.ModelAdmin):
     user_email.short_description = 'User Email'
 
 admin.site.register(Profile, ProfileAdmin)
+
+class CartAdmin(admin.ModelAdmin):
+    list_display = ('user', 'is_paid')
+    list_filter = ('is_paid',)
+    search_fields = ('user__username', 'user__email')
+
+class CartItemAdmin(admin.ModelAdmin):
+    list_display = ( 'cart', 'product', 'language_variant', 'edition_variant')
+    search_fields = ('cart__user__username', 'product__product_name')
+
+admin.site.register(Cart, CartAdmin)
+admin.site.register(CartItem, CartItemAdmin)
