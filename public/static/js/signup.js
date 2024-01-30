@@ -4,6 +4,17 @@ function validateEmail(email){
 
     return emailPattern.test(email) 
 }
+function containsLetters(mobile) {
+    var letterPattern = /[a-zA-Z]/;
+
+    return letterPattern.test(mobile);
+}
+
+function validateMobileNumber(mobile) {
+    var mobilePattern = /^\d{10}$/;
+
+    return mobilePattern.test(mobile);
+}
 
 
 function validateForm(){
@@ -53,6 +64,17 @@ function validateForm(){
         mobileError.innerHTML = 'mobile is required';
         return false;
     }
+    else if (containsLetters(mobile)) {
+        mobileError.innerHTML = 'Mobile number cannot contain letters';
+        return false;
+    }
+
+    else if (!validateMobileNumber(mobile)) {
+    mobileError.innerHTML = 'Mobile number must have ten digits';
+    return false;
+    }   
+
+    
 
 
     if (password===""){

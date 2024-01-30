@@ -1,0 +1,74 @@
+{% extends 'base/real_base.html' %}
+
+{% block start %}
+
+<style>
+    .table tbody tr td {
+        padding: 8px; /* Adjust the padding as needed */
+    }
+    /* Add custom CSS to adjust spacing between table rows */
+.order-item {
+    margin-bottom: 20px; /* Adjust the margin to increase or decrease spacing */
+}
+
+</style>
+
+    <!-- Start Hero Section -->
+    <div class="hero">
+        <div class="container">
+            <div class="row justify-content-between">
+                <div class="col-lg-5">
+                    <div class="intro-excerpt">
+                        <h1>My orders</h1>
+                    </div>
+                </div>
+                <div class="col-lg-7">
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Hero Section -->
+
+    <div class="untree_co-section before-footer-section">
+        <div class="container">
+            <div class="row mb-5">
+                <div class="site-blocks-table">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th class="product-thumbnail">Image</th>
+                                <th class="product-name">Product</th>
+                                <th class="product-price">Price</th>
+                                <th class="product-quantity">Quantity</th>
+                                <th class="product-total">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order, order_items in order_items_dict.items %}
+                            {% for item in order_items %}
+                                <tr class="order-item" data-item-uid="{{ item.uid }}" data-quantity="{{ item.qty }}">
+                                    <td class="product-thumbnail">
+                                        <img src="{{ item.product.image.url }}" alt="Image" class="img-fluid">
+                                    </td>
+                                    <td class="product-name">
+                                        <h2 class="h5 text-black">{{ item.product.product_name }}</h2>
+                                        {% if item.product_variant %}
+                                            <p>Variant: {{ item.product_variant }}</p>
+                                        {% endif %}
+                                    </td>
+                                    <td>₹{{ item.price }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>{{ order.order_status }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endfor %}
+                        
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,451 @@
+{% extends 'base/real_base.html' %}
+
+{% block start %}
+
+<style>
+    .order-item-wrapper {
+        background-color: #e6e6e6;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    
+    .order-item {
+        display: flex;
+    }
+    
+    .product-image {
+        width: 100px;
+        height: 150px;
+        margin-right: 20px;
+    }
+    
+    .image-wrapper {
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+    }
+    
+    .product-details {
+        flex-grow: 1;
+    }
+    
+    .product-name {
+        font-weight: bold;
+    }
+    
+    .quantity {
+        display: flex;
+        align-items: center;
+    }
+    
+    .qty-button {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+    
+    .qty-value {
+        margin: 0 10px;
+        font-weight: bold;
+    }
+    
+    .remove-link {
+        color: #dc3545;
+        text-decoration: none;
+        margin-left: 10px;
+        cursor: pointer;
+    }
+    
+    .remove-link:hover {
+        text-decoration: underline;
+    }
+    
+
+
+</style>
+
+    <!-- Start Hero Section -->
+    <div class="hero">
+        <div class="container">
+            <div class="row justify-content-between">
+                <div class="col-lg-5">
+                    <div class="intro-excerpt">
+                        <h1>Checkout</h1>
+                    </div>
+                </div>
+                <div class="col-lg-7"></div>
+            </div>
+        </div>
+    </div>
+    <!-- End Hero Section -->
+
+    <div class="untree_co-section">
+        <div class="container">
+            <div class="row mb-5">
+                <div class="col-md-12">
+                    <div class="border p-4 rounded" role="alert">
+                        Returning customer? <a href="#">Click here</a> to login
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+               
+
+                <!-- Left Column - Billing, Order Summary, and Continue Button -->
+                <div class="col-md-6" id="billing-section">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h2 class="h3 mb-3 text-black">Billing Details</h2>
+                        <button class="btn btn-link" onclick="enableOrderSummary()">Change</button>
+                    </div>
+                    
+                    <!-- Display all addresses with radio buttons for selection -->
+                    <div class="other-addresses mt-5">
+                        {% for address in addresses %}
+                        <!-- Display details of other addresses in a loop -->
+                        <div class="address-card">
+                            <label>
+                                <input type="radio" name="selected-address" value="{{ address.uid }}" id="address-{{ address.uid }}" {% if default_address and default_address.address == address %}checked{% endif %}>                                <p>{{ address.name }}, {{ address.postal_code }}, {{ address.street_address }}, {{ address.city }}, {{ address.state }}, {{ address.country }}</p>
+                                <p>Mobile: {{ address.mobile }}</p>
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" id="selected-address-uid" name="selected-address-uid" value="">
+
+                    <a href="{% url 'new_address' %}">Add a new address</a>
+                    
+                    <!-- Delivery button -->
+                    <div class="text-center mt-3">
+                        <button class="btn btn-black" id="enableDelivery" disabled onclick="enableDelivery()">Delivery Here</button>
+                    </div>
+                </div>
+                <!-- End Left Column -->
+
+<!-- Order Summary Section -->
+<div class="col-md-6">
+    <h2 class="h3 mb-3 text-black">Order Summary</h2>
+    <div class="p-3 p-lg-5 border bg-white" id="order-summary-section" disabled>
+        {% for item in order_items %}
+            <div class="order-item-wrapper">
+                <div class="order-item">
+                    <div class="product-image">
+                        <div class="image-wrapper" style="background-image: url('{{ item.product.product_images.first.image.url }}');"></div>
+                    </div>
+                    <div class="product-details">
+                        <p class="product-name">{{ item.product.product_name }}</p>
+                        <p class="product-variant">Variance: {{ item.edition_variant }}</p>
+                        
+                        <div class="quantity">
+                            <button class="qty-button btn btn-primary ml-3" onclick="changeQuantity('{{ item.uid }}', 'minus')">-</button>
+                            <input type="number" class="qty-input" id="qty-{{ item.uid }}" value="{{ item.qty }}" style="width: 30px; text-align: center;">
+                            <button class="qty-button btn btn-primary" onclick="changeQuantity('{{ item.uid }}', 'plus')">+</button>
+                        </div>
+                        
+                        
+                        <p class="product-price" id="total-{{ item.uid }}">Price: ₹{{ item.get_product_price }}</p>
+                        <a href="{% url 'remove_cart' item.uid %}" class="remove-link" disabled>Remove</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        <div class="text-right">
+            <button id="continue-button" class="btn btn-black" data-cart-uid="{{ cart_uid }}" onclick="enablePaymentSection()" disabled>CONTINUE</button>        </div>
+    </div>
+    <!-- End Order Summary Section -->
+</div>
+
+
+                <!-- Right Column - Coupon and Your Order Section -->
+                <div class="col-md-6">
+                    <!-- Coupon Section -->
+                    <!-- <div class="row mb-5">
+                        <div class="col-md-12">
+                            <h2 class="h3 mb-3 text-black">Coupon Code</h2>
+                            <div class="p-3 p-lg-5 border bg-white">
+                                <label for="c_code" class="text-black mb-3">Enter your coupon code if you have one</label>
+                                <div class="input-group w-75 couponcode-wrap">
+                                    <input type="text" class="form-control me-2" id="c_code" placeholder="Coupon Code" aria-label="Coupon Code" aria-describedby="button-addon2">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-black btn-sm" type="button" id="button-addon2" onclick="enableOrderSummary()">Apply</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> -->
+
+                    <!-- Your Order Section -->
+                    <div class="row mb-5">
+                        <div class="col-md-12">
+                            <h2 class="h3 mb-3 text-black">Your Order</h2>
+                            <div class="p-3 p-lg-5 border bg-white" id="payment-section" disabled>
+                                <table class="table site-block-order-table mb-5">
+                                    <thead>
+                                        <th>Product</th>
+                                        <th>Total</th>
+                                    </thead>
+                                    <tbody>
+
+                                        <tr>
+                                            <td class="text-black font-weight-bold"><strong>Cart Subtotal</strong></td>
+                                            <td class="text-black" id="grand-total">₹{{cart_total}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-black font-weight-bold" ><strong>Order Total</strong></td>
+                                            <td class="text-black font-weight-bold" id="grand-subtotal"><strong>₹{{cart_total}}</strong></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                {% for payment in payment_methods %}
+                                <!-- Payment Options -->
+                                <div class="border p-3 mb-5">
+                                    <h3 class="h6 mb-0"><a class="d-block" data-bs-toggle="collapse" href="#collapsebank" role="button" aria-expanded="false" aria-controls="collapsebank">{{payment.name}}</a></h3>
+                                    <div class="collapse" id="collapsebank">
+                                        <div class="py-2">
+                                            <p class="mb-0">Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order won’t be shipped until the funds have cleared in our account.</p>
+                                        </div>
+                                
+                                        <!-- Button for "Use this payment method" -->
+                                        <button id="use-payment-method-button" class="btn btn-black btn-sm" onclick="usePaymentMethod('{{payment.uid}}')" disabled>Use this payment method</button>    </div>
+                                    </div>
+                                {% endfor %}
+                        
+                                <!-- Place Order Button -->
+                                <div class="form-group">
+                                    <button class="btn btn-black btn-lg py-3 btn-block" id="place-order-btn" onclick="placeOrder()" disabled>Place Order</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Right Column -->
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+
+function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+        function enableOrderSummary() {
+            document.getElementById('enableDelivery').disabled = false;
+
+            
+        }
+
+
+
+        function enablePaymentSection() {
+    // Enable the "Use this payment method" button
+    document.getElementById('use-payment-method-button').disabled = false;
+
+    // Disable the "Continue" button to prevent multiple clicks
+    document.getElementById('continue-button').disabled = true;
+
+    // Retrieve the cart_uid from the data attribute
+    const cartUid = document.getElementById('continue-button').getAttribute('data-cart-uid');
+
+    // Now you can use the cartUid in your further processing
+    console.log('Cart UID:', cartUid);
+}
+
+
+
+
+function usePaymentMethod(paymentUid) {
+    // Enable the "Place Order" button
+    document.getElementById('place-order-btn').disabled = false;
+
+    // Set the data-selected-payment-uid attribute on the "Use this payment method" button
+    const usePaymentMethodButton = document.getElementById('use-payment-method-button');
+    usePaymentMethodButton.setAttribute('data-selected-payment-uid', paymentUid);
+
+    // You can perform any additional actions here, such as updating the order with the selected payment method
+    console.log('Selected Payment Method:', paymentUid);
+
+    // If needed, you can also redirect the user to the next step or perform other actions
+    // Example: window.location = 'next_step_url';
+}
+
+        
+
+        function enableDelivery() {
+            document.getElementById('enableDelivery').disabled = true;
+            document.getElementById('continue-button').disabled = true;
+            
+    var selectedAddressInput = document.querySelector('input[name="selected-address"]:checked');
+    
+    if (selectedAddressInput) {
+        var selectedAddressValue = selectedAddressInput.value;
+
+        if (selectedAddressValue) {
+            console.log("Delivery option enabled for address with UID: " + selectedAddressValue);
+
+            // Set the value of the hidden input
+            var selectedAddressUidInput = document.getElementById('selected-address-uid');
+
+            if (selectedAddressUidInput) {
+                selectedAddressUidInput.value = selectedAddressValue;
+
+                // Enable the "Continue" button
+                var continueButton = document.getElementById('continue-button');
+
+                if (continueButton) {
+                    continueButton.disabled = false;
+                } else {
+                    console.error('Continue button not found.');
+                }
+            } else {
+                console.error('Selected address UID input not found.');
+            }
+        } else {
+            alert("Selected address value is empty.");
+        }
+    } else {
+        alert("Please select an address before enabling delivery.");
+    }
+}
+
+
+function placeOrder() {
+    // Display SweetAlert confirmation
+    Swal.fire({
+        title: 'Are you sure?',
+        text: 'Do you want to place the order?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, place order!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Gather data from the front end
+            const selectedAddressUid = document.querySelector('input[name="selected-address"]:checked').value;
+            const selectedPaymentUid = document.getElementById('use-payment-method-button').getAttribute('data-selected-payment-uid');
+            const selectedCartItemUid = document.getElementById('continue-button').getAttribute('data-cart-uid');
+
+            // Create an object with the collected data
+            const orderData = {
+                addressUid: selectedAddressUid,
+                paymentUid: selectedPaymentUid,
+                cartItemUid: selectedCartItemUid
+            };
+
+            // Fetch to the specified URL with the collected data
+            fetch("{% url 'save_order' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(orderData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Handle the response if needed
+                console.log('Order saved successfully:', data);
+
+                // Redirect or perform other actions as needed
+                window.location.href = 'thankyou';
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    });
+}
+
+
+
+
+
+
+function changeQuantity(itemUid, action) {
+    const quantityElement = document.getElementById(`qty-${itemUid}`);
+
+    let newQuantity = parseInt(quantityElement.value);
+
+    if (action === 'plus') {
+      newQuantity++;
+    } else if (action === 'minus' && newQuantity > 1) {
+      newQuantity--;
+    }
+    quantityElement.value = newQuantity;
+
+    console.log(`Item UID: ${itemUid}, New Quantity: ${newQuantity}`);
+    updateQuantityOnServer(itemUid, newQuantity);
+  }
+
+  function updateQuantityOnServer(itemUid, newQuantity) {
+    const csrfToken = getCookie('csrftoken');
+
+    if (!csrfToken) {
+      console.error('CSRF token is missing.');
+      return;
+    }
+
+    const data = {
+      itemUid: itemUid,
+      newQuantity: newQuantity
+    };
+   
+    fetch("{% url 'change_quantity' %}", {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrfToken
+      },
+      body: JSON.stringify(data)
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      const totalElement = document.getElementById(`total-${itemUid}`);
+      const grandTotalElement = document.getElementById('grand-total');
+      const grandSubTotalElement = document.getElementById('grand-subtotal');
+
+      if (totalElement) {
+        totalElement.textContent = `Price: ₹${data.newTotal}`;
+      }
+
+      if (grandTotalElement) {
+        grandTotalElement.textContent = `₹${data.grand_total}`;
+      }
+      if (grandSubTotalElement) {
+        grandSubTotalElement.textContent = `₹${data.grand_total}`
+      }
+    })
+    .catch(error => console.error('Error:', error));
+  }
+
+
+
+    </script>
+{% endblock %}

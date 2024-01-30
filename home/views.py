@@ -69,7 +69,7 @@ def profile_page(request):
             #     return render(request, 'home/profile_page.html', context)
             
             
-            messages.success(request, f'{form_type.capitalize()} form data saved successfully.')
+            messages.success(request, f'{form_type.capitalize()}  saved successfully.')
             return redirect('profile')
         else:
             messages.warning(request, 'Form submission failed. Please check the form data.')
@@ -134,6 +134,46 @@ def add_address(request):
     
     return render(request, 'home/add_address.html', context)
 
+
+@login_required
+def new_address(request):
+    context = {}
+    if request.method == 'POST':
+        form = ManageAddress(request.POST)
+
+        if form.is_valid():
+            address = form.save()
+
+            is_default=form.cleaned_data.get('is_default', False)
+
+
+            user_address = UserAddress(
+                user=request.user,
+                address=address,
+                is_default=is_default 
+            )
+            user_address.save()
+
+            if is_default:
+                UserAddress.objects.filter(user=request.user).exclude(uid=user_address.uid).update(is_default=False)
+
+
+            messages.success(request, 'Address added successfully.')
+            return redirect('checkout')
+        else:
+            messages.warning(request, 'Form submission failed. Please check the form data.')
+            context['form'] = form
+            context['form_errors'] = form.errors
+            
+        
+    else:
+        form = ManageAddress() 
+        context = {"form":form}
+    
+    
+    return render(request, 'home/new_address.html', context)
+
+
 @login_required
 def edit_address(request, address_uid):
     user = request.user
@@ -175,6 +215,10 @@ def edit_address(request, address_uid):
     }
 
     return render(request, 'home/edit_address.html', context)
+
+
+
+
 
 @login_required
 def delete_address(request, address_uid):

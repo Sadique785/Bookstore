@@ -15,6 +15,7 @@ from django.contrib.auth.decorators import user_passes_test, login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
+from orders.models import Order, OrderItem
 
 # Create your views here.
 # ------------------------------------------------ACCOUNTS-------------------------------------------------------------
@@ -427,6 +428,82 @@ def delete_variant(request, uid):
 
     messages.error(request, 'Invalid Variant UID')
     return redirect('admin_variance')
+
+@login_required
+def admin_order(request):
+    orders = Order.objects.all().order_by('-created_at')
+    print(f"Number of orders: {orders.count()}")
+
+    order_items_dict = {}  
+
+    for order in orders:
+       
+        order_items = OrderItem.objects.filter(order=order)
+        order_items_dict[order] = order_items
+        
+    order_status_choices = Order.ORDER_STATUS_CHOICES
+        
+    context = {
+        'orders': orders,
+        'order_items_dict': order_items_dict,
+        'order_status_choices': order_status_choices,
+    }
+
+    return render(request, 'admin_home/admin_order.html', context)
+
+
+
+def update_order_status(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            order_uid = data.get('order_uid')
+            new_status = data.get('new_status')
+
+            order = Order.objects.get(uid=order_uid)
+            order.order_status = new_status
+            order.save()
+
+            if new_status == Order.DELIVERED:
+                order.is_delivered = True
+                order.save()
+
+            return JsonResponse({'status': 'success', 'new_status': order.order_status})
+        except Exception as e:
+            print(str(e))
+            return JsonResponse({'status': 'error', 'message': 'Failed to update order status'})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
+@require_POST
+def admin_cancel_order(request):
+    try:
+        data = json.loads(request.body)
+        order_uid = data.get('order_uid')
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'message': 'Invalid JSON data'})
+
+    order = get_object_or_404(Order, uid=order_uid)
+
+    if order.is_active:
+        order.is_active = False
+        order.save()
+        response_data = {'success': True, 'message': 'Order is cancelled'}
+    else:
+        response_data = {'success': False, 'message': 'Order is already cancelled'}
+
+    return JsonResponse(response_data)
+
+# @login_required
+
+# def admin_order_item(request, uid):
+#         return render(request, 'admin_home/admin_order_item.html')
+
+
+
+@login_required
+def admin_order_detail(request):
+    return render(request, 'admin_home/admin_order_detail.html')
 
 
 

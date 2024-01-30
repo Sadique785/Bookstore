@@ -287,3 +287,60 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
+function enableOrderSummary() {
+    document.getElementById('order-summary-section').disabled = false;
+}
+
+function enablePaymentSection() {
+    document.getElementById('payment-section').disabled = false;
+}
+
+function enableDelivery() {
+var selectedAddressInput = document.querySelector('input[name="selected-address"]:checked');
+if (selectedAddressInput) {
+var selectedAddressValue = selectedAddressInput.value;
+if (selectedAddressValue) {
+    console.log("Delivery option enabled for address with UID: " + selectedAddressValue);
+
+    // Set the value of the hidden input
+    var selectedAddressUidInput = document.getElementById('selected-address-uid');
+    if (selectedAddressUidInput) {
+        selectedAddressUidInput.value = selectedAddressValue;
+
+        // Enable the "Continue" button
+        var continueButton = document.getElementById('continue-button');
+        if (continueButton) {
+            continueButton.disabled = false;
+        } else {
+            console.error('Continue button not found.');
+        }
+        const csrftoken = getCookie('csrftoken');
+        // Perform a fetch request to the backend view
+        fetch('{% url "save_order_address" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken,
+            },
+            body: JSON.stringify({
+                selected_address_uid: selectedAddressValue,
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Handle the response as needed
+            console.log('Response from backend:', data);
+        })
+        .catch(error => {
+            console.error('Error in fetch request:', error);
+        });
+    } else {
+        console.error('Selected address UID input not found.');
+    }
+} else {
+    alert("Selected address value is empty.");
+}
+} else {
+alert("Please select an address before enabling delivery.");
+}
+}

@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'accounts',
     'home',
     'admin_folder.admin_side',
+    'orders',
+    'payments',
     
     
 ]

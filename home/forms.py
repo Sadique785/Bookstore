@@ -6,6 +6,8 @@ from accounts.models import Profile
 from django import forms
 from django.forms import ValidationError
 from .constants import COUNTRY_CHOICES
+from django.core.validators import validate_email
+
 
 
 class InfoFirst(forms.ModelForm):
@@ -31,16 +33,19 @@ class InfoSecond(forms.ModelForm):
         model = User
         fields = ['email']
 
-    def clean(self):
-        cleaned_data = super().clean()
-        email = cleaned_data.get('email')
+    def clean_email(self):
+        email = self.cleaned_data['email']
 
+        try:
+            validate_email(email)
+        except ValidationError:
+            raise ValidationError("Enter a valid email address.")
 
-        if not email.endswith('@example.com'):
-            raise ValidationError("Email must be from example.com domain.")
+        # Update username to the new email
+        self.instance.username = email
+        self.instance.save()
 
-
-
+        return email
 
 class InfoThird(forms.ModelForm):
     class Meta:

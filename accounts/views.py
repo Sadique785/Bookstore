@@ -1,3 +1,4 @@
+from audioop import reverse
 import json
 from django.shortcuts import get_object_or_404, render,redirect
 from django.contrib import messages
@@ -11,6 +12,14 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.hashers import make_password
 from products.models import Product, EditionVariant, LanguageVariant
 from django.views.decorators.http import require_POST
+from home.models import Address, UserAddress
+from django.views import View
+from django.db import transaction
+from orders.models import  Order, OrderAddress, OrderItem
+from django.views.decorators.csrf import csrf_exempt
+from payments.models import  PaymentMethod
+
+
 
 
 
@@ -164,7 +173,8 @@ def activate_email(request, email_token):
         user = Profile.objects.get(email_token = email_token)
         user.is_email_verified = True
         user.save()
-        return redirect('index')
+        messages.success(request, 'Successfully registered Please Login')
+        return redirect('login')
         
     except Exception as e:
         return HttpResponse("Invalid Email Token")
@@ -225,17 +235,230 @@ def change_quantity(request):
 
 
 def cart(request):
-    cart = Cart.objects.filter(is_paid = False, user = request.user).first()
-    cart_items = CartItem.objects.filter(cart = cart)
-    print(cart_items)
-    print(cart.get_cart_total)
+    # Retrieve the cart for the user
+    cart = Cart.objects.filter(is_paid=False, user=request.user).first()
+    
+    if cart:
+        cart_items = CartItem.objects.filter(cart=cart)
+        print(cart_items)
+        print(cart.get_cart_total)
+    else:
+        cart_items = []
 
-    context = {'cart': cart}
-    return render(request, 'accounts/cart.html',context )
+    context = {'cart': cart, 'cart_items': cart_items}
+    return render(request, 'accounts/cart.html', context)
+
+
+
+def order_history(request):
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    
+    order_items_dict = {}
+
+    for order in orders:
+        order_items = OrderItem.objects.filter(order=order)
+        order_items_dict[order] = order_items
+
+    context = {'orders': orders, 'order_items_dict': order_items_dict}
+    return render(request, 'accounts/order_history.html', context)
 
 
 
 
+@login_required
+def checkout(request):
+    user = request.user
+    user_addresses = UserAddress.objects.filter(user=user)
+    addresses = [user_address.address for user_address in user_addresses]
+
+    # default_address = next((user_address.address for user_address in user_addresses if user_address.is_default), None)
+    default_address = UserAddress.objects.filter(is_default = True).first()
+    print(default_address)
+    cart = Cart.objects.filter(is_paid=False, user=user).first()
+    cart_items = CartItem.objects.filter(cart=cart)
+    cart_total = cart.get_cart_total()
+    payment_methods = PaymentMethod.objects.filter(is_active=True)
+
+    context = {
+        "addresses": addresses,
+        "default_address": default_address,
+        "order_items": cart_items,
+        "cart_total": cart_total,
+        'payment_methods':payment_methods,
+        'cart_uid':cart.uid,
+         
+    }
+    return render(request, 'accounts/checkout.html', context)
+
+
+@require_POST
+def save_order(request):
+    user = request.user
+
+    data  = json.loads(request.body.decode('utf-8'))
+    print(data)
+    addressUid = data.get('addressUid')
+    paymentUid = data.get('paymentUid')
+    cartItemUid = data.get('cartItemUid')
+
+    address = Address.objects.get(uid = addressUid)
+    print(address)
+    payment_method = PaymentMethod.objects.get(uid = paymentUid)
+    print(payment_method)
+    cart = Cart.objects.get(uid = cartItemUid)
+    print(cart)
+    cart_items  = CartItem.objects.filter(cart = cart)
+    print(cart)
+
+    order = Order.objects.create(
+    user=request.user,  # Assuming you have user authentication
+    order_status=Order.PENDING,
+    total_amount=cart.get_cart_total(),
+    )
+    print(order)
+    order.save()
+
+            
+
+    for cart_item in cart_items:
+        first_image = cart_item.product.product_images.first()
+
+    
+        order_item = OrderItem.objects.create(
+            order=order,
+            product_name=cart_item.product.product_name,
+            quantity=cart_item.qty,
+            product_variant=getattr(cart_item.edition_variant, 'edition_variant.name', None),
+            price=cart_item.product.price,
+            payment_method=payment_method,
+            image=first_image.image if first_image else None,
+            name=address.name,
+            city=address.city,
+            country=address.country,
+            state=address.state,
+            postal_code=address.postal_code,
+            street_address=address.street_address,
+            mobile=address.mobile,
+        )
+        order_item.save()
+        print(order_item)
+        
+
+        cart_items.delete()
+        
+
+
+
+
+
+
+    # Your logic to save the order goes here
+
+    # Assuming you have some data to return in the JSON response
+    data = {
+        'status': 'success',
+        'message': 'Order saved successfully',
+        'order_id': '12345',  # Replace with the actual order ID or relevant data
+    }
+
+    return JsonResponse(data)
+
+
+def thankyou(request):
+    return render(request, 'home/thankyou.html')
+
+# @require_POST
+# def save_order_address(request):
+#     url = reverse('save_order_address')
+#     print(f'URL: {url}')
+#     try:
+#         data = json.loads(request.body.decode('utf-8'))
+#         selected_address_uid = data.get('selected_address_uid')
+#         selected_address = Address.objects.get(uid=selected_address_uid)
+
+#         order_instance = Order.objects.create(
+#             user=request.user,
+#             total_amount=0,
+#         )
+#         order_instance.save()
+
+#         order_address = OrderAddress.objects.create(
+#             order=order_instance,
+#             name=selected_address.name,
+#             city=selected_address.city,
+#             country=selected_address.country,
+#             state=selected_address.state,
+#             postal_code=selected_address.postal_code,
+#             street_address=selected_address.street_address,
+#             mobile=selected_address.mobile,
+#             is_billing_address=False,
+#             is_shipping_address=False,
+#         )
+
+#         return JsonResponse({
+#             'order_uid': order_instance.uid,
+#             'selected_address_uid': selected_address_uid,
+#         })
+
+#     except Exception as e:
+#         return JsonResponse({'error': str(e)}, status=500)
+            
+
+
+# class SaveOrderAddressView(View):
+#     print('First')
+#     @transaction.atomic
+#     def post(self, request, *args, **kwargs):
+#         try:
+#             data = json.loads(request.body.decode('utf-8'))
+
+#             selected_address_uid = data.get('selected_address_uid')
+
+            
+#             selected_address = Address.objects.get(uid=selected_address_uid)
+#             print(selected_address)
+#             print('second')
+#             # Start a database transaction
+#             with transaction.atomic():
+#                 order_address = OrderAddress(
+#                     name=selected_address.name,
+#                     city=selected_address.city,
+#                     country=selected_address.country,
+#                     state=selected_address.state,
+#                     postal_code=selected_address.postal_code,
+#                     street_address=selected_address.street_address,
+#                     mobile=selected_address.mobile,
+                    
+#                     is_billing_address=False,
+#                     is_shipping_address=False,
+#                 )
+#                 order_address.save()
+
+#                 order_instance = Order(
+#                     user=request.user,
+#                     total_amount=0,
+#                 )
+#                 print(order_instance)
+#                 order_instance.save()
+
+#                 order_address.order = order_instance
+#                 order_address.save()
+
+
+
+#                 transaction.on_commit(lambda: self.handle_transaction_success(order_instance, selected_address_uid))
+
+#             return JsonResponse({'order_uid': order_instance.uid, 'selected_address_uid': selected_address_uid, })
+
+#         except Exception as e:
+#             print('error')
+#             print(f"Error: {str(e)}")
+#             return JsonResponse({'error': str(e)}, status=500)
+
+
+#     def handle_transaction_success(self, order_instance, selected_address_uid):
+#         print(f"Order {order_instance.uid} created successfully.")
+#         print(f"Selected address with UID {selected_address_uid} processed successfully.")
 
 # def otp_verification(request):
 #     if request.method == 'POST':

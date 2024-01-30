@@ -1,0 +1,273 @@
+{% extends "base/new_base.html" %}
+
+
+{% block content %}
+
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Order List </h2>
+
+        </div>
+        <div>
+            <input type="text" placeholder="Search order ID" class="form-control bg-white">
+        </div>
+    </div>
+    <div class="card mb-4">
+        <header class="card-header">
+            <div class="row gx-3">
+                <div class="col-lg-4 col-md-6 me-auto">
+                    <input type="text" placeholder="Search..." class="form-control">
+                </div>
+                <div class="col-lg-2 col-6 col-md-3">
+                    <select class="form-select">
+                        <option>Status</option>
+                        <option>Active</option>
+                        <option>Disabled</option>
+                        <option>Show all</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-6 col-md-3">
+                    <select class="form-select">
+                        <option>Show 20</option>
+                        <option>Show 30</option>
+                        <option>Show 40</option>
+                    </select>
+                </div>
+            </div>
+        </header> <!-- card-header end// -->
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                           
+                            <th scope="col">Name</th>
+                            <th scope="col">Id</th>
+                            <th scope="col">Total</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Created Date</th>
+                            <th scope="col">Updated Date</th>
+                            <th scope="col">Cancel</th>
+
+
+                            
+
+                         
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                                <tr>
+                                    <td><a href="#">{{ order.user.username }}</a></td>
+                                    <td><a href="#">{{ order.uid }}</a></td>
+                                    <td>{{ order.calculate_total }}</td>
+                                    {% if order.is_delivered %}
+                                    <td>Delivered</td>
+
+                                    {% elif order.is_active %}
+                                    <td>
+                                        <div class="dropdown">
+                                            <button class="btn btn-light rounded btn-sm font-sm" type="button" id="orderStatusDropdown_{{ order.uid }}" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                {{ order.order_status }}
+                                            </button>
+                                            <div class="dropdown-menu" aria-labelledby="orderStatusDropdown_{{ order.uid }}">
+                                                {% for choice_value, choice_label in order_status_choices %}
+                                                    <a class="dropdown-item order-status-item" href="#" data-order-uid="{{ order.uid }}" data-value="{{ choice_value }}">
+                                                        {{ choice_label }}
+                                                    </a>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        <!-- dropdown //end -->
+                                    </td>
+                                    
+                                {% else %}
+                                    <td>Cancelled</td>  
+                                {% endif %}
+                                    <td>{{ order.created_at }}</td>
+                                    <td>{{ order.updated_at }}</td>
+                                    <td class="">
+                                        {% if order.is_delivered %}
+                                        <p>Order is Delivered</p>
+
+                                        {% elif order.is_active %}
+                                            <a href="#" class="btn btn-md rounded font-sm cancel-order-btn" data-order-uid="{{ order.uid }}">Cancel</a>
+                                        {% else %}
+                                            <p>Order is Cancelled</p>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                 
+                    </tbody>
+                    
+                    
+                </table>
+            </div> <!-- table-responsive //end -->
+        </div> <!-- card-body end// -->
+    </div> <!-- card end// -->
+    <div class="pagination-area mt-15 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+                <li class="page-item active"><a class="page-link" href="#">01</a></li>
+                <li class="page-item"><a class="page-link" href="#">02</a></li>
+                <li class="page-item"><a class="page-link" href="#">03</a></li>
+                <li class="page-item"><a class="page-link dot" href="#">...</a></li>
+                <li class="page-item"><a class="page-link" href="#">16</a></li>
+                <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
+            </ul>
+        </nav>
+    </div>
+</section>
+
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        console.log("DOMContentLoaded event listener is working.");
+
+
+    // Function to handle dropdown item click
+    document.querySelectorAll('.order-status-item').forEach(item => {
+        item.addEventListener('click', function () {
+            var orderUid = this.dataset.orderUid;
+            var newStatus = this.dataset.value;
+
+            // Log the order UID and new status to the console
+            console.log('Order UID:', orderUid);
+            console.log('New Status:', newStatus);
+
+            // Send a fetch request to update the order status
+            fetch('{% url "update_order_status" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                body: JSON.stringify({
+                    'order_uid': orderUid,
+                    'new_status': newStatus,
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Check if the new status is 'Delivered'
+                    if (data.new_status === 'Delivered') {
+                        // Replace the dropdown button with a span
+                        var dropdownButton = document.querySelector(`#orderStatusDropdown_${orderUid}`);
+                        if (dropdownButton) {
+                            var deliveredSpan = document.createElement('span');
+                            deliveredSpan.innerText = 'Delivered';
+                            deliveredSpan.style.fontSize = '13px'; // Set the desired font size
+                            dropdownButton.replaceWith(deliveredSpan);
+                            var deliveredText = document.createElement('span');
+                                deliveredText.innerText = 'Order is Delivered';
+                                deliveredText.style.fontSize = '14px';
+                                var cancelBtn = document.querySelector(`.cancel-order-btn[data-order-uid="${orderUid}"]`);
+                                if (cancelBtn) {
+                                    cancelBtn.replaceWith(deliveredText);
+                                }
+
+
+                        } else {
+                            console.warn('Dropdown button not found for order:', orderUid);
+                        }
+                    } else {
+                        // Update the inner HTML of the dropdown button
+                        var dropdownButton = document.querySelector(`#orderStatusDropdown_${orderUid}`);
+                        if (dropdownButton) {
+                            dropdownButton.innerHTML = data.new_status;
+                        } else {
+                            console.warn('Dropdown button not found for order:', orderUid);
+                        }
+                    }
+
+                    console.log('Order status updated successfully');
+                } else {
+                    console.error(data.message);
+                }
+            })
+            .catch(error => {
+                console.error(error);
+            });
+        });
+    });
+
+
+
+
+
+        // Function to handle cancel order button click
+        document.querySelectorAll('.cancel-order-btn').forEach(function (cancelBtn) {
+            cancelBtn.addEventListener('click', function (event) {
+                event.preventDefault();
+
+                var orderUid = cancelBtn.getAttribute('data-order-uid');
+                var orderStatusElement = cancelBtn.parentElement.previousElementSibling.previousElementSibling.previousElementSibling;
+
+                // Fetch the UID and status of the order
+                var requestData = {
+                    order_uid: orderUid
+                };
+
+                // Send a fetch request to cancel the order
+                fetch('{% url "admin_cancel_order" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken'),
+                    },
+                    body: JSON.stringify(requestData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update UI based on the response message
+                        var cancelledText = document.createElement('span');
+                        cancelledText.innerText = 'Cancelled';
+                        cancelledText.style.fontSize = '13px'; // Set the desired font size
+                        orderStatusElement.replaceWith(cancelledText);
+
+                        var messageText = document.createElement('span');
+                        messageText.innerText = 'Order is Cancelled';
+                        messageText.style.fontSize = '14px'; // Set the desired font size
+                        cancelBtn.parentElement.replaceWith(messageText);
+                        cancelBtn.remove();  // Remove the cancel button
+                    } else {
+                        // Handle failure (if needed)
+                        console.error(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+            });
+        });
+    });
+</script>
+
+
+    
+    
+    
+
+{% endblock %}
+
+

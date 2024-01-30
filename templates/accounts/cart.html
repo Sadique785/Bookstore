@@ -21,7 +21,7 @@
 <!-- End Hero Section -->
 
 
-
+{% if cart_items %}
 <div class="untree_co-section before-footer-section">
   <div class="container">
     <div class="row mb-5">
@@ -81,7 +81,7 @@
             <button class="btn btn-outline-black btn-sm btn-block">Continue Shopping</button>
           </div>
         </div>
-        <div class="row">
+        <!-- <div class="row">
           <div class="col-md-12">
             <label class="text-black h4" for="coupon">Coupon</label>
             <p>Enter your coupon code if you have one.</p>
@@ -92,7 +92,7 @@
           <div class="col-md-4">
             <button class="btn btn-black">Apply Coupon</button>
           </div>
-        </div>
+        </div> -->
       </div>
       <div class="col-md-6 pl-5">
         <div class="row justify-content-end">
@@ -121,7 +121,7 @@
 
             <div class="row">
               <div class="col-md-12">
-                <button class="btn btn-black btn-lg py-3 btn-block" onclick="window.location='checkout.html'">Proceed To Checkout</button>
+                <a href="{% url 'checkout' %}"> <button class="btn btn-black btn-lg py-3 btn-block">Proceed To Checkout</button></a>
               </div>
             </div>
           </div>
@@ -130,7 +130,13 @@
     </div>
   </div>
 </div>
+{% else %}
+<div class="col-md-12" style="text-align: center; font-size: 20px; color: #ff0000; margin-top: 20px;">
+  <p>Oops! Your Cart is empty. Start shopping now!</p>
+  <a href="{% url 'all_products' %}" class="btn btn-primary">Shop Now</a>
+</div>
 
+{% endif %}
 
 <script>
   function getCSRFToken() {
