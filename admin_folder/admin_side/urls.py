@@ -29,8 +29,12 @@ urlpatterns = [
     path('delete_variant/<uid>/', views.delete_variant, name="delete_variant"),
     path('admin-order/', views.admin_order, name="admin_order"),
     # path('admin-order-item/', views.admin_order_item, name="admin_order_item"),
-    path('admin-order-detail/', views.admin_order_detail, name="admin_order_detail"),
+    path('admin-order-item/<uid>/', views.admin_order_item, name="admin_order_item"),
+    path('admin-item-detail/<uid>/', views.admin_item_detail, name="admin_item_detail"),
     path('update_order_status/', views.update_order_status, name="update_order_status"),
+    path('update_order_item_status/', views.update_order_item_status, name="update_order_item_status"),
+
+    path('admin_cancel_item/', views.admin_cancel_item, name="admin_cancel_item"),
     path('admin_cancel_order/', views.admin_cancel_order, name="admin_cancel_order"),
     
 

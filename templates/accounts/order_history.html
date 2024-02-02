@@ -1,16 +1,30 @@
 {% extends 'base/real_base.html' %}
 
 {% block start %}
-
 <style>
     .table tbody tr td {
         padding: 8px; /* Adjust the padding as needed */
     }
     /* Add custom CSS to adjust spacing between table rows */
-.order-item {
-    margin-bottom: 20px; /* Adjust the margin to increase or decrease spacing */
-}
+    .order-item {
+        margin-bottom: 5px; /* Adjust the margin to increase or decrease spacing */
+    }
 
+    .order-item td {
+        padding: 5px !important; /* Adjust the padding for each table cell */
+        vertical-align: middle !important; /* Center content vertically */
+    }
+
+    .order-item img {
+        width: 76px;
+        height: 119px; /* Maintain the aspect ratio of the image */
+        display: block; /* Remove any extra spacing around the image */
+        margin: 0 auto; /* Center the image horizontally */
+    }
+
+    a{
+        text-decoration: none;
+    }
 </style>
 
     <!-- Start Hero Section -->
@@ -34,7 +48,7 @@
         <div class="container">
             <div class="row mb-5">
                 <div class="site-blocks-table">
-                    <table class="table">
+                    <table class="table table-sm">
                         <thead>
                             <tr>
                                 <th class="product-thumbnail">Image</th>
@@ -45,25 +59,25 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for order, order_items in order_items_dict.items %}
-                            {% for item in order_items %}
-                                <tr class="order-item" data-item-uid="{{ item.uid }}" data-quantity="{{ item.qty }}">
-                                    <td class="product-thumbnail">
-                                        <img src="{{ item.product.image.url }}" alt="Image" class="img-fluid">
-                                    </td>
-                                    <td class="product-name">
-                                        <h2 class="h5 text-black">{{ item.product.product_name }}</h2>
-                                        {% if item.product_variant %}
-                                            <p>Variant: {{ item.product_variant }}</p>
-                                        {% endif %}
-                                    </td>
-                                    <td>₹{{ item.price }}</td>
-                                    <td>{{ item.quantity }}</td>
-                                    <td>{{ order.order_status }}</td>
-                                </tr>
+                            {% for order in orders %}
+                                {% for order_item in order.order_items.all %}
+                                    <tr class="order-item" data-item-uid="{{ item.uid }}" data-quantity="{{ item.qty }}">
+                                        <td class="product-thumbnail">
+                                           <a href="{% url 'order_product_detail' order_item.uid %}"> <img src="{{ order_item.image.url }}" alt="Image" class="img-fluid"></a>
+                                        </td>
+                                        <td class="product-name">
+                                            <a href="{% url 'order_product_detail' order_item.uid %}"> <h2 class="h5 text-black">{{ order_item.product_name }}</h2></a>
+                                           
+                                            {% if order_item.edition_variant %}
+                                                <p>Variant: {{ order_item.edition_variant }}</p>
+                                            {% endif %}
+                                        </td>
+                                        <td>₹{{ order_item.get_total }}</td>
+                                        <td>{{ order_item.quantity }}</td>
+                                        <td>{{ order_item.order_status }}</td>
+                                    </tr>
+                                {% endfor %}
                             {% endfor %}
-                        {% endfor %}
-                        
                         </tbody>
                     </table>
                 </div>

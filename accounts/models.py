@@ -61,7 +61,7 @@ class Cart(BaseModel):
 class CartItem(BaseModel):
     cart = models.ForeignKey(Cart, on_delete = models.SET_NULL,null=True, related_name = 'cart_item')
     product = models.ForeignKey(Product, on_delete = models.SET_NULL,null=True, related_name = 'product')
-    language_variant = models.ForeignKey(LanguageVariant, on_delete = models.SET_NULL,null=True)
+    language_variant = models.ForeignKey(LanguageVariant, on_delete = models.SET_NULL,null=True,related_name = 'language_variant')
     edition_variant = models.ForeignKey(EditionVariant, on_delete = models.SET_NULL,null=True,related_name = 'edition_variant')
     qty = models.IntegerField(default = 1)
     price = models.IntegerField(default = 0)

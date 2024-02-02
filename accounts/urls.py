@@ -20,6 +20,8 @@ urlpatterns = [
     path('save_order/', views.save_order, name="save_order"),
     path('cart/checkout/thankyou/', views.thankyou, name="thankyou"),
     path('order_history/', views.order_history, name="order_history"),
+    path('order-product-detail/<uid>', views.order_product_detail, name="order_product_detail"),
+
 ]
 
 

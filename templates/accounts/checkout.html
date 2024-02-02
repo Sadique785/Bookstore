@@ -138,7 +138,9 @@
                     </div>
                     <div class="product-details">
                         <p class="product-name">{{ item.product.product_name }}</p>
-                        <p class="product-variant">Variance: {{ item.edition_variant }}</p>
+                        {% if item.edition_variant %}
+                        <p class="edition-variant">Variance: {{ item.edition_variant }}</p>
+                        {% endif %}
                         
                         <div class="quantity">
                             <button class="qty-button btn btn-primary ml-3" onclick="changeQuantity('{{ item.uid }}', 'minus')">-</button>

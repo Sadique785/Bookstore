@@ -253,14 +253,23 @@ def cart(request):
 def order_history(request):
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
     
-    order_items_dict = {}
+    # order_items_dict = {}
 
-    for order in orders:
-        order_items = OrderItem.objects.filter(order=order)
-        order_items_dict[order] = order_items
+    # for order in orders:
+    #     order_items = OrderItem.objects.filter(order=order)
+    #     order_items_dict[order] = order_items
 
-    context = {'orders': orders, 'order_items_dict': order_items_dict}
+    # context = {'orders': orders, 'order_items_dict': order_items_dict}
+    context = {'orders':orders}
     return render(request, 'accounts/order_history.html', context)
+
+
+def order_product_detail(request, uid):
+    item = OrderItem.objects.get(uid = uid)
+    context = {'item':item}
+    return render(request, 'accounts/order_product_detail.html', context)
+
+
 
 
 
@@ -322,13 +331,24 @@ def save_order(request):
 
     for cart_item in cart_items:
         first_image = cart_item.product.product_images.first()
+        if cart_item.edition_variant:
+            edition_variant = cart_item.edition_variant.name
+        else:
+            edition_variant = None
 
-    
+        if cart_item.language_variant:
+            language_variant = cart_item.language_variant.name
+
+        else:
+            language_variant = None
+       
+
         order_item = OrderItem.objects.create(
             order=order,
             product_name=cart_item.product.product_name,
             quantity=cart_item.qty,
-            product_variant=getattr(cart_item.edition_variant, 'edition_variant.name', None),
+            language_variant = language_variant,
+            edition_variant = edition_variant,
             price=cart_item.product.price,
             payment_method=payment_method,
             image=first_image.image if first_image else None,

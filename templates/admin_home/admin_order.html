@@ -60,7 +60,8 @@
                     <tbody>
                         {% for order in orders %}
                                 <tr>
-                                    <td><a href="#">{{ order.user.username }}</a></td>
+                                    <td><a href="{% url 'admin_order_item' uid=order.uid %}">{{ order.user.username }}</a></td>
+                                    
                                     <td><a href="#">{{ order.uid }}</a></td>
                                     <td>{{ order.calculate_total }}</td>
                                     {% if order.is_delivered %}

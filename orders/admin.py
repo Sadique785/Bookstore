@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import Order, OrderAddress, OrderPayment
+from .models import Order, OrderAddress, OrderPayment, OrderItem
 
 
 
@@ -23,6 +23,13 @@ class OrderAddressAdmin(admin.ModelAdmin):
 class OrderPaymentAdmin(admin.ModelAdmin):
     list_display = ('order', 'payment_method')
     search_fields = ('order__user__username', 'payment_method__name')
+
+@admin.register(OrderItem)
+class OrderItemAdmin(admin.ModelAdmin):
+    list_display = ('uid', 'order', 'product_name', 'quantity', 'price', 'order_status', 'is_active', 'is_delivered')
+    list_filter = ('order_status', 'is_active', 'is_delivered')
+    search_fields = ('product_name', 'order__uid', 'name', 'mobile')
+
 
 
 # admin.site.register(OrderAdmin, OrderAddressAdmin, OrderPaymentAdmin)

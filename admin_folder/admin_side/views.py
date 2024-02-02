@@ -82,10 +82,21 @@ def admin_users(request):
 
 @user_passes_test(is_superuser, login_url='admin_login')
 def admin_user_details(request, details_pk):
-    user = Profile.objects.get(user_id = details_pk )
-    # user1 = Profile.objects.get(id = pk)
-    context = {'user':user}
-    # context2 = {'user1':user1}
+    profile = get_object_or_404(Profile, user_id=details_pk)
+    user = profile.user
+    print(f"User ID: {user.id}")
+
+    orders = Order.objects.filter(user_id=user.id)
+    print(f"Orders: {orders}")
+
+    order_items = OrderItem.objects.filter(order__in=orders)
+    print(f"Order Items: {order_items}")
+
+    context = {'user':profile,
+               'user_obj':user, 
+               'orders': orders,
+               'order_items': order_items,
+               }
     return render(request, "admin_home/admin_user_details.html",context )
 
 @user_passes_test(is_superuser, login_url='admin_login')
@@ -452,6 +463,29 @@ def admin_order(request):
     return render(request, 'admin_home/admin_order.html', context)
 
 
+@login_required
+def admin_order_item(request, uid):
+    order = Order.objects.get(uid=uid)
+    order_items = OrderItem.objects.filter(order = order)
+    item_status_choices = OrderItem.ORDER_STATUS_CHOICES
+    print(item_status_choices)
+
+    context = {'order': order,
+             'order_items':order_items,
+             'item_status_choices':item_status_choices,
+             }  
+    
+    return render(request, 'admin_home/admin_order_item.html', context)
+
+
+def admin_item_detail(request, uid):
+    item = OrderItem.objects.get(uid = uid)
+    item_status_choices = OrderItem.ORDER_STATUS_CHOICES
+    context = {'item':item,
+               'item_status_choices':item_status_choices,}
+    return render(request, 'admin_home/admin_order_detail.html', context)
+
+
 
 def update_order_status(request):
     if request.method == 'POST':
@@ -469,6 +503,32 @@ def update_order_status(request):
                 order.save()
 
             return JsonResponse({'status': 'success', 'new_status': order.order_status})
+        except Exception as e:
+            print(str(e))
+            return JsonResponse({'status': 'error', 'message': 'Failed to update order status'})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
+
+def update_order_item_status(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            item_uid = data.get('item_uid')
+            new_status = data.get('new_status')
+            print(item_uid)
+            print(new_status)
+
+            item = OrderItem.objects.get(uid=item_uid)
+            item.order_status = new_status
+            item.save()
+            print(item.order_status)
+
+            if new_status == Order.DELIVERED:
+                item.is_delivered = True
+                item.save()
+
+            return JsonResponse({'status': 'success', 'new_status': item.order_status})
         except Exception as e:
             print(str(e))
             return JsonResponse({'status': 'error', 'message': 'Failed to update order status'})
@@ -494,16 +554,30 @@ def admin_cancel_order(request):
 
     return JsonResponse(response_data)
 
-# @login_required
 
-# def admin_order_item(request, uid):
-#         return render(request, 'admin_home/admin_order_item.html')
+@require_POST
+def admin_cancel_item(request):
+    
+    try:
+        data = json.loads(request.body)
+        item_uid = data.get('item_uid')
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'message': 'Invalid JSON data'})
+
+    order_item = get_object_or_404(OrderItem, uid=item_uid)
+    print('Ho')
+
+    if order_item.is_active:
+        order_item.is_active = False
+        order_item.save()
+        response_data = {'success': True, 'message': 'Order is cancelled'}
+    else:
+        response_data = {'success': False, 'message': 'Order is already cancelled'}
+
+    return JsonResponse(response_data)
 
 
 
-@login_required
-def admin_order_detail(request):
-    return render(request, 'admin_home/admin_order_detail.html')
 
 
 
