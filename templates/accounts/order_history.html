@@ -2,6 +2,10 @@
 
 {% block start %}
 <style>
+    body {
+    margin: 0 ;
+    
+    }
     .table tbody tr td {
         padding: 8px; /* Adjust the padding as needed */
     }
@@ -25,56 +29,85 @@
     a{
         text-decoration: none;
     }
+    .filter-section {
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    /* Adjust styling for the filter label and dropdown */
+    .filter-label {
+        display: inline-block;
+        margin-bottom: 5px;
+        color: rgb(210, 212, 212);
+    }
+
+    .filter-dropdown {
+        width: 170 px; /* Adjust the width as needed */
+        display: inline-block;
+    }
+
+    
 </style>
 
     <!-- Start Hero Section -->
-    <div class="hero">
+    <div class="hero" style="padding: 80px 80px;">
         <div class="container">
             <div class="row justify-content-between">
                 <div class="col-lg-5">
                     <div class="intro-excerpt">
                         <h1>My orders</h1>
                     </div>
-                </div>
-                <div class="col-lg-7">
 
+                </div>
+
+                <div class="col-lg-7">
+                    <div class="row filter-section">
+                        <div class="col-md-12 text-md-end">
+                            <label class="filter-label">Filter Orders:</label>
+                            <select id="orderFilter" class="form-select filter-dropdown">
+                                <option value="all">All Order Items</option>
+                                <option value="paid">Paid Orders</option>
+                                <option value="nonpaid">Non-Paid Orders</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     <!-- End Hero Section -->
 
-    <div class="untree_co-section before-footer-section">
-        <div class="container">
+    <div class="untree_co-section before-footer-section"  >
+        <div class="container" >
             <div class="row mb-5">
                 <div class="site-blocks-table">
-                    <table class="table table-sm">
+                    <table class="table table-responsive-sm table-sm">
                         <thead>
                             <tr>
-                                <th class="product-thumbnail">Image</th>
-                                <th class="product-name">Product</th>
-                                <th class="product-price">Price</th>
-                                <th class="product-quantity">Quantity</th>
-                                <th class="product-total">Status</th>
+                                <th class="product-thumbnail ">Image</th>
+                                <th class="product-name ">Product</th>
+                                <th class="product-price d-none d-sm-table-cell">Price</th>
+                                <th class="product-quantity d-none d-sm-table-cell">Quantity</th>
+                                <th class="product-total d-none d-sm-table-cell">Status</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="orderTableBody">
                             {% for order in orders %}
                                 {% for order_item in order.order_items.all %}
                                     <tr class="order-item" data-item-uid="{{ item.uid }}" data-quantity="{{ item.qty }}">
-                                        <td class="product-thumbnail">
+                                        <td class="product-thumbnail ">
                                            <a href="{% url 'order_product_detail' order_item.uid %}"> <img src="{{ order_item.image.url }}" alt="Image" class="img-fluid"></a>
                                         </td>
-                                        <td class="product-name">
+                                        <td class="product-name ">
                                             <a href="{% url 'order_product_detail' order_item.uid %}"> <h2 class="h5 text-black">{{ order_item.product_name }}</h2></a>
                                            
                                             {% if order_item.edition_variant %}
                                                 <p>Variant: {{ order_item.edition_variant }}</p>
                                             {% endif %}
                                         </td>
-                                        <td>₹{{ order_item.get_total }}</td>
-                                        <td>{{ order_item.quantity }}</td>
-                                        <td>{{ order_item.order_status }}</td>
+                                        <td class="d-none d-sm-table-cell" >₹{{ order_item.get_total }}</td>
+                                        <td class="d-none d-sm-table-cell">{{ order_item.quantity }}</td>
+                                        <td class="d-none d-sm-table-cell">{{ order_item.order_status }}</td>
                                     </tr>
                                 {% endfor %}
                             {% endfor %}
@@ -85,4 +118,100 @@
         </div>
     </div>
 
+
+    <script>
+
+
+        function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    const orderFilter = document.getElementById('orderFilter');
+    const orderTableBody = document.getElementById('orderTableBody');
+    console.log(orderFilter)
+    console.log(orderTableBody)
+    
+    
+    orderFilter.addEventListener('change', function () {
+        const selectedValue = orderFilter.value;
+        console.log(selectedValue)
+
+        fetch("{% url 'order_history' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken' :getCookie('csrftoken'),
+            },
+            body: JSON.stringify({ selectedValue: selectedValue }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            
+            console.log('Response from server:', data);
+
+            orderTableBody.innerHTML = '';
+
+            data.orders.forEach(order_item => {
+                
+                const order = order_item.order; // Access the 'order' property
+                const orderItems = order_item.order_items;
+                
+
+                orderItems.forEach(order_item => {
+
+                    console.log('Order Item:', order_item);
+                console.log('Image URL:', order_item.image); 
+                    const imageUrl = order_item.image ? order_item.image.url : 'No Image';
+        const html = `
+            <tr class="order-item" data-item-uid="${order_item.uid}" data-quantity="${order_item.qty}">
+                <td class="product-thumbnail">
+                    <a href="/accounts/order_product_detail/${order_item.uid}">
+                        <img src="${order_item.image}" alt="Image" class="img-fluid">
+                    </a>
+                </td>
+                <td class="product-name">
+                    <a href="">
+                        <h2 class="h5 text-black">${order_item.product_name}</h2>
+                    </a>
+                    {% if order_item.edition_variant %}
+                        <p>Variant: ${order_item.edition_variant}</p>
+                    {% endif %}
+                </td>
+                <td>₹${order_item.get_total}</td>
+                <td>${order_item.quantity}</td>
+                <td>${order_item.order_status}</td>
+            </tr>`;
+
+        orderTableBody.innerHTML += html;
+    });
+
+           
+            });
+
+        })
+        .catch(error => console.error('Error:', error));
+    });
+});
+
+
+
+    </script>
+
 {% endblock %}
+
+
+

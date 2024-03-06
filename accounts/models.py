@@ -10,7 +10,8 @@ import string
 import random
 from datetime import timedelta
 from django.utils import timezone
-from products.models import Product , LanguageVariant, EditionVariant
+from products.models import Product , LanguageVariant, EditionVariant, Coupon
+from orders.models import OrderItem
 
 # Create your models here.
 
@@ -33,29 +34,49 @@ class Profile(BaseModel):
 
 class Cart(BaseModel):
     user = models.ForeignKey(User, on_delete = models.CASCADE, related_name = 'carts')
+    coupon = models.ForeignKey(Coupon, on_delete = models.SET_NULL, null = True, blank = True)
     is_paid = models.BooleanField(default = False)
+    razor_pay_order_id = models.CharField(max_length = 100, null = True, blank = True)
+    razor_payment_id = models.CharField(max_length = 100, null = True, blank = True)
+    razor_payment_signature = models.CharField(max_length = 100, null = True, blank = True)
+    delivery_charge = models.IntegerField(null = True, blank = True, default = 59)
+ 
     
     def get_cart_total(self):
-        cart_items = self.cart_item.all()
+        cart_items = self.cart_item.filter(product__stock_quantity__gt = 0)
         total = 0
 
         for cart_item in cart_items:
-            # Multiply each cart item's price by its quantity and add to the total
             total += cart_item.price
 
+
+        if self.coupon:
+            if self.coupon.minimum_amount < total:
+                return total - self.coupon.discount_price
+
         return total
+    
+    def get_cart_total_couponless(self):
+        cart_items = self.cart_item.filter(product__stock_quantity__gt = 0)
+        total = 0
+
+        for cart_item in cart_items:
+            total += cart_item.price
 
 
-    # def get_cart_total(self):
-    #     cart_items = self.cart_item.all()
-    #     price = []
-    #     for cart_item in cart_items:
-    #         price.append(cart_item.product.price)
-    #         if cart_item.edition_variant:
-    #              edition_variant_price = cart_item.edition_variant.price
-    #              price.append(edition_variant_price)
-    #     return sum(price)
+        
 
+        return total
+    
+    def get_final_total(self):
+        if self.get_cart_total() < 999:
+
+            return self.get_cart_total() + self.delivery_charge
+        else:
+            return self.get_cart_total()
+
+
+    
 
 
 class CartItem(BaseModel):
@@ -101,14 +122,52 @@ class CartItem(BaseModel):
 
         super(CartItem, self).save(*args, **kwargs)
 
-# @receiver(post_save, sender=User)
-# def create_user_profile(sender, instance, created, **kwargs):
-#     if created:
-#         if not hasattr(instance, 'profile'):
-#             Profile.objects.create(user=instance)
 
-# def is_otp_valid(self):
-#         return self.otp_valid_until > timezone.now() if self.otp_valid_until else False
+
+
+class Wallet(BaseModel):
+    user = models.OneToOneField(User, on_delete = models.CASCADE)
+    balance = models.DecimalField(max_digits = 10, decimal_places = 2, default = 0.00)
+    refund = models.DecimalField(max_digits = 10, decimal_places = 2, default = 0.00)
+
+
+    def __str__(self):
+        return f"{self.user.first_name}'s Wallet"
+    
+
+
+
+class Transaction(BaseModel):
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    transaction_type = models.CharField(max_length=20, choices=[('credit', 'Credit'), ('debit', 'Debit')])
+    description = models.TextField(blank = True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+
+    def __str__(self):
+        return f"{self.transaction_type} - {self.amount} on {self.timestamp}"
+
+
+
+def generate_invoice_name():
+    return f'INV{random.randint(100, 999)}'
+
+class Invoice(models.Model):
+    name = models.CharField(max_length=10, default=generate_invoice_name, unique=True)
+    order_item = models.ForeignKey(OrderItem, on_delete = models.CASCADE)
+    
+
+    def __str__(self):
+        return self.name
+
+
+
+
+
+
+
+
 
 @receiver(post_save, sender = User)
 def send_email(sender, instance, created, **kwargs):
@@ -126,41 +185,18 @@ def send_email(sender, instance, created, **kwargs):
             email = instance.email
             send_account_activation_email(email, email_token)
             
-            # subject = 'Account Activation'
-            # message = f'Your account activation token is: {email_token}'
-            # from_email = 'vssadique785@gmail.com'  
-            # to_email = [email]
             
-            # # Send email
-            # send_mail(subject, message, from_email, to_email)
 
     except Exception as e:
         print(e) 
 
-# @receiver(post_save, sender=User)
-# def send_otp(sender, instance, created, **kwargs):
-#     try:
-#         if created:
-#             email = instance.email
-#             email_token = str(uuid.uuid4())
-#             otp_code = generate_otp()  
 
-           
-#             otp_validity_duration = timedelta(minutes=5)
-#             otp_valid_until = timezone.now() + otp_validity_duration
 
-          
-#             Profile.objects.create(
-#                 user=instance,
-#                 email_token=email_token,
-#                 otp_code=otp_code,
-#                 otp_valid_until=otp_valid_until
-#             )
 
-          
-#             send_otp_email(email, otp_code)
-            
-#     except Exception as e:
-#         print(e)
+
+
+
+
+
         
         

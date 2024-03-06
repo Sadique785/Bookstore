@@ -8,6 +8,7 @@ from .models import Address, UserAddress
 from django.shortcuts import get_object_or_404
 from .constants import COUNTRY_CHOICES
 from django.contrib.auth.decorators import login_required
+from home.models import Banner
 
 
 
@@ -18,10 +19,23 @@ from django.contrib.auth.decorators import login_required
 def index(request):
     products = Product.objects.filter(is_listed = True, is_category_listed = True)
     new_products = Product.objects.filter(is_listed = True, is_category_listed = True).order_by('-created_at')
+    banners = Banner.objects.all().order_by('-created_at')
+    if banners.count() >= 3:
+        banners = Banner.objects.all().order_by('-created_at')[:3]
+
+    else:
+        banners = Banner.objects.all().order_by('-created_at')
+
+
+   
+
+
     context = {
         'products': products,
         'new_products':new_products,
+        'banners':banners,
         }
+    
     return render(request, 'home/real_index.html', context)
 
 @login_required
@@ -231,3 +245,14 @@ def delete_address(request, address_uid):
     user_address.delete()
     messages.success(request, 'Address deleted successfully.')
     return redirect('manage_address')
+
+
+@login_required
+def contact_us(request):
+    user = request.user
+    profile = Profile.objects.filter(user = user).first()
+    user_addresses = UserAddress.objects.filter(user=request.user)
+    context = {'user':user,
+               'profile':profile,
+               'user_addresses':user_addresses,}
+    return render(request, 'home/contact_us.html', context)

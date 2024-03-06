@@ -28,3 +28,14 @@ class UserAddress(BaseModel):
 
     class Meta:
         verbose_name_plural = 'User Addresses'
+
+
+class Banner(BaseModel):
+    title = models.CharField(max_length=255)
+    image = models.ImageField(upload_to='banners')
+    link = models.URLField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.title

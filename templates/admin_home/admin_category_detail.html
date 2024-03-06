@@ -11,9 +11,13 @@
             <p>Edit a Category</p>
 
         </div>
-        <div>
-            <input type="text" placeholder="Search Categories" class="form-control bg-white">
-        </div>
+        <form action="{% url 'admin_category_detail' category.slug %}" method="get" class="d-flex">
+            <div class="flex-grow-1">
+                <input type="text" name="search"  style="width: 400px; margin-right: 10px;" placeholder="Search Categories" {% if search_term %} value="{{search_term}}" {% endif %} class="form-control bg-white">
+            </div>
+            <button type="submit" class="btn btn-primary" style="height: 40px; width: 100p;">Search</button>
+        </form>
+        
     </div>
     <div class="card">
         <div class="card-body">

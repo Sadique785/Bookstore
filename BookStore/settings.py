@@ -158,3 +158,12 @@ EMAIL_HOST_PASSWORD = 'cope zthx rfyg alfn'
 # EMAIL_HOST_PASSWORD = 'xrphnbnczeduojf'
 # EMAIL_HOST_PASSWORD = 'xrphn/bncze/duojf'
 # DEFAULT_FROM_EMAIL = 'vssadique785@gmail.com'
+
+
+
+# KEY = 'rzp_test_XH0emxFS9LkGnD'
+# SECRET = 'HrLnMD6J2pVE8Mxq4FLVs4TE'
+
+
+RAZORPAY_API_KEY = 'rzp_test_XH0emxFS9LkGnD'
+RAZORPAY_API_SECRET_KEY = 'HrLnMD6J2pVE8Mxq4FLVs4TE'

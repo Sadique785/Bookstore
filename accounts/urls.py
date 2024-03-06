@@ -1,7 +1,6 @@
 
 from django.urls import path, include
 from . import views
-from products import views as products
 
 
 urlpatterns = [
@@ -14,14 +13,25 @@ urlpatterns = [
     path('cart/', views.cart, name="cart"),
     path('add-to-cart/<uid>',views.add_to_cart, name="add_to_cart"),
     path('remove-cart/<cart_item_uid>',views.remove_cart, name="remove_cart"),
-    # path('change-quantity/<str:item_uid>/<int:new_quantity>/', views.change_quantity, name='change_quantity'),
     path('change-quantity/', views.change_quantity, name='change_quantity'),
     path('cart/checkout/', views.checkout, name='checkout'),
     path('save_order/', views.save_order, name="save_order"),
     path('cart/checkout/thankyou/', views.thankyou, name="thankyou"),
     path('order_history/', views.order_history, name="order_history"),
     path('order-product-detail/<uid>', views.order_product_detail, name="order_product_detail"),
+    path('order_product_detail/<uuid:uid>/', views.order_product_detail, name='order_new_product_detail'),
+    path('remove-coupon/<cart_id>', views.remove_coupon, name="remove_coupon"),
+    path('payment-callback/', views.razorpay_callback, name='razorpay_callback'),
+    path('failed-payment/', views.failed_payment, name='failed_payment'),
+    path('wallet/', views.wallet, name='wallet'),
+    path('transactions/', views.transactions, name='transactions'),
+    path('coupons/', views.coupons, name='coupons'),
+    path('add-money/', views.add_money, name='add_money'),
+    path('create_razorpay_order/', views.create_razorpay_order, name='create_razorpay_order'),
+    path('cancel_item/', views.cancel_item, name='cancel_item'),
+    path('invoice/<item_uid>', views.invoice, name='invoice'),
 
+    
 ]
 
 

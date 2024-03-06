@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" href="/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#000000" />
+  <title>Frame 1</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter%3A300%2C400%2C500%2C700"/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro%3A300%2C400%2C500%2C700"/>
+  <link rel="stylesheet" href="/media/home/styles/frame-1.css"/>
+
+ <style>
+#loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    z-index: 1000;
+}
+
+.loading-spinner {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #3498db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.rectangle-3-wM9{
+    display: none;
+}
+.rectangle-4-BWP{
+    background-color: #fff !important;
+}
+
+ </style>
+</head>
+
+<div id="loading-overlay">
+    <div class="loading-spinner"></div>
+</div>
+
+
+
+<div class="frame-1-6G7" id="content">
+  <div class="group-3-sw5">
+    <div class="group-2-gn3">
+      <div class="auto-group-qufv-1JX">
+        <div class="auto-group-tebh-kmu">
+          <div class="auto-group-vrtz-53V">
+            <p class="tax-invoice-tv3">TAX INVOICE</p>
+            <div class="auto-group-sylp-AsZ">
+              <p class="order-id-od329825832079869100-7no">
+                <span class="order-id-od329825832079869100-7no-sub-0">Order Id</span>
+                <span class="order-id-od329825832079869100-7no-sub-1">: </span>
+                <span class="order-id-od329825832079869100-7no-sub-2">{{order_item.uid}} </span>
+              </p>
+              <p class="order-date-01-12-2023-09-26-am-oBm">
+                <span class="order-date-01-12-2023-09-26-am-oBm-sub-0">Order Date</span>
+                <span class="order-date-01-12-2023-09-26-am-oBm-sub-1">: </span>
+                <span class="order-date-01-12-2023-09-26-am-oBm-sub-2">{{order_item.created_at}} </span>
+              </p>
+            </div>
+            <div class="auto-group-yx9d-sqq">
+              <div class="line-2-c2j">
+              </div>
+              <div class="auto-group-1fvo-hK5">
+                <p class="invoice-no-fapmji2400027981-o7D">
+                  <span class="invoice-no-fapmji2400027981-o7D-sub-0">Invoice No</span>
+                  <span class="invoice-no-fapmji2400027981-o7D-sub-1">: FAPMJI2400027981</span>
+                </p>
+                <p class="invoice-date-01-12-2023-09-26-am-N3q">
+                  <span class="invoice-date-01-12-2023-09-26-am-N3q-sub-0">Invoice </span>
+                  <span class="invoice-date-01-12-2023-09-26-am-N3q-sub-1"> Date</span>
+                  <span class="invoice-date-01-12-2023-09-26-am-N3q-sub-2">: {{invoice_date}}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="line-1-HKD">
+          </div>
+
+
+<div class="auto-group-ay4k-1FD" style="display: flex; justify-content: space-between; width: 100%;">
+    <div class="group-1-Whm" style="flex: 1;">
+        <p class="sold-by-Etf">Sold By</p>
+        <p class="assiduus-distribution-private-limited-village-ghitorni-silver-oak-farms-road-no-2-newdelhi-110030-n9V">
+            ASSIDUUS DISTRIBUTION PRIVATE LIMITED,
+            <br/>
+            Village Ghitorni, 
+            <br/>
+            Silver Oak Farms,
+            <br/>
+            Road No 2, NEWDELHI - 110030
+        </p>
+    </div>
+    <div class="auto-group-dhqh-4co" style="flex: 1; margin-left: 20px;"> <!-- Adjust margin as needed -->
+        <p class="shipping-address-CDD">Shipping Address</p>
+        <p class="v-s-sadique-mundakayam-po-mundakayam-kkroad-kottayamkk-road-opposite-tvs-show-room-kallepalam-kottayam-district-686513-in-kl-XWP">
+            {{order_item.name}},
+            <br/>
+            {{order_item.state}},
+            <br/>
+            {{order_item.street_address}},
+            <br/>
+            {{order_item.city}} - {{order_item.postal_code}}, IN-KL
+        </p>
+    </div>
+    <div class="auto-group-psib-QKH" style="flex: 1; margin-left: 20px;"> <!-- Adjust margin as needed -->
+        <p class="billing-address-ZT5">Billing Address</p>
+        <p class="v-s-sadique-mundakayam-po-mundakayam-kkroad-kottayamkk-road-opposite-tvs-show-room-kallepalam-kottayam-district-686513-in-kl-THZ">
+            {{order_item.name}},
+            <br/>
+            {{order_item.state}},
+            <br/>
+            {{order_item.street_address}},
+            <br/>
+            {{order_item.city}} - {{order_item.postal_code}}, IN-KL
+        </p>
+    </div>
+</div>
+
+
+
+        </div>
+
+      </div>
+      <div class="auto-group-nwao-sVh">
+
+        <div class="rectangle-4-BWP">
+            <table style="width: 100%; border-collapse: collapse; border: 1px solid #000;">
+                <thead>
+                    <tr>
+                        <th style="padding: 10px; text-align: left; border: 1px solid #000;">Product</th>
+                        <th style="padding: 10px; text-align: left; border: 1px solid #000;">Quantity</th>
+                        <th style="padding: 10px; text-align: left; border: 1px solid #000;">Price</th>
+                        <th style="padding: 10px; text-align: left; border: 1px solid #000;">Total Price</th>
+                    </tr>
+                </thead>
+                <tbody style="padding: 20px;">
+                    <!-- Add rows dynamically based on your data -->
+                    <tr>
+                        <td style="padding: 10px; border: 1px solid #000;">{{order_item.product_name}}</td>
+                        <td style="padding: 10px; border: 1px solid #000;">{{order_item.quantity}}</td>
+                        <td style="padding: 10px; border: 1px solid #000;">₹ {{order_item.price}}</td>
+                        <td style="padding: 10px; border: 1px solid #000;">₹ {{order_item.get_total}}</td>
+                    </tr>
+                    <!-- Add more rows as needed -->
+                </tbody>
+            </table>
+        
+            <!-- Display total quantity and total price below the table -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 20px; padding: 0 10px;">
+                <div style="padding: 10px; text-align: left; font-weight: bold;">Total Quantity: {{order_item.quantity}}</div>
+                <div style="padding: 10px; text-align: right; font-weight: bold;">Total Price: ₹ {{ order_item.price }}</div>
+            </div>
+        </div>
+        
+        <p class="seller-registered-address-assiduus-distribution-private-limited-357-first-floor-san-deigo-building-6th-main-rd-1st-block-koramangala-opp-wipro-park-bangalore-560034-L8P">
+        Seller Registered Address: HISTORIA PRIVATE LIMITED,
+        <br/>
+        357, First floor, San deigo building, 6th main rd, 1st Block Koramangala, opp wipro park, KERALA - 560034
+        </p>
+        <p class="declaration-the-goods-sold-are-intended-for-end-user-consumption-and-not-for-resale-fssai-license-number-11219334002365-L1u">
+          <span class="declaration-the-goods-sold-are-intended-for-end-user-consumption-and-not-for-resale-fssai-license-number-11219334002365-L1u-sub-0">
+          Declaration
+          <br/>
+          
+          <br/>
+          
+          </span>
+          <span class="declaration-the-goods-sold-are-intended-for-end-user-consumption-and-not-for-resale-fssai-license-number-11219334002365-L1u-sub-1">
+          The goods sold are intended for end user consumption and not for resale.
+          <br/>
+          
+          </span>
+          <span class="declaration-the-goods-sold-are-intended-for-end-user-consumption-and-not-for-resale-fssai-license-number-11219334002365-L1u-sub-2">FSSAI License number</span>
+          <span class="declaration-the-goods-sold-are-intended-for-end-user-consumption-and-not-for-resale-fssai-license-number-11219334002365-L1u-sub-3">: 11219334002365</span>
+        </p>
+
+
+        <div style="display: flex; width:100%; justify-content: space-between; align-items: flex-start; flex-direction: row; margin-top: 10px;">
+            <img class="historia-1-DvF" src="/media/userside/img/logo.png" style="margin-right: 10px;" />
+        
+            <p class="ordered-through-assiduus-distribution-private-limited-authorized-signature-hYb" style="margin: 0; text-align: right;">
+                <span class="ordered-through-assiduus-distribution-private-limited-authorized-signature-hYb-sub-0">
+                    Ordered Through
+                    <br />
+                </span>
+                <span class="ordered-through-assiduus-distribution-private-limited-authorized-signature-hYb-sub-1">
+                    HISTORIA PRIVATE LIMITED
+                    <br />
+                    Authorized Signature
+                </span>
+            </p>
+        </div>
+
+
+
+  </div>
+</div>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.2/jspdf.min.js"></script> -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"> </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+// Function to show the loading overlay
+function showLoading() {
+    document.getElementById('loading-overlay').style.display = 'block';
+}
+
+// Function to hide the loading overlay
+function hideLoading() {
+    document.getElementById('loading-overlay').style.display = 'none';
+}
+
+// Function to generate PDF
+function generate_pdf() {
+    const { jsPDF } = window.jspdf;
+    let doc = new jsPDF();
+    let pdfjs = document.getElementById('content');
+
+    doc.html(pdfjs, {
+        callback: function(doc) {
+            doc.save("invoice.pdf");
+            hideLoading(); // Hide loading overlay when PDF is generated
+        },
+        x: 12,
+        y: 12,
+        width: 170, // target width in the PDF document
+        windowWidth: 650 // window width in CSS pixels
+    });
+
+    // Redirect to the previous page
+    window.location.href = document.referrer;
+}
+
+// Function to initiate PDF generation with loading overlay
+function initiatePdfGeneration() {
+    showLoading(); // Show loading overlay before starting PDF generation
+
+    // Simulate an asynchronous operation (e.g., fetching data from the server)
+    setTimeout(function () {
+        generate_pdf(); // Call the generate_pdf function after a delay
+    }, 1000); // Simulating a 1-second delay
+}
+
+// Automatically initiate PDF generation on page load
+document.addEventListener('DOMContentLoaded', initiatePdfGeneration);
+
+</script>
+
+</body>
+
+
+
+
+
+ 

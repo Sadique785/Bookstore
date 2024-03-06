@@ -13,8 +13,8 @@
     }
 
     .manage_address {
-        width: 50%; /* Adjust the width as needed */
-        margin: 20px auto; /* This will center the div and provide separation from the heading */
+        width: 50%; 
+        margin: 20px auto; 
     }
 
     .manage_address .form-group {
@@ -48,12 +48,38 @@
         width: 20px !important; 
         height: 20px !important; 
     }
+    .nav-toggle {
+        display: none;
+    }
+    @media (max-width: 768px) {
+        .manage_address {
+            width: 90%;
+        }
+
+        .nav-toggle {
+            display: block;
+            font-size: 20px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .manage_address form {
+            display: none;
+        }
+
+        .manage_address form.show {
+            display: block;
+        }
+    }
 
 </style>
 
 <div class="manage_address mt-5">
     <h2 class="form-heading">ADD A NEW ADDRESS</h2>
-    <form action="" method="POST">
+
+
+
+    <form action="" method="POST" >
         {% csrf_token %}
 
         <div class="form-group">
@@ -355,4 +381,14 @@
     </form>
 </div>
 
+
+
+
+
+<script>
+    function toggleForm() {
+        var form = document.querySelector('.manage_address form');
+        form.classList.toggle('show');
+    }
+</script>
 {% endblock %}

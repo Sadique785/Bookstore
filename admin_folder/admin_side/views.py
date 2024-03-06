@@ -1,14 +1,17 @@
 
+from io import BytesIO
 import json
 import re
+from django.db.models import F
 from django.db import IntegrityError
 from django.shortcuts import render,redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
-from accounts.models import Profile
-from products.models import Product, Category, SubCategory, ProductImage, LanguageVariant, EditionVariant
+from django.contrib.sessions.models import Session
+from accounts.models import Profile, Transaction, Wallet
+from products.models import Product, Category, SubCategory, ProductImage, LanguageVariant, EditionVariant, Coupon
 from .forms import LanguageVariantForm, EditionVariantForm
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.contrib.auth import authenticate,login, logout
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import user_passes_test, login_required
@@ -16,6 +19,22 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from orders.models import Order, OrderItem
+from django.views.decorators.cache import cache_control
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+from django.db.models import Count
+from django.utils import timezone
+import pytz
+from django.db.models import Sum
+from django.db.models import Q
+from home.models import Banner
+from django.db import transaction
+import pandas as pd
+from django.core.paginator import Paginator,PageNotAnInteger, EmptyPage
+# from .your_data_fetch_module import fetch_data
+
+
+
 
 # Create your views here.
 # ------------------------------------------------ACCOUNTS-------------------------------------------------------------
@@ -68,17 +87,469 @@ def admin_logout(request):
     logout(request)
     return redirect('admin_login')
 
+
+
+
+
+
+
+def best_selling_products():
+    best_selling_product_name = OrderItem.objects.filter(is_paid = True).values('product_name','price').annotate(total_quantity = Sum('quantity')).order_by('-total_quantity')[:5]
+    print(best_selling_product_name)
+    # list_of_items = [[item['product_name'], item['total_quantity']] for item in best_selling_product_name]
+    # print(list_of_items)
+    best_selling_product_names = [entry['product_name'] for entry in best_selling_product_name]
+    best_selling_quantities = [entry['total_quantity'] for entry in best_selling_product_name]
+    best_selling_prices = [entry['price'] for entry in best_selling_product_name]
+    print(best_selling_product_names)
+    print(best_selling_quantities)
+    print(best_selling_prices)
+
+    list_of_items = []
+
+    for name, quantity, price in zip(best_selling_product_names, best_selling_quantities, best_selling_prices):
+        product = Product.objects.filter(product_name = name).first()
+        
+        if name :
+            revenue = price * quantity
+            list_of_items.append([product, quantity, revenue])
+    print(list_of_items)
+
+    return list_of_items
+
+
+
+def best_selling_categories():
+    best_selling_product_names = OrderItem.objects.filter(is_paid=True).values('product_name').annotate(total_quantity=Sum('quantity')).order_by('-total_quantity')[:5]
+
+    best_selling_product_names = [entry['product_name'] for entry in best_selling_product_names]
+
+    best_selling_categories = {}
+    for product_name in best_selling_product_names:
+        product = Product.objects.filter(product_name=product_name).first()
+
+        
+
+
+        if product:
+            category = product.category
+            total_quantity = OrderItem.objects.filter(is_paid=True, product_name=product_name).aggregate(total_quantity=Sum('quantity'))['total_quantity']
+            total_revenue = OrderItem.objects.filter(is_paid=True, product_name=product_name).aggregate(total_revenue=Sum(F('quantity') * F('price')))['total_revenue']
+
+            if category in best_selling_categories:
+
+                best_selling_categories[category]['total_quantity'] += total_quantity
+                best_selling_categories[category]['total_revenue'] += total_revenue
+
+
+            else:
+                best_selling_categories[category] = {
+                    'total_quantity': total_quantity,
+                    'total_revenue': total_revenue,
+                }
+
+    print(best_selling_categories)
+    return best_selling_categories
+
 # ----------------------------------------------------HOME------------------------------
 @user_passes_test(is_superuser, login_url='admin_login')
 def admin_index(request):
-    return render(request, "admin_home/admin_index.html")
+
+
+    total_revenue = Order.objects.filter(is_delivered=True).aggregate(Sum('total_amount'))['total_amount__sum']
+    total_count = Order.objects.filter(is_delivered = True).count()
+    product_count = Product.objects.all().count()
+    category_count = Category.objects.all().count()
+    best_products = best_selling_products()
+    best_categories = best_selling_categories()
+    print(best_categories)
+
+
+    if total_count > 0:
+        monthly_revenue = total_revenue / total_count
+    else:
+        monthly_revenue = 0
+
+
+
+    if total_revenue is None:
+        total_revenue = 0
+    if total_count is None:
+        total_count = 0
+    if product_count is None:
+        product_count = 0
+    if category_count is None:
+        category_count = 0
+
+    print(total_revenue)
+    print(total_count)
+    print(product_count)
+    print(category_count)
+
+
+    # Assuming the custom year is 2023
+    custom_year = 2024
+
+
+# ------------------Monthly data-------------------------
+    today = timezone.now()
+    last_12_months = [today - relativedelta(months=i) for i in range(11, -1, -1)]
+
+    # Use the custom year for the date range
+    last_12_months_custom_year = [
+        timezone.datetime(custom_year, month.month, 1, tzinfo=pytz.UTC) 
+        for month in last_12_months
+    ]
+
+    month_labels = [month.strftime('%b') for month in last_12_months_custom_year]
+
+    products_count_data = []
+    order_items_count_data = []
+    user_count_data = []
+
+    for start_date in last_12_months_custom_year:
+        end_date = start_date + relativedelta(day=31, hour=23, minute=59, second=59)
+
+        products_count_for_month = Product.objects.filter(created_at__range=(start_date, end_date)).count()
+        products_count_data.append(products_count_for_month)
+
+        order_items_count_for_month = OrderItem.objects.filter(created_at__range=(start_date, end_date), is_delivered=True).count()
+        order_items_count_data.append(order_items_count_for_month)
+
+        user_count_for_month = Profile.objects.filter(created_at__range=(start_date, end_date)).count()
+        user_count_data.append(user_count_for_month)
+
+    print(products_count_data)
+
+    monthly_data ={'product_count': products_count_data,
+        'order_count': order_items_count_data,
+        'user_count': user_count_data,
+
+    }
+
+
+
+# -------------------------------Weeekly data-----------------------
+    selected_month = 2
+
+    today = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    last_12_weeks = [today - relativedelta(weeks=i) for i in range(11, -1, -1)]
+
+    week_labels = [week.strftime('%d %b') for week in last_12_weeks]
+    selected_month_start = timezone.datetime(custom_year, selected_month, 1, tzinfo=pytz.UTC)
+    selected_month_end = (selected_month_start + relativedelta(months=1) - relativedelta(seconds=1))
+
+    weekly_products_count_data = []
+    weekly_order_items_count_data = []
+    weekly_user_count_data = []
+
+    for start_date in last_12_weeks:
+        end_date = start_date + relativedelta(days=6, hour=23, minute=59, second=59)
+
+
+        if selected_month_start <= start_date <= selected_month_end or selected_month_start <= end_date <= selected_month_end:
+
+            weekly_products_count = Product.objects.filter(created_at__range=(start_date, end_date)).count()
+            weekly_products_count_data.append(weekly_products_count)
+
+            weekly_order_items_count = OrderItem.objects.filter(created_at__range=(start_date, end_date), is_delivered=True).count()
+            weekly_order_items_count_data.append(weekly_order_items_count)
+
+            weekly_user_count = Profile.objects.filter(created_at__range=(start_date, end_date)).count()
+            weekly_user_count_data.append(weekly_user_count)
+
+    weekly_data = {
+        'product_count': weekly_products_count_data,
+        'order_count': weekly_order_items_count_data,
+        'user_count': weekly_user_count_data,
+    }
+
+
+# ---------------------------------------daily_data------------------------
+    # Get daily data
+
+    selected_week = 3
+    selected_week_start = selected_month_start + relativedelta(weeks=selected_week - 1)
+    selected_week_end = selected_week_start + relativedelta(weeks=1, days=-1, hour=23, minute=59, second=59)
+    today = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    # last_12_days = [today - relativedelta(days=i) for i in range(11, -1, -1)]
+    last_7_days = [selected_week_start + relativedelta(days=i) for i in range(6, -1, -1)]
+
+    day_labels = [day.strftime('%d %b') for day in last_7_days]
+
+    daily_products_count_data = []
+    daily_order_items_count_data = []
+    daily_user_count_data = []
+
+    for start_date in last_7_days:
+        end_date = start_date + relativedelta(hour=23, minute=59, second=59)
+
+        daily_products_count = Product.objects.filter(created_at__range=(start_date, end_date)).count()
+        daily_products_count_data.append(daily_products_count)
+
+        daily_order_items_count = OrderItem.objects.filter(created_at__range=(start_date, end_date), is_delivered=True).count()
+        daily_order_items_count_data.append(daily_order_items_count)
+
+        daily_user_count = Profile.objects.filter(created_at__range=(start_date, end_date)).count()
+        daily_user_count_data.append(daily_user_count)
+
+    daily_data = {
+        'product_count': daily_products_count_data,
+        'order_count': daily_order_items_count_data,
+        'user_count': daily_user_count_data,
+    }
+
+    new_profiles = Profile.objects.all().order_by('-created_at')[:3]
+
+
+
+
+
+
+    context = {
+        
+        'month_labels': month_labels,
+        'monthly_data':monthly_data,
+        'weekly_data':weekly_data,
+        'week_labels': week_labels,
+        'day_labels': day_labels,
+        'daily_data': daily_data,
+        'total_revenue':total_revenue,
+        'monthly_revenue':monthly_revenue,
+        'category_count':category_count,
+        'product_count':product_count,
+        'total_revenue':total_revenue,
+        'total_count':total_count,
+        'best_products':best_products,
+        'best_categories':best_categories,
+        'new_profiles':new_profiles,
+        
+    }
+
+    return render(request, "admin_home/admin_index.html", context)
+
+
+
+
+
+def calculate_selected_week(selected_day):
+    # Define the week ranges
+    week_ranges = [
+        (1, 8), (9, 15), (16, 22), (23, 31)
+        # Add more ranges if needed
+    ]
+
+    # Find the week based on the day
+    for week, (start_day, end_day) in enumerate(week_ranges, start=1):
+        if start_day <= selected_day <= end_day:
+            return week
+
+    return None
+
+
+
+def filter_chart(request):
+
+
+    if request.method == 'POST':
+        print("view called")
+        
+        data = json.loads(request.body.decode('utf-8'))
+        selected_date = data.get('date')
+
+        
+
+        selected_datetime = datetime.strptime(selected_date, "%Y-%m-%d")
+        print(selected_datetime)
+
+        # Extract year, month, and day
+        custom_year = selected_datetime.year
+        selected_month = selected_datetime.month
+        selected_day = selected_datetime.day
+        selected_week = calculate_selected_week(selected_day)
+
+        print(custom_year)
+        print(selected_month)
+        print(selected_day)
+        print(selected_week)
+
+
+
+
+        
+
+        
+    # ------------------Monthly data-------------------------
+        today = timezone.now()
+        last_12_months = [today - relativedelta(months=i) for i in range(11, -1, -1)]
+
+        # Use the custom year for the date range
+        last_12_months_custom_year = [
+            timezone.datetime(custom_year, month.month, 1, tzinfo=pytz.UTC) 
+            for month in last_12_months
+        ]
+
+        month_labels = [month.strftime('%b') for month in last_12_months_custom_year]
+
+        products_count_data = []
+        order_items_count_data = []
+        user_count_data = []
+
+        for start_date in last_12_months_custom_year:
+            end_date = start_date + relativedelta(day=31, hour=23, minute=59, second=59)
+
+            products_count_for_month = Product.objects.filter(created_at__range=(start_date, end_date)).count()
+            products_count_data.append(products_count_for_month)
+
+            order_items_count_for_month = OrderItem.objects.filter(created_at__range=(start_date, end_date), is_delivered=True).count()
+            order_items_count_data.append(order_items_count_for_month)
+
+            user_count_for_month = Profile.objects.filter(created_at__range=(start_date, end_date)).count()
+            user_count_data.append(user_count_for_month)
+
+        print(products_count_data)
+
+        monthly_data ={'product_count': products_count_data,
+            'order_count': order_items_count_data,
+            'user_count': user_count_data,
+
+        }
+
+
+
+    # -------------------------------Weeekly data-----------------------
+        
+
+        today = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        last_12_weeks = [today - relativedelta(weeks=i) for i in range(11, -1, -1)]
+
+        week_labels = [week.strftime('%d %b') for week in last_12_weeks]
+        selected_month_start = timezone.datetime(custom_year, selected_month, 1, tzinfo=pytz.UTC)
+        selected_month_end = (selected_month_start + relativedelta(months=1) - relativedelta(seconds=1))
+
+        weekly_products_count_data = []
+        weekly_order_items_count_data = []
+        weekly_user_count_data = []
+
+        for start_date in last_12_weeks:
+            end_date = start_date + relativedelta(days=6, hour=23, minute=59, second=59)
+
+
+            if selected_month_start <= start_date <= selected_month_end or selected_month_start <= end_date <= selected_month_end:
+
+                weekly_products_count = Product.objects.filter(created_at__range=(start_date, end_date)).count()
+                weekly_products_count_data.append(weekly_products_count)
+
+                weekly_order_items_count = OrderItem.objects.filter(created_at__range=(start_date, end_date), is_delivered=True).count()
+                weekly_order_items_count_data.append(weekly_order_items_count)
+
+                weekly_user_count = Profile.objects.filter(created_at__range=(start_date, end_date)).count()
+                weekly_user_count_data.append(weekly_user_count)
+
+        weekly_data = {
+            'product_count': weekly_products_count_data,
+            'order_count': weekly_order_items_count_data,
+            'user_count': weekly_user_count_data,
+        }
+
+
+    # ---------------------------------------daily_data------------------------
+        # Get daily data
+
+        selected_week = 3
+        selected_week_start = selected_month_start + relativedelta(weeks=selected_week - 1)
+        selected_week_end = selected_week_start + relativedelta(weeks=1, days=-1, hour=23, minute=59, second=59)
+        today = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        # last_12_days = [today - relativedelta(days=i) for i in range(11, -1, -1)]
+        last_7_days = [selected_week_start + relativedelta(days=i) for i in range(6, -1, -1)]
+
+        day_labels = [day.strftime('%d %b') for day in last_7_days]
+
+        daily_products_count_data = []
+        daily_order_items_count_data = []
+        daily_user_count_data = []
+
+        for start_date in last_7_days:
+            end_date = start_date + relativedelta(hour=23, minute=59, second=59)
+
+            daily_products_count = Product.objects.filter(created_at__range=(start_date, end_date)).count()
+            daily_products_count_data.append(daily_products_count)
+
+            daily_order_items_count = OrderItem.objects.filter(created_at__range=(start_date, end_date), is_delivered=True).count()
+            daily_order_items_count_data.append(daily_order_items_count)
+
+            daily_user_count = Profile.objects.filter(created_at__range=(start_date, end_date)).count()
+            daily_user_count_data.append(daily_user_count)
+
+        daily_data = {
+            'product_count': daily_products_count_data,
+            'order_count': daily_order_items_count_data,
+            'user_count': daily_user_count_data,
+        }
+        print(month_labels )
+        print(monthly_data)
+        print(weekly_data)
+        print(week_labels)
+        print(day_labels)
+        print(daily_data)
+        
+        return JsonResponse({
+                'month_labels': month_labels,
+                'monthly_data':monthly_data,
+                'weekly_data':weekly_data,
+                'week_labels': week_labels,
+                'day_labels': day_labels,
+                'daily_data': daily_data,
+            })
+    
+
+
+
+
+
+
+
 
 # -----------------------------------------------USERS-------------------------------
 @user_passes_test(is_superuser, login_url='admin_login')
 def admin_users(request):
-    users_with_profiles = User.objects.filter(profile__isnull=False)
-    context = {'profiles': users_with_profiles}
+    query_set = User.objects.filter(profile__isnull=False)
+    search_term = request.GET.get('search')
+    
+    print(request.GET)
+
+    if search_term and search_term.lower() != 'none':
+        query_set = query_set.filter(
+            Q(first_name__icontains=search_term) | Q(last_name__icontains=search_term) | Q(email__icontains=search_term)
+        )
+
+    status_filter = request.GET.get('status')
+    print(f"Search term: {search_term}, Status filter: {status_filter}")
+
+    if status_filter == 'active':
+        query_set = query_set.filter(is_active=True)
+    elif status_filter == 'blocked':
+        query_set = query_set.filter(is_active=False)
+
+
+    page = request.GET.get('page', 1)
+    paginator = Paginator(query_set, 6)
+    try:
+        query_set = paginator.page(page)
+    except PageNotAnInteger:
+        query_set = paginator.page(page)
+    except EmptyPage:
+        query_set = paginator.page(paginator.num_pages)
+
+    print(f"Query set after filtering: {query_set}")
+
+
+    context = {'profiles': query_set, 'search_term': search_term, 'status_filter': status_filter}
     return render(request, "admin_home/admin_user.html", context)
+
+
+
+
 
 @user_passes_test(is_superuser, login_url='admin_login')
 def admin_user_details(request, details_pk):
@@ -103,34 +574,59 @@ def admin_user_details(request, details_pk):
 def block_unblock_user(request, block_pk):
     profile = get_object_or_404(Profile, user_id = block_pk)
     user = profile.user
+
+
+    for session in Session.objects.iterator():
+            data = session.get_decoded()
+            if '_auth_user_id' in data and str(data['_auth_user_id']) == str(user.id):
+
+                session.delete()
+
+    sessions = Session.objects.iterator() 
+    for session in sessions: 
+        data = session.get_decoded() 
+        data["session_key"] = session.session_key
+        print(data)
+        
+         # normally the data doesn't include the session key, so add it
     
+
+
+    # lista = [s for s in Session.objects.all() if s.get_decoded().get('_auth_user_id') == user.id]
+    # print(lista)
     user.is_active = not user.is_active
     user.save()
+    # if not user.is_active:
+    #     logout(user)
+    
+    
     return redirect('admin_users')
 # ---------------------------------------CATEGORIES-----------------------------------
 @user_passes_test(is_superuser, login_url='admin_login')
 def admin_category(request):
     if request.method == "POST":
-        new_category = request.POST.get('category_name')
+        new_category = request.POST.get('category')
         description = request.POST.get('description')
+        print(new_category)
+        print(description)
         try:
-            if new_category and description is not None:
-                if new_category.strip() and description.strip():
-                    
-                    existing_category = Category.objects.filter(category_name=new_category).first()
+            if new_category is not None and description is not None:
+                cleaned_category_name = re.sub(r'[^A-Za-z]', '', new_category).strip()
+                if cleaned_category_name and description.strip():
+                    existing_category = Category.objects.filter(category_name=cleaned_category_name).first()
                     if existing_category:
                         messages.error(request, 'Category already exists.')
                         return redirect('admin_category')
-                    cat = Category.objects.create(category_name = new_category, description = description )
+
+                    cat = Category.objects.create(category_name=cleaned_category_name, description=description)
                     cat.save()
                     messages.success(request, 'Category Successfully created')
                     return redirect('admin_category')
                 else:
-                    messages.error(request, 'Field(s) cannot be emptyspaces')
+                    messages.error(request, 'Category name and description cannot be empty')
                     return redirect('admin_category')
-            
             else:
-                messages.error(request, 'Field(s) cannot be empty')
+                messages.error(request, 'Category name and description cannot be None')
                 return redirect('admin_category')
         except ValueError as e:
             messages.error(request, str(e))
@@ -138,8 +634,20 @@ def admin_category(request):
 
 
 
-    category = Category.objects.filter()
-    context = {'categories': category}
+    query_set = Category.objects.filter()
+
+
+    search_term = request.GET.get('search')
+    print(search_term)
+
+    if search_term:
+        cleaned_search_term = re.sub(r'[^A-Za-z]', '', search_term)
+        query_set = query_set.filter(Q(category_name__icontains=cleaned_search_term)).order_by('category_name')
+        if not query_set:
+            messages.warning(request, 'Nothing matches the query')
+            return redirect('admin_category')
+
+    context = {'categories': query_set, 'search_term':search_term}
     return render(request, 'admin_home/admin_category.html', context)
 
 
@@ -176,42 +684,51 @@ def unlist_category(request):
 @user_passes_test(is_superuser, login_url='admin_login')
 def admin_category_detail(request, slug):
     category = Category.objects.get(slug = slug)
-    sub_category = SubCategory.objects.filter(category = category)
+    query_set = SubCategory.objects.filter(category = category)
+
+    search_term = request.GET.get('search')
+    print(search_term)
+
+    if search_term:
+        
+        query_set = query_set.filter(Q(subcategory_name__icontains= search_term)).order_by('subcategory_name')
+        if not query_set:
+            messages.warning(request, 'Nothing matches the query')
+            return redirect('admin_category')
 
 
     if request.method == 'POST':
         category_name = request.POST.get('category_name')
         description = request.POST.get('description')
 
-        try:
-            if category_name and description is not None:
-                    
-                    if category_name.strip() and description.strip():
-                        
-
-
-                    
-                        category.category_name = category_name
-                        category.description = description
-                        category.save() 
-                        messages.success(request, 'Category Edited successfully')
-
-                        return redirect('admin_category_detail', slug=slug)
-                    else:
-                        messages.error(request, 'Field(s) cannot be emptyspaces')
-                        return redirect('admin_category_detail', slug=slug)
-            else:
-                messages.error(request, 'Field(s) cannot be empty')
-                return redirect('admin_category_detail', slug=slug)
+        
+        if category_name and description is not None:
                 
-        except ValueError as e:
-            messages.error(request, str(e))
+                if category_name.strip() and description.strip():
+                    existing_category = Category.objects.exclude(slug=slug).filter(category_name=category_name).first()
+                    if existing_category:
+                        messages.error(request, 'Category name already exists.')
+                        return redirect('admin_category_detail', slug=slug)
+                    
+                    category.category_name = category_name
+                    category.description = description
+                    category.save() 
+                    messages.success(request, 'Category Edited successfully')
+                    return redirect('admin_category_detail', slug=slug)
+                else:
+                    messages.error(request, 'Field(s) cannot be emptyspaces')
+                    return redirect('admin_category_detail', slug=slug)
+        else:
+            messages.error(request, 'Field(s) cannot be empty')
             return redirect('admin_category_detail', slug=slug)
+                
+        
 
 
     context = {
             'category':category,
-             'sub_categories': sub_category
+             'sub_categories': query_set,
+             'search_term':search_term,
     }
     return render(request, 'admin_home/admin_category_detail.html', context)
 
@@ -265,6 +782,7 @@ def admin_subcategory(request, slug):
     return render(request, 'admin_home/admin_subcategory.html', context)
 
 # -------------------------------------VARIANCES------------------------------------------------
+@user_passes_test(is_superuser, login_url='admin_login')
 def admin_variance(request):
     if request.method == 'POST':
         if 'language_name' in request.POST:
@@ -333,6 +851,7 @@ def admin_variance(request):
         
     return render(request, 'admin_home/admin_variance.html', context)
 
+@user_passes_test(is_superuser, login_url='admin_login')
 def admin_variance_detail(request, uid = None):
     if uid == None:
         context = {'nothing':True}
@@ -354,7 +873,7 @@ def admin_variance_detail(request, uid = None):
 
         return render(request, 'admin_home/admin_variance_detail.html', context)
 
-
+@user_passes_test(is_superuser, login_url='admin_login')
 def admin_edit_variant(request, uid):
 
     if request.method == "POST":
@@ -416,7 +935,7 @@ def admin_edit_variant(request, uid):
 
 
 from django.shortcuts import get_object_or_404
-
+@user_passes_test(is_superuser, login_url='admin_login')
 def delete_variant(request, uid):
    
     language_variant = LanguageVariant.objects.filter(uid = uid).first()
@@ -441,6 +960,7 @@ def delete_variant(request, uid):
     return redirect('admin_variance')
 
 @login_required
+@user_passes_test(is_superuser, login_url='admin_login')
 def admin_order(request):
     orders = Order.objects.all().order_by('-created_at')
     print(f"Number of orders: {orders.count()}")
@@ -464,6 +984,7 @@ def admin_order(request):
 
 
 @login_required
+@user_passes_test(is_superuser, login_url='admin_login')
 def admin_order_item(request, uid):
     order = Order.objects.get(uid=uid)
     order_items = OrderItem.objects.filter(order = order)
@@ -477,7 +998,7 @@ def admin_order_item(request, uid):
     
     return render(request, 'admin_home/admin_order_item.html', context)
 
-
+@user_passes_test(is_superuser, login_url='admin_login')
 def admin_item_detail(request, uid):
     item = OrderItem.objects.get(uid = uid)
     item_status_choices = OrderItem.ORDER_STATUS_CHOICES
@@ -486,7 +1007,7 @@ def admin_item_detail(request, uid):
     return render(request, 'admin_home/admin_order_detail.html', context)
 
 
-
+@user_passes_test(is_superuser, login_url='admin_login')
 def update_order_status(request):
     if request.method == 'POST':
         try:
@@ -498,9 +1019,21 @@ def update_order_status(request):
             order.order_status = new_status
             order.save()
 
+            order_items = OrderItem.objects.filter(order = order)
+            for item in order_items:
+                item.order_status = new_status
+                item.save()
+
             if new_status == Order.DELIVERED:
                 order.is_delivered = True
                 order.save()
+
+                for item in order_items:
+                    item.is_delivered = True
+                    item.save()
+
+
+            
 
             return JsonResponse({'status': 'success', 'new_status': order.order_status})
         except Exception as e:
@@ -509,7 +1042,7 @@ def update_order_status(request):
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
-
+@user_passes_test(is_superuser, login_url='admin_login')
 def update_order_item_status(request):
     if request.method == 'POST':
         try:
@@ -528,6 +1061,30 @@ def update_order_item_status(request):
                 item.is_delivered = True
                 item.save()
 
+            # all_orders = item.order.order_items.all()
+            # all_items_delivered = all( order.is_delivered for order in all_orders)
+
+            # if all_items_delivered:
+            #     item.order.is_delivered = True
+            #     item.order.save()
+
+            # print(item.order.is_delivered)
+            all_items_delivered = not item.order.order_items.filter(is_delivered=False).exists()
+
+            if all_items_delivered:
+                item.order.is_delivered = True
+                item.order.save()
+
+            print(item.order.is_delivered)
+
+
+
+            
+
+
+
+                
+
             return JsonResponse({'status': 'success', 'new_status': item.order_status})
         except Exception as e:
             print(str(e))
@@ -535,6 +1092,8 @@ def update_order_item_status(request):
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
+
+@user_passes_test(is_superuser, login_url='admin_login')
 @require_POST
 def admin_cancel_order(request):
     try:
@@ -544,10 +1103,43 @@ def admin_cancel_order(request):
         return JsonResponse({'success': False, 'message': 'Invalid JSON data'})
 
     order = get_object_or_404(Order, uid=order_uid)
-
+    user = order.user
+    print(user)
+    wallet = Wallet.objects.filter(user = user).first()
+    print(wallet)
     if order.is_active:
         order.is_active = False
         order.save()
+
+
+        
+        order_items = order.order_items.all()
+        total_price = 0
+        for item in order_items:
+            item.is_active = False
+            print(item.is_active)
+            price = item.get_total()
+            total_price += price
+            # wallet.balance += price
+            # wallet.save()
+            Wallet.objects.filter(uid=wallet.uid).update(balance=F('balance') + price)
+            Wallet.objects.filter(uid=wallet.uid).update(refund=F('refund') + price)
+
+            item.save()
+            print(item)
+
+
+        transaction = Transaction.objects.create(
+                        wallet=wallet,
+                        amount=total_price,
+                        transaction_type='credit',
+                        description='Added money to wallet',
+                        )
+        transaction.save()
+
+
+
+
         response_data = {'success': True, 'message': 'Order is cancelled'}
     else:
         response_data = {'success': False, 'message': 'Order is already cancelled'}
@@ -555,6 +1147,7 @@ def admin_cancel_order(request):
     return JsonResponse(response_data)
 
 
+@user_passes_test(is_superuser, login_url='admin_login')
 @require_POST
 def admin_cancel_item(request):
     
@@ -566,10 +1159,51 @@ def admin_cancel_item(request):
 
     order_item = get_object_or_404(OrderItem, uid=item_uid)
     print('Ho')
+    order = order_item.order
+    user = order.user
+    wallet = Wallet.objects.filter(user = user).first()
+    print(wallet)
 
     if order_item.is_active:
         order_item.is_active = False
         order_item.save()
+        price = order_item.get_total()
+            
+        Wallet.objects.filter(uid=wallet.uid).update(balance=F('balance') + price)
+        Wallet.objects.filter(uid=wallet.uid).update(refund=F('refund') + price)
+
+
+        print('helloooooooooooooooooooooooooooooooo')
+        print(order_item.order.total_amount)
+        order_item.order.total_amount -= order_item.get_total()
+        order_item.order.save()
+        print(order_item.order.total_amount)
+
+
+
+        all_orders = order_item.order.order_items.all()
+        print(all_orders)
+        
+        all_items_cancelled = all(not order.is_active for order in all_orders)
+        print(all_items_cancelled)
+        
+        if all_items_cancelled:
+            order_item.order.is_active = False
+            order_item.order.save()
+        
+        print(order_item.order.is_active)
+
+        transaction = Transaction.objects.create(
+                        wallet=wallet,
+                        amount=price,
+                        transaction_type='credit',
+                        description='Added money to wallet',
+                        )
+        transaction.save()
+
+
+
+
         response_data = {'success': True, 'message': 'Order is cancelled'}
     else:
         response_data = {'success': False, 'message': 'Order is already cancelled'}
@@ -600,27 +1234,43 @@ def admin_cancel_item(request):
 #          'category_option':category
 #          }
 #     return render(request, 'admin_home/admin_product.html', context)
+
 @user_passes_test(is_superuser, login_url='admin_login')
-def admin_product(request, slug = None):
-    
-    products = Product.objects.all().order_by('product_name')
+def admin_product(request, slug=None):
+    print(request.GET)
+    search_term = request.GET.get('search')
+    category_options = request.GET.getlist('categories')  # Use getlist to get multiple selected categories
+    categories = Category.objects.all()
 
-    if slug:
-        categories  = Category.objects.exclude(slug = slug)
-        category = get_object_or_404(Category, slug=slug)
-        products = Product.objects.filter(category = category)
-    else:
-         category = None
-         categories  = Category.objects.all()
+    # Initial query set with all products
+    query_set = Product.objects.all().order_by('product_name')
 
+    if category_options and 'all' not in category_options:
+       
+        query_set = query_set.filter(category__category_name__in=category_options)
+
+    if search_term:
+        # If search term is provided, filter products based on the search term
+        query_set = query_set.filter(Q(product_name__icontains=search_term) | Q(category__category_name__icontains=search_term))
+
+    page = request.GET.get('page', 1)
+    paginator = Paginator(query_set, 8)
+    try:
+        query_set = paginator.page(page)
+    except PageNotAnInteger:
+        query_set = paginator.page(page)
+    except EmptyPage:
+        query_set = paginator.page(paginator.num_pages)
 
     context = {
         'categories': categories,
-        'products': products,
-        'category_option': category
+        'products': query_set , # Order the final result
+        'search_term': search_term,
+        'category_options': category_options,
     }
 
     return render(request, 'admin_home/admin_product.html', context)
+
 
 
 @user_passes_test(is_superuser, login_url='admin_login')
@@ -634,6 +1284,10 @@ def admin_add_product(request):
         currency = request.POST.get('currency')
         category_id = request.POST.get('category')
         subcategory_id = request.POST.get('sub_category')
+        edition_variant_names = request.POST.getlist('edition_variant')
+        stock_quantity = request.POST.get('stock')
+
+        selected_editions = EditionVariant.objects.filter(name__in = edition_variant_names)
         print(product_name)
         print(category_id)
         print(subcategory_id)
@@ -655,12 +1309,19 @@ def admin_add_product(request):
             currency = currency,
             tax_rate = tax_rate,
             category = category,
-            sub_category = subcategory
+            sub_category = subcategory,
+            stock_quantity = stock_quantity,
+            
         
         )
+            
+        if not selected_editions:
+            new_product.save()
+        else:
+            new_product.edition_variant.add(*selected_editions)
+            new_product.save()
 
-
-        new_product.save()
+        
         messages.success(request, 'Product added successfully!')
         upload_images = request.FILES.getlist('images')
         print(upload_images)
@@ -683,9 +1344,11 @@ def admin_add_product(request):
         return render(request, 'admin_home/admin_add_product.html', context)
     categories = Category.objects.all()
     subcategories = SubCategory.objects.all()
+    editions = EditionVariant.objects.all()
     context = {
         'categories':categories,
         'subcategories':subcategories,
+        'editions':editions,
     }
         
 
@@ -708,41 +1371,69 @@ def admin_edit_product(request, product_slug):
     categories = Category.objects.all()
     subcategories = SubCategory.objects.all()
     product_images = ProductImage.objects.filter(product=product)
+    editions = EditionVariant.objects.all()
+
 
     if request.method == 'POST':
+        print(request.POST)
         product.product_name = request.POST.get('product_name')
         product.product_description = request.POST.get('product_description')
         product.price = request.POST.get('regular_price')
         product.promotional_price = request.POST.get('promotional_price')
         product.tax_rate = request.POST.get('tax_rate')
         product.currency = request.POST.get('currency')
-        category_id = request.POST.get('category')
+        category_id = request.POST.get('category') 
         subcategory_id = request.POST.get('sub_category')
+        product.stock_quantity = request.POST.get('stock')
         print(category_id)
         print(subcategory_id)
 
+        selected_editions = request.POST.getlist('edition_variant')
+        print(selected_editions)
+
+        if selected_editions:
+            product.edition_variant.clear()
+            for edition_name in selected_editions:
+                edition = EditionVariant.objects.get(name = edition_name)
+                product.edition_variant.add(edition)
+        
+        
+
         category = Category.objects.get(slug=category_id)
         subcategory = SubCategory.objects.get(sub_slug=subcategory_id)
-
         product.category = category
         product.sub_category = subcategory
         product.save()
-        request.session['success_message'] = 'Product edited successfully'
-        return redirect('admin_product')
+
+
+
+        with transaction.atomic():
+            product.save()
+
+            # Update product images
+            updated_images = request.FILES.getlist('images')
+            for image in updated_images:
+                image_upload(product, image)
+
+        messages.success(request, 'Product edited successfully!')
+        return redirect('admin_edit_product', product_slug=product_slug)
+    
 
     context = {
         'product': product,
         'categories':categories,
         'subcategories':subcategories,
         'product_images': product_images,
+        'editions':editions,
         }
     
 
     return render(request,'admin_home/edit_product.html', context)
 
-from django.http import JsonResponse
+
 
 from django.http import JsonResponse
+@user_passes_test(is_superuser, login_url='admin_login')
 
 def admin_change_image(request):
     if request.method == 'POST':
@@ -769,6 +1460,37 @@ def admin_change_image(request):
     # Return a default response if the request method is not POST
     return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
+import os
+def admin_delete_image(request):
+    if request.method == 'POST':
+        print('HHHHIIIIII')
+        data = json.loads(request.body.decode('utf-8'))
+
+        image_uid = data['imageUid']
+        print(image_uid)
+        image_object = ProductImage.objects.filter(uid = image_uid).first()
+
+        image_path = os.path.join('your_image_directory', image_uid)
+        print(image_object)
+        image_object.delete()
+        print(image_path)
+
+        # try:
+            
+        #     os.remove(image_path)
+        # except OSError as e:
+            
+        #     return JsonResponse({'success': False, 'message': f'Error deleting image: {str(e)}'})
+
+
+        
+        
+        return JsonResponse({'success': True, 'message': 'Image Deleted successfully'})
+
+    return JsonResponse({'success': True, 'message': 'Image Deleted successfully'})
+
+
+
 
 def get_sub_categories(request):
     if request.method=='POST':
@@ -794,5 +1516,270 @@ def unlist_product(request, product_slug):
     product.save()
 
     return redirect(admin_product)
+
+# -----------------------------------------------coupon section------------------------
+
+@user_passes_test(is_superuser, login_url='admin_login')
+
+def admin_coupon(request):
+    coupons = Coupon.objects.all().order_by('-created_at')
+    context = {'coupons': coupons}
+
+    return render(request, 'admin_home/admin_coupon.html', context)
+
+
+
+@user_passes_test(is_superuser, login_url='admin_login')
+
+def admin_add_coupon(request):
+    if request.method == 'POST':
+        # Extract form data
+        coupon_code = request.POST.get('coupon_code', '').strip()
+        discount_price = request.POST.get('discount_price')
+        minimum_amount = request.POST.get('minimum_amount')
+        coupon_count = request.POST.get('coupon_count')
+        expiration_date = request.POST.get('expiration_date')
+        expire_checkbox = request.POST.get('expireCheckbox')
+        print(expire_checkbox)
+
+
+        if not coupon_code:
+            messages.error(request, 'Coupon code must not be empty or contain only spaces.')
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+        
+        if Coupon.objects.filter(coupon_code=coupon_code).exists():
+            messages.error(request, 'Coupon with the same code already exists.')
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
+        coupon = Coupon(
+            coupon_code=coupon_code,
+            discount_price=discount_price,
+            minimum_amount=minimum_amount,
+            coupon_count=coupon_count,
+            expiration_date=expiration_date,
+            is_expired=bool(expire_checkbox),  # Convert string to boolean
+        )
+        coupon.save()
+
+
+        messages.success(request, 'Coupon added successfully!')
+
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    
+    
+    return render(request, 'admin_home/admin_add_coupon.html')
+
+
+@user_passes_test(is_superuser, login_url='admin_login')
+
+def admin_edit_coupon(request, coupon_uid):
+    coupon = Coupon.objects.filter(uid = coupon_uid).first()
+    print(coupon)
+    context = {'coupon':coupon}
+
+    if request.method == 'POST':
+        coupon_code = request.POST.get('coupon_code', '').strip()
+        discount_price = request.POST.get('discount_price')
+        minimum_amount = request.POST.get('minimum_amount')
+        coupon_count = request.POST.get('coupon_count')
+        expiration_date = request.POST.get('expiration_date')
+        expire_checkbox = request.POST.get('expireCheckbox')
+
+        if not coupon_code:
+            messages.error(request, 'Coupon code must not be empty or contain only spaces.')
+            return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+        
+        
+        coupon.coupon_code=coupon_code
+        coupon.discount_price=discount_price
+        coupon.minimum_amount=minimum_amount
+        coupon.coupon_count=coupon_count
+        coupon.expiration_date=expiration_date
+        coupon.is_expired=bool(expire_checkbox)  # Convert string to boolean
+        
+        coupon.save()
+        messages.success(request, 'Coupon Edited Successfully')
+        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
+    return render(request, 'admin_home/admin_edit_coupon.html', context)
+
+
+
+@user_passes_test(is_superuser, login_url='admin_login')
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+
+def admin_delete_coupon(request, coupon_uid):
+    try:
+        coupon = Coupon.objects.get(uid=coupon_uid)
+    except Coupon.DoesNotExist:
+        raise Http404("Coupon does not exist")  
+   
+    coupon.delete()
+    messages.success(request, 'Coupon deleted successfully')
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+
+# ---------------------------------BANNER------------------------
+@user_passes_test(is_superuser, login_url='admin_login')
+def admin_banner(request):
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        image = request.FILES.get('image')
+        print(title)
+        print(image)
+        print(request.POST)
+
+
+
+
+        existing_banner = Banner.objects.filter(title=title).first()
+
+        if not existing_banner:
+            banner = Banner.objects.create(title=title)
+
+
+
+            if image:
+                banner.image.save(image.name, image)
+
+            banner.save()
+            messages.success(request, 'Banner saved successfully')
+        else:
+           messages.warning(request, 'A Banner with same name already exists')
+           return redirect('admin_banner')
+
+
+    banners = Banner.objects.all()
+    context = {'banners':banners}
+    return render(request, 'admin_home/banner.html', context)
+
+
+
+@require_POST
+@user_passes_test(is_superuser, login_url='admin_login')
+def delete_banner(request):
+    print('view is running')
+    data = json.loads(request.body.decode('utf-8'))
+    uid = data.get('uid')
+     
+    banner = get_object_or_404(Banner, uid=uid)
+
+    
+    if not request.user.has_perm('your_app.delete_banner'): 
+        return JsonResponse({'error': 'Permission Denied'}, status=403)
+
+    banner.delete()
+    messages.success(request, 'Banner Deleted successfully')
+
+    return JsonResponse({'success': 'Banner deleted successfully'})
+
+
+
+
+
+
+@user_passes_test(is_superuser, login_url='admin_login')
+def export_data_to_excel(request):
+    objs = OrderItem.objects.all()
+    orders = Order.objects.all()
+    
+    data = []
+
+    for obj in objs:
+        data.append({
+            "Order ID": obj.order.uid,
+            "Item ID": obj.order.uid,
+            "Product": obj.product_name,
+            "Edition Variant": obj.edition_variant,
+            "Quantity": obj.quantity,
+            "Price": obj.price,
+            "Payment Method": obj.payment_method,
+            "Address": f"{obj.street_address}, {obj.city}, {obj.state}, {obj.postal_code}, {obj.country}",
+            "Mobile": obj.mobile,
+            "Total": obj.get_total(),
+            "Paid": obj.is_paid,
+            "Order Status": obj.order_status,
+        })
+
+    overall_revenue = sum(order.total_amount for order in orders)
+    overall_data = {
+        "Overall Revenue": overall_revenue,
+        
+    }
+
+    df_orders = pd.DataFrame(data)
+    df_overall = pd.DataFrame([overall_data])
+
+    total_revenue = Order.objects.filter(is_delivered=True).aggregate(Sum('total_amount'))['total_amount__sum']
+    total_count = Order.objects.filter(is_delivered = True).count()
+    product_count = Product.objects.all().count()
+    category_count = Category.objects.all().count()
+    if total_count > 0:
+        monthly_revenue = total_revenue / total_count
+    else:
+        monthly_revenue = 0
+
+
+
+    if total_revenue is None:
+        total_revenue = 0
+    if total_count is None:
+        total_count = 0
+    if product_count is None:
+        product_count = 0
+    if category_count is None:
+        category_count = 0
+
+    overall_combined_data = {
+        "Overall Revenue": total_revenue,
+        "Total Products Available": product_count,
+        "Overall Categories": category_count,
+        "Monthly Income": monthly_revenue,
+    }
+
+
+    df_overall_combined = pd.DataFrame([overall_combined_data])
+
+    output_buffer = BytesIO()
+    with pd.ExcelWriter(output_buffer, engine='xlsxwriter') as writer:
+        df_orders.to_excel(writer, sheet_name='Orders', index=False)
+
+        worksheet_orders = writer.sheets['Orders']
+        for i, col in enumerate(df_orders.columns):
+            max_len = max(df_orders[col].astype(str).apply(len).max(), len(col))
+            worksheet_orders.set_column(i, i, max_len)
+       
+
+        df_overall_combined = pd.DataFrame([overall_combined_data])
+        df_overall_combined.to_excel(writer, sheet_name='Overall',startcol = 2,  index=False)
+        start_row_monthly_data = len(df_overall_combined) + 5  
+        start_col_monthly_data = len(df_overall_combined.columns) + 2
+        df_monthly_data = pd.DataFrame({
+            "Months": ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            "Sales": [100, 150, 200, 120, 180, 250, 300, 200, 180, 220, 280, 320],
+            "Products": [50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160],
+            "Visitors": [500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400, 1500, 1600],
+        })
+        df_monthly_data.to_excel(writer, sheet_name='Overall',  startcol=start_col_monthly_data + 5 , index=False)
+        worksheet = writer.sheets['Overall']
+        for i, col in enumerate(df_overall_combined.columns):
+            max_len = max(df_overall_combined[col].astype(str).apply(len).max(), len(col))
+            worksheet.set_column(i + 2, i + 2, max_len) 
+
+        for i, col in enumerate(df_monthly_data.columns):
+            max_len = max(df_monthly_data[col].astype(str).apply(len).max(), len(col))
+            worksheet.set_column(start_col_monthly_data + i, start_col_monthly_data + i, max_len)  
+
+
+    output_buffer.seek(0)
+
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=output.xlsx'
+    response.write(output_buffer.getvalue())
+
+    return response
+
 
 

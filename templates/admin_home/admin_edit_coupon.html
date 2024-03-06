@@ -1,0 +1,137 @@
+{% extends "base/new_base.html" %}
+
+{% block content %}
+<section class="content-main">
+    <form method="POST" id="couponForm" onsubmit=" return couponValidation()" >
+        {% csrf_token %}
+
+    <div class="row">
+        <div class="col-lg-6 offset-lg-3">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="content-header">
+                                <h2 class="content-title">Edit Coupon</h2>
+                                <button type="submit" class="btn btn-md rounded font-sm hover-up ml-auto">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <h6>1. General info</h6>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="mb-4">
+                                <label class="form-label">Coupon Code</label>
+                                <input name="coupon_code" type="text"  placeholder="Type here" value="{{coupon.coupon_code}}" class="form-control">
+                                <span id="couponCodeError" class="text-danger"></span>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">Discount Price</label>
+                                <input name="discount_price"  type="number" min="0" placeholder="$00.0" value="{{coupon.discount_price}}" class="form-control">
+                                <span id="discountPriceError" class="text-danger"></span>
+
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">Minimum Amount</label>
+                                <input name="minimum_amount" type="number" min="0" placeholder="$00.0" value="{{coupon.minimum_amount}}" class="form-control">
+                                <span id="minimumAmountError" class="text-danger"></span>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">Coupon Count</label>
+                                <input name="coupon_count" type="number" min="0" placeholder="10" value="{{coupon.coupon_count}}" class="form-control">
+                                <span id="couponCountError" class="text-danger"></span>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">Expiration Date</label>
+                                <input name="expiration_date" type="datetime-local" value="{{ coupon.expiration_date|date:'Y-m-d\TH:i' }}" class="form-control">
+                                <span id="expirationDateError" class="text-danger"></span>
+                            </div>
+                            <!-- <div class="mb-4">
+                                <label class="form-label">Set Coupon to Expire</label>
+                                <div class="form-check">
+                                    <input name="expireCheckbox" class="form-check-input" {% if coupon.is_expired %} checked {% endif %} type="checkbox" id="expireCheckbox">
+                                    <label class="form-check-label" for="expireCheckbox">Expire Coupon</label>
+                                </div>
+                            </div> -->
+                            {% include 'base/alert.html' %}
+                            
+                        </div> <!-- col.// -->
+                    </div> <!-- row.// -->
+                    <hr class="mb-4 mt-0">
+                    <!-- You can continue with other sections as needed -->
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+</section>
+
+
+
+
+<script>
+    function couponValidation() {
+        var couponCode = document.getElementsByName('coupon_code')[0].value;
+        var discountPrice = document.getElementsByName('discount_price')[0].value;
+        var minimumAmount = document.getElementsByName('minimum_amount')[0].value;
+        var couponCount = document.getElementsByName('coupon_count')[0].value;
+        var expirationDate = document.getElementsByName('expiration_date')[0].value;
+
+        var couponCodeError = document.getElementById('couponCodeError');
+        var discountPriceError = document.getElementById('discountPriceError');
+        var minimumAmountError = document.getElementById('minimumAmountError');
+        var couponCountError = document.getElementById('couponCountError');
+        var expirationDateError = document.getElementById('expirationDateError');
+
+        couponCodeError.innerHTML = '';
+        discountPriceError.innerHTML = '';
+        minimumAmountError.innerHTML = '';
+        couponCountError.innerHTML = '';
+        expirationDateError.innerHTML = '';
+
+        if (couponCode === '') {
+            couponCodeError.innerHTML = 'Coupon code is required.';
+            return false;
+        }
+
+        if (discountPrice === '' || isNaN(discountPrice)) {
+            discountPriceError.innerHTML = 'Invalid discount price.';
+            return false;
+        }
+
+        if (minimumAmount === '' || isNaN(minimumAmount)) {
+            minimumAmountError.innerHTML = 'Invalid minimum amount.';
+            return false;
+        }
+
+        if (couponCount === '' || isNaN(couponCount) || couponCount < 0) {
+            couponCountError.innerHTML = 'Invalid coupon count.';
+            return false;
+        }
+
+        if (expirationDate === '') {
+            expirationDateError.innerHTML = 'Expiration date is required.';
+            return false;
+        }
+
+        var expirationDateTime = new Date(expirationDate).getTime();
+        var now = new Date().getTime();
+
+        if (isNaN(expirationDateTime)) {
+            expirationDateError.innerHTML = 'Invalid expiration date format.';
+            return false;
+        }
+
+        if (expirationDateTime <= now) {
+            expirationDateError.innerHTML = 'Expiration date must be in the future.';
+            return false;
+        }
+
+        // If all validations pass, the form will be submitted
+        return true;
+    }
+</script>
+
+{% endblock %}

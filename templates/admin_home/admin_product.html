@@ -19,38 +19,27 @@
     </div>
     <div class="card mb-4">
         <header class="card-header">
-            <div class="row gx-3">
-                <div class="col-lg-4 col-md-6 me-auto">
-                    <input type="text" placeholder="Search..." class="form-control">
+            <form method="get" action="{% url 'admin_product' %}">
+                <div class="row gx-3">
+                    <div class="col-lg-6 col-md-6 text-end">
+                        <select name="categories" class="form-select">
+                            <option value="all">All Categories</option>
+                            {% for category in categories %}
+                                <option value="{{ category.category_name }}" {% if category.category_name in category_options %}selected{% endif %}>
+                                    {{ category.category_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-lg-6 col-md-6">
+                        <div class="input-group">
+                            <input type="text" name="search" placeholder="Search..." {% if search_term  %} value="{{search_term}}" {% endif %} class="form-control">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-lg-2 col-6 col-md-3">
-                    <select class="form-select" onchange="window.location.href=this.value;">
-                        {% if category_option %}
-                            <option value="{% url 'products_by_category' category_option.slug %}">
-                                {{ category_option.category_name }}
-                            </option>
-                            <option value="{% url 'admin_product' %}">All Categories</option>
-                        {% else %}
-                            <option>All Categories</option>
-                        {% endif %}
-                        {% for category in categories %}
-                            <option value="{% url 'products_by_category' category.slug %}">
-                                {{ category.category_name }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                    
-                    
-                </div>
-                <div class="col-lg-2 col-6 col-md-3">
-                    <select class="form-select">
-                        <option>Latest added</option>
-                        <option>Cheap first</option>
-                        <option>Most viewed</option>
-                    </select>
-                </div>
-            </div>
-        </header> <!-- card-header end// -->
+            </form>
+        </header>  
         
         <div class="card-body">
             <div class="row gx-3">
@@ -85,18 +74,26 @@
         
 
     </div> <!-- card end// -->
-    <div class="pagination-area mt-30 mb-50">
+
+    
+    <div class="pagination-area mt-15 mb-50">
         <nav aria-label="Page navigation example">
             <ul class="pagination justify-content-start">
-                <li class="page-item active"><a class="page-link" href="#">01</a></li>
-                <li class="page-item"><a class="page-link" href="#">02</a></li>
-                <li class="page-item"><a class="page-link" href="#">03</a></li>
+                {% for i in products.paginator.page_range %}
+                    {% if i == products.number %}
+                        <li class="page-item active"><a class="page-link" href="?page={{i}}">{{i}}</a></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{i}}">{{i}}</a></li>
+                    {% endif %}
+                {% endfor %}
                 <li class="page-item"><a class="page-link dot" href="#">...</a></li>
-                <li class="page-item"><a class="page-link" href="#">16</a></li>
                 <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
             </ul>
         </nav>
     </div>
+    
+
+
 </section>
 
 

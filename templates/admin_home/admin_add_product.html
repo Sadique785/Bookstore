@@ -2,6 +2,31 @@
 
 
 {% block content %}
+<style>
+    .custom-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .selected-option {
+        padding: 10px;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        min-width: 200px; /* Set a fixed width */
+    }
+
+     .edition_select {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        border: 1px solid #ccc;
+        border-top: none;
+        display: none;
+        background-color: #fff;
+        z-index: 1;
+    }
+</style>
 
 
 <section class="content-main">
@@ -80,7 +105,7 @@
                                 <div class="card-body" style="display: flex; flex-direction: column;">
                                     <div class="input-upload">
                                         <img src="/media/assets/imgs/theme/upload.svg" alt="">
-                                        <input class="image-input" type="file"  name="images" id="images" accept="image/*" multiple >
+                                        <input class="image-input" type="file"  name="images" id="images" accept="image/*" multiple onchange="validateImage()" >
                                     </div>
                                     <!-- <button type="button" id="addMorePhotos" style="display: inline-block; width: 150px;">Add more photos</button> -->
                                 </div>
@@ -88,15 +113,21 @@
 
    
                         </div>
+                        <div class="form-group">
+                            <span id="imageError"></span>
+                        </div>
                             <!-- Category Dropdown -->
     <div class="mb-4">
         <label class="form-label">Category</label>
-        <select name="category" id="category" onclick="get_sub_category()" class="form-select">
+        <select name="category" id="category" onclick="get_sub_category()" class="form-select" >
             <option selected >Select Category</option>
             {% for category in categories %}
-                <option name="category" >{{ category.category_name }}</option>
+                <option  >{{ category.category_name }}</option>
             {% endfor %}
         </select>
+    </div>
+    <div class="form-group">
+        <span id="categoryError"></span>
     </div>
     
     <!-- Subcategory Dropdown -->
@@ -107,7 +138,32 @@
 
         </select>
     </div>
-    
+    <div class="form-group">
+        <span id="subcategoryError"></span>
+    </div>
+
+<!-- Edition Variant Dropdown -->
+<div class="mb-4">
+    <label class="form-label">Edition Variant</label>
+    <div class="custom-dropdown">
+        <select name="edition_variant" id="edition_variant" multiple class="form-select edition_select" style="display: none;">
+            {% for edition in editions %}
+                <option value="{{ edition.name }}">{{ edition.name }}</option>
+            {% endfor %}
+        </select>
+        <div class="selected-option" onclick="toggleDropdown('edition_variant')">Select Edition Variant</div>
+    </div>
+</div>
+
+<div class="mb-4">
+    <label class="form-label">Stock</label>
+    <input type="number" id="stock" name="stock" placeholder="Stock" class="form-control" min="0" >
+</div>
+<div class="form-group">
+    <span id="stockError"></span>
+</div>
+
+
                         <div class="row justify-content-md-center">
                             <div class="col-md-auto">
                                 <button type="submit" class="btn btn-primary">Submit</button>
@@ -121,6 +177,47 @@
 
     </div>
 </section>
+
+
+<script>
+    function toggleDropdown(dropdownId) {
+        var dropdown = document.getElementById(dropdownId);
+        dropdown.style.display = (dropdown.style.display === 'none') ? 'block' : 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var dropdown = document.getElementById('edition_variant');
+        dropdown.addEventListener('change', function() {
+            var selectedOptions = Array.from(this.selectedOptions).map(option => option.value);
+            var selectedOptionText = selectedOptions.length > 0 ? selectedOptions.join(', ') : 'Select Edition Variant';
+            document.querySelector('.custom-dropdown .selected-option').textContent = selectedOptionText;
+        });
+    });
+
+
+
+    function validateImage() {
+        var input = document.getElementById('images');
+        var errorSpan = document.getElementById('imageError');
+        var validExtensions = ['jpg', 'jpeg', 'png'];
+
+        if (input.files.length > 0) {
+            for (var i = 0; i < input.files.length; i++) {
+                var fileName = input.files[i].name;
+                var extension = fileName.split('.').pop().toLowerCase();
+
+                if (validExtensions.indexOf(extension) === -1) {
+                    errorSpan.innerHTML = 'Please select only JPG or PNG images.';
+                    input.value = ''; // Clear the input
+                    return;
+                }
+            }
+        }
+
+        errorSpan.innerHTML = ''; // Clear any previous errors
+    }
+</script>
+    
 
 
 

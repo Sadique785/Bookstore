@@ -20,15 +20,25 @@ class Order(BaseModel):
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    order_status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default=PENDING)
+    order_status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default=PROCESSING)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
     is_active  = models.BooleanField(default = True)
     is_delivered  = models.BooleanField(default = False)
+    is_paid = models.BooleanField(default = True)
+
 
 
     
     def __str__(self):
         return f"Order {self.uid} - Status: {self.order_status} - Total: ${self.total_amount}"
+    
+    # def save(self, *args, **kwargs):
+
+    #     all_items_paid = all(item.is_paid for item in self.order_items.all())
+
+    #     self.is_paid = all_items_paid
+
+    #     super().save(*args, **kwargs)
     
     def get_order_status_choices():
         return Order.ORDER_STATUS_CHOICES
@@ -39,6 +49,16 @@ class Order(BaseModel):
     def calculate_total(self):
         total = sum(item.price for item in self.order_items.all())
         return total
+    
+
+    def to_dict(self):
+        return {
+            'id': self.uid,
+            'created_at': self.created_at.strftime('%Y-%m-%d %H:%M:%S'),
+        }
+    def calculate_revenue(self):
+        return sum(price for price in self.total_amount)
+
     
 
     
@@ -54,7 +74,7 @@ class OrderItem(BaseModel):
         (SHIPPED, 'Shipped'),
         (DELIVERED, 'Delivered'),
     ]
-    order_status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default=PENDING)
+    order_status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default=PROCESSING)
 
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items')
     product_name = models.CharField(max_length=255)
@@ -75,11 +95,30 @@ class OrderItem(BaseModel):
     mobile = models.CharField(max_length=20)
     is_active  = models.BooleanField(default = True)
     is_delivered  = models.BooleanField(default = False)
+    is_paid = models.BooleanField(default = True)
 
     def get_order_item_status_choices():
         return OrderItem.ORDER_STATUS_CHOICES
     def get_total(self):
         return self.price * self.quantity
+    
+    
+
+    
+    
+    def to_dict(self):
+
+        return {
+            'uid': self.uid,
+            'qty': self.quantity,
+            'image': str(self.image.url) if self.image else None,
+            'product_name': self.product_name,
+            'edition_variant': self.edition_variant,
+            'get_total': str(self.get_total()),
+            'quantity': self.quantity,
+            'order_status': self.order_status,
+        }
+    
         
 
     def __str__(self):

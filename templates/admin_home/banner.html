@@ -1,0 +1,214 @@
+{% extends "base/new_base.html" %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/dist/toastr.min.css">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/dist/toastr.min.js"></script>
+
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Banners</h2>
+            <p>Add, edit, or delete a banner</p>
+        </div>
+        <form action="{% url 'admin_banner' %}" method="get" class="d-flex">
+            <div class="flex-grow-1">
+                <input type="text" name="search" style="width: 400px; margin-right: 10px;" placeholder="Search Banners" {% if search_term %} value="{{search_term}}" {% endif %} class="form-control bg-white">
+            </div>
+            <button type="submit" class="btn btn-primary" style="height: 40px; width: 100p;">Search</button>
+        </form>
+    </div>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <form method="POST" enctype="multipart/form-data"  onsubmit="return validateForm()">
+                        {% csrf_token %}
+                        <!-- <input type="hidden" name="crop_x" id="crop_x">
+                        <input type="hidden" name="crop_y" id="crop_y">
+                        <input type="hidden" name="crop_width" id="crop_width">
+                        <input type="hidden" name="crop_height" id="crop_height"> -->
+
+                        <div class="mb-4">
+                            <label for="banner_title" class="form-label">Title</label>
+                            <input type="text" placeholder="Type here" name="title" class="form-control" id="banner_title">
+                            <span id="titleError" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-4">
+                             <label for="banner_image" class="form-label">Image</label>
+                            <input type="file" name="image" class="form-control" id="banner_image_input">
+                            <span id="imageError" class="text-danger"></span>
+                        </div>
+            
+                        <!-- Add an image preview container -->
+                        <div class="mb-4">
+                            <label for="banner_image_preview" class="form-label">Image Preview</label>
+                            <div id="banner_image_preview"></div>
+                        </div>
+                        
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Create Banner</button>
+                        </div>
+                       <div class="alert-message mt-5" id="alert-message">
+                        {% include "base/alert.html" %}
+                       </div>
+                    </form>
+                </div>
+                <div class="col-md-9">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="">
+                                        </div>
+                                    </th>
+                                    <th>ID</th>
+                                    <th>Title</th>
+                                    <th>Image</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for banner in banners %}
+                                <tr>
+                                    <td class="text-center">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="">
+                                        </div>
+                                    </td>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td><a href=""><b>{{ banner.title }}</b></a></td>
+                                    <td><img src="{{ banner.image.url }}" alt="{{ banner.title }}" style="max-height: 50px;"></td>
+                                    <td class="text-end">
+                                        <div class="dropdown" id="banner-{{ banner.slug }}">
+                                            <button class="btn btn-danger" onclick="delete_banner('{{ banner.uid }}')">Delete </button>
+
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        
+                    </div>
+                </div> <!-- .col// -->
+            </div> <!-- .row // -->
+        </div> <!-- card body .// -->
+    </div> <!-- card .// -->
+</section>
+
+
+
+
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    function delete_banner(uid) {
+        if (confirm("Are you sure you want to delete this banner?")) {
+            // Use Fetch API to send a DELETE request to the Django view
+            fetch("{% url 'delete_banner' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ uid: uid }),
+                // Add additional headers or body if needed
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                
+                console.log(`Banner with uid ${uid} deleted successfully.`);
+                window.location.reload()
+            })
+            .catch(error => {
+                
+                console.error('There was a problem with the fetch operation:', error);
+            });
+        }
+    }
+
+  
+
+    function validateForm() {
+        var titleInput = document.getElementById("banner_title").value;
+        var titleErrorSpan = document.getElementById('titleError');
+        var imageInput = document.getElementById('banner_image_input');
+        var imageErrorSpan = document.getElementById('imageError');
+
+        console.log('Validating form...');
+
+        if (titleInput.trim() === "") {
+            titleErrorSpan.innerText = 'Title cannot be empty';
+            titleErrorSpan.style.display = 'block';
+            console.log('Title is empty');
+            return false;
+        } else {
+            titleErrorSpan.innerText = '';
+            titleErrorSpan.style.display = 'none';
+            console.log('Title is valid');
+        }
+
+        if (imageInput.files.length === 0) {
+            imageErrorSpan.innerText = 'Please select an image';
+            imageErrorSpan.style.display = 'block';
+            console.log('Image not selected');
+            return false;
+        } else {
+            imageErrorSpan.innerText = '';
+            imageErrorSpan.style.display = 'none';
+            console.log('Image selected');
+        }
+
+        var allowedFormats = ['png', 'jpeg', 'jpg'];
+        var selectedFormat = imageInput.files[0].name.split('.').pop().toLowerCase();
+
+        if (!allowedFormats.includes(selectedFormat)) {
+            imageErrorSpan.innerText = 'Invalid image format. Please select a PNG, JPEG, or JPG file.';
+            imageErrorSpan.style.display = 'block';
+            console.log('Invalid image format');
+            return false; 
+        } else {
+            imageErrorSpan.innerText = '';
+            imageErrorSpan.style.display = 'none';
+            console.log('Valid image format');
+        }
+        return true;
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(function () {
+            var alertMessage = document.getElementById('alert-message');
+            if (alertMessage) {
+                alertMessage.style.display = 'none';
+            }
+        }, 5000);
+    });
+</script>
+
+
+
+{% endblock %}

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Profile, Cart, CartItem
+from .models import Profile, Cart, CartItem, Wallet, Transaction, Invoice
 # Register your models here.
 
 
@@ -24,3 +24,19 @@ class CartItemAdmin(admin.ModelAdmin):
 
 admin.site.register(Cart, CartAdmin)
 admin.site.register(CartItem, CartItemAdmin)
+
+
+@admin.register(Wallet)
+class WalletAdmin(admin.ModelAdmin):
+    list_display = ('user', 'balance')
+
+@admin.register(Transaction)
+class TransactionAdmin(admin.ModelAdmin):
+    list_display = ('wallet', 'amount', 'transaction_type', 'description', 'timestamp')
+
+
+class InvoiceAdmin(admin.ModelAdmin):
+    list_display = ('name', 'order_item')
+    search_fields = ('name', 'order_item__some_field')  
+
+admin.site.register(Invoice, InvoiceAdmin)

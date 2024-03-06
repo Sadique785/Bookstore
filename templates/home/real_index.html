@@ -1,20 +1,107 @@
 {% extends 'base/real_base.html' %}
 
 {% block start %}
-		<!-- Start Header/Navigation -->
+<style>
+	.carousel {
+    height: 80vh;
+	overflow: hidden;
 
-		<!-- End Header/Navigation -->
+	
+}
+#heroCarousel img {
+        height: 700px; /* Set the desired height for your carousel */
+        object-fit: cover; /* This property ensures the image covers the entire container while maintaining its aspect ratio */
+        width: 100%; /* Ensure the image takes the full width of the container */
+    } 
+#heroCarousel .carousel-item {
+    margin-right: 0; 
+}
+
+@media only screen and (max-width: 1024px) {
+    .fixed-size.third-item {
+        margin-left: 2%; 
+    }
+
+    .carousel {
+        height: 42vh; 
+    }
+	.btn-explore{
+		margin-left: 40%;
+	}
+	#heroCarousel img {
+        height: 550px; /* Set the desired height for your carousel */
+        object-fit: cover; /* This property ensures the image covers the entire container while maintaining its aspect ratio */
+        width: auto; /* Ensure the image takes the full width of the container */
+    } 
+}
+
+
+@media only screen and (max-width: 767px) {
+    .fixed-size,
+    .fixed-size.third-item {
+        margin-left: 11%; 
+    }
+	.btn-explore{
+		margin-left: 32%;
+	}
+	.carousel {
+        height: 30vh; 
+    }
+	#heroCarousel img {
+        height: 280px; /* Set the desired height for your carousel */
+        object-fit: cover; /* This property ensures the image covers the entire container while maintaining its aspect ratio */
+        width: auto; /* Ensure the image takes the full width of the container */
+    } 
+
+}
+</style>
+
+<!-- Start Hero Section with Carousel -->
+<div id="heroCarousel" class="carousel slide" data-ride="carousel">
+    <div class="carousel-inner">
+        {% if banners %}
+            {% for banner in banners %}
+                <div class="carousel-item{% if forloop.first %} active{% endif %}">
+                    <img src="{{ banner.image.url }}" class="d-block w-100" alt="Banner {{ forloop.counter }}">
+                    <div class="carousel-caption d-none d-md-block">
+                        <!-- Additional text or content for the carousel item -->
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <!-- Default Carousel Item (use a default image) -->
+            <div class="carousel-item active">
+				<img src="https://img.freepik.com/free-photo/book-composition-with-open-book_23-2147690555.jpg?size=626&ext=jpg&ga=GA1.1.1269040533.1708992000&semt=sph" class="d-block w-100" alt="Slide 1">
+                <div class="carousel-caption d-none d-md-block">
+                    <!-- Additional text or content for the default carousel item -->
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Add carousel controls if needed -->
+    <a class="carousel-control-prev" href="#heroCarousel" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only">Previous</span>
+    </a>
+    <a class="carousel-control-next" href="#heroCarousel" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only">Next</span>
+    </a>
+</div>
+
+<!-- End Hero Section with Carousel -->
 
 		<!-- Start Hero Section -->
 			<div class="hero background-image">
-				<div class="container">
+				<div class="container" style="padding: 100px;">
 					<div class="row justify-content-between">
 						<div class="col-lg-5">
 							<div class="intro-excerpt">
 								<h1>Historia<span class="d-block"> Bookstore</span></h1>
 								<p class="mb-4">"A book is a dream that you hold in your hand." - Neil Gaiman
 									"There are many little ways to enlarge your world. Love of books is the best of all." - Jacqueline Kennedy Onassis</p>
-								<p><a href="" class="btn btn-secondary me-2">Shop Now</a><a href="#" class="btn btn-white-outline">Explore</a></p>
+								<p><a href="{% url 'all_products' %}" class="btn btn-secondary me-2">Shop Now</a><a href="{% url 'all_products' %}"  class="btn btn-white-outline">Explore</a></p>
 							</div>
 						</div>
 						<div class="col-lg-7">
@@ -43,12 +130,12 @@
 								<div class="col-md-12 col-lg-3 mb-5 mb-lg-0">
 									<h2 class="mb-4 section-title">Crafted with excellent material.</h2>
 									<p class="mb-4">Explore the latest bestsellers captivating readers with gripping plots, relatable characters, and intriguing storytelling. Discover why these books are gaining popularity and resonating with audiences worldwide." </p>
-									<p><a href="shop.html" class="btn btn-explore">Explore</a></p>
+									<p><a href="{% url 'all_products' %}"  class="btn btn-explore">Explore</a></p>
 								</div> 
 								<!-- End Column 1 -->
 								{% for product in products|slice:":3" %}
 								<!-- Start Column 2 -->
-								<div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0 fixed-size">
+								<div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0 fixed-size {% if forloop.counter0 == 2 %}third-item{% endif %}">
 									<a class="product-item" href="{% url 'get_product' product.slug %}">
 									{% if product.product_images.first %}
 										<img src="{{ product.product_images.first.image.url }}" class="img-fluid product-thumbnail">
@@ -92,12 +179,12 @@
 								<div class="col-md-12 col-lg-3 mb-5 mb-lg-0">
 									<h3 class="mb-4 section-title">Newly Added Books</h2>
 									<p class="mb-4">Discover our latest additions, each crafted with excellent material and offering gripping plots, relatable characters, and intriguing storytelling. Explore why these new books are gaining popularity and resonating with audiences worldwide.</p>
-									<p><a href="shop.html" class="btn btn-explore">Explore</a></p>
+									<p><a href="{% url 'all_products' %}"  class="btn btn-explore">Explore</a></p>
 								</div> 
 								<!-- End Column 1 -->
 								{% for product in new_products|slice:":3" %}
 								<!-- Start Column 2 -->
-								<div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0 fixed-size">
+								<div class="col-12 col-md-4 col-lg-3 mb-5 mb-md-0 fixed-size {% if forloop.counter0 == 2 %}third-item{% endif %}">
 									<a class="product-item" href="{% url 'get_product' product.slug %}">
 									{% if product.product_images.first %}
 										<img src="{{ product.product_images.first.image.url }}" class="img-fluid product-thumbnail">
@@ -127,298 +214,8 @@
 					</div>
 					<!-- End Product Section -->
 			
-		<!-- Start Why Choose Us Section -->
-		<!-- <div class="why-choose-section">
-			<div class="container">
-				<div class="row justify-content-between">
-					<div class="col-lg-6">
-						<h2 class="section-title">Why Choose Us</h2>
-						<p>Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate velit imperdiet dolor tempor tristique.</p>
+	
 
-						<div class="row my-5">
-							<div class="col-6 col-md-6">
-								<div class="feature">
-									<div class="icon">
-										<img src="images/truck.svg" alt="Image" class="imf-fluid">
-									</div>
-									<h3>Fast &amp; Free Shipping</h3>
-									<p>Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate.</p>
-								</div>
-							</div>
-
-							<div class="col-6 col-md-6">
-								<div class="feature">
-									<div class="icon">
-										<img src="images/bag.svg" alt="Image" class="imf-fluid">
-									</div>
-									<h3>Easy to Shop</h3>
-									<p>Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate.</p>
-								</div>
-							</div>
-
-							<div class="col-6 col-md-6">
-								<div class="feature">
-									<div class="icon">
-										<img src="images/support.svg" alt="Image" class="imf-fluid">
-									</div>
-									<h3>24/7 Support</h3>
-									<p>Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate.</p>
-								</div>
-							</div>
-
-							<div class="col-6 col-md-6">
-								<div class="feature">
-									<div class="icon">
-										<img src="images/return.svg" alt="Image" class="imf-fluid">
-									</div>
-									<h3>Hassle Free Returns</h3>
-									<p>Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate.</p>
-								</div>
-							</div>
-
-						</div>
-					</div>
-
-					<div class="col-lg-5">
-						<div class="img-wrap">
-							<img src="images/why-choose-us-img.jpg" alt="Image" class="img-fluid">
-						</div>
-					</div>
-
-				</div>
-			</div>
-		</div> -->
-		<!-- End Why Choose Us Section -->
-
-		<!-- Start We Help Section -->
-		<!-- <div class="we-help-section">
-			<div class="container">
-				<div class="row justify-content-between">
-					<div class="col-lg-7 mb-5 mb-lg-0">
-						<div class="imgs-grid">
-							<div class="grid grid-1"><img src="images/img-grid-1.jpg" alt="Untree.co"></div>
-							<div class="grid grid-2"><img src="images/img-grid-2.jpg" alt="Untree.co"></div>
-							<div class="grid grid-3"><img src="images/img-grid-3.jpg" alt="Untree.co"></div>
-						</div>
-					</div>
-					<div class="col-lg-5 ps-lg-5">
-						<h2 class="section-title mb-4">We Help You Make Modern Interior Design</h2>
-						<p>Donec facilisis quam ut purus rutrum lobortis. Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate velit imperdiet dolor tempor tristique. Pellentesque habitant morbi tristique senectus et netus et malesuada</p>
-
-						<ul class="list-unstyled custom-list my-4">
-							<li>Donec vitae odio quis nisl dapibus malesuada</li>
-							<li>Donec vitae odio quis nisl dapibus malesuada</li>
-							<li>Donec vitae odio quis nisl dapibus malesuada</li>
-							<li>Donec vitae odio quis nisl dapibus malesuada</li>
-						</ul>
-						<p><a herf="#" class="btn">Explore</a></p>
-					</div>
-				</div>
-			</div>
-		</div> -->
-		<!-- End We Help Section -->
-
-		<!-- Start Popular Product -->
-		<!-- <div class="popular-product">
-			<div class="container">
-				<div class="row">
-
-					<div class="col-12 col-md-6 col-lg-4 mb-4 mb-lg-0">
-						<div class="product-item-sm d-flex">
-							<div class="thumbnail">
-								<img src="images/product-1.png" alt="Image" class="img-fluid">
-							</div>
-							<div class="pt-3">
-								<h3>Nordic Chair</h3>
-								<p>Donec facilisis quam ut purus rutrum lobortis. Donec vitae odio </p>
-								<p><a href="#">Read More</a></p>
-							</div>
-						</div>
-					</div>
-
-					<div class="col-12 col-md-6 col-lg-4 mb-4 mb-lg-0">
-						<div class="product-item-sm d-flex">
-							<div class="thumbnail">
-								<img src="images/product-2.png" alt="Image" class="img-fluid">
-							</div>
-							<div class="pt-3">
-								<h3>Kruzo Aero Chair</h3>
-								<p>Donec facilisis quam ut purus rutrum lobortis. Donec vitae odio </p>
-								<p><a href="#">Read More</a></p>
-							</div>
-						</div>
-					</div>
-
-					<div class="col-12 col-md-6 col-lg-4 mb-4 mb-lg-0">
-						<div class="product-item-sm d-flex">
-							<div class="thumbnail">
-								<img src="images/product-3.png" alt="Image" class="img-fluid">
-							</div>
-							<div class="pt-3">
-								<h3>Ergonomic Chair</h3>
-								<p>Donec facilisis quam ut purus rutrum lobortis. Donec vitae odio </p>
-								<p><a href="#">Read More</a></p>
-							</div>
-						</div>
-					</div>
-
-				</div>
-			</div>
-		</div> -->
-		<!-- End Popular Product -->
-
-		<!-- Start Testimonial Slider -->
-		<!-- <div class="testimonial-section">
-			<div class="container">
-				<div class="row">
-					<div class="col-lg-7 mx-auto text-center">
-						<h2 class="section-title">Testimonials</h2>
-					</div>
-				</div>
-
-				<div class="row justify-content-center">
-					<div class="col-lg-12">
-						<div class="testimonial-slider-wrap text-center">
-
-							<div id="testimonial-nav">
-								<span class="prev" data-controls="prev"><span class="fa fa-chevron-left"></span></span>
-								<span class="next" data-controls="next"><span class="fa fa-chevron-right"></span></span>
-							</div>
-
-							<div class="testimonial-slider">
-								
-								<div class="item">
-									<div class="row justify-content-center">
-										<div class="col-lg-8 mx-auto">
-
-											<div class="testimonial-block text-center">
-												<blockquote class="mb-5">
-													<p>&ldquo;Donec facilisis quam ut purus rutrum lobortis. Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate velit imperdiet dolor tempor tristique. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Integer convallis volutpat dui quis scelerisque.&rdquo;</p>
-												</blockquote>
-
-												<div class="author-info">
-													<div class="author-pic">
-														<img src="images/person-1.png" alt="Maria Jones" class="img-fluid">
-													</div>
-													<h3 class="font-weight-bold">Maria Jones</h3>
-													<span class="position d-block mb-3">CEO, Co-Founder, XYZ Inc.</span>
-												</div>
-											</div>
-
-										</div>
-									</div>
-								</div>  -->
-								<!-- END item -->
-
-								<!-- <div class="item">
-									<div class="row justify-content-center">
-										<div class="col-lg-8 mx-auto">
-
-											<div class="testimonial-block text-center">
-												<blockquote class="mb-5">
-													<p>&ldquo;Donec facilisis quam ut purus rutrum lobortis. Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate velit imperdiet dolor tempor tristique. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Integer convallis volutpat dui quis scelerisque.&rdquo;</p>
-												</blockquote>
-
-												<div class="author-info">
-													<div class="author-pic">
-														<img src="images/person-1.png" alt="Maria Jones" class="img-fluid">
-													</div>
-													<h3 class="font-weight-bold">Maria Jones</h3>
-													<span class="position d-block mb-3">CEO, Co-Founder, XYZ Inc.</span>
-												</div>
-											</div>
-
-										</div>
-									</div>
-								</div>  -->
-								<!-- END item -->
-
-								<!-- <div class="item">
-									<div class="row justify-content-center">
-										<div class="col-lg-8 mx-auto">
-
-											<div class="testimonial-block text-center">
-												<blockquote class="mb-5">
-													<p>&ldquo;Donec facilisis quam ut purus rutrum lobortis. Donec vitae odio quis nisl dapibus malesuada. Nullam ac aliquet velit. Aliquam vulputate velit imperdiet dolor tempor tristique. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Integer convallis volutpat dui quis scelerisque.&rdquo;</p>
-												</blockquote>
-
-												<div class="author-info">
-													<div class="author-pic">
-														<img src="images/person-1.png" alt="Maria Jones" class="img-fluid">
-													</div>
-													<h3 class="font-weight-bold">Maria Jones</h3>
-													<span class="position d-block mb-3">CEO, Co-Founder, XYZ Inc.</span>
-												</div>
-											</div>
-
-										</div>
-									</div>
-								</div> 
-								 END item -->
-
-							<!-- </div>
-
-						</div>
-					</div>
-				</div>
-			</div>
-		</div> --> 
-		<!-- End Testimonial Slider -->
-
-		<!-- Start Blog Section -->
-		<!-- <div class="blog-section">
-			<div class="container">
-				<div class="row mb-5">
-					<div class="col-md-6">
-						<h2 class="section-title">Recent Blog</h2>
-					</div>
-					<div class="col-md-6 text-start text-md-end">
-						<a href="#" class="more">View All Posts</a>
-					</div>
-				</div>
-
-				<div class="row">
-
-					<div class="col-12 col-sm-6 col-md-4 mb-4 mb-md-0">
-						<div class="post-entry">
-							<a href="#" class="post-thumbnail"><img src="images/post-1.jpg" alt="Image" class="img-fluid"></a>
-							<div class="post-content-entry">
-								<h3><a href="#">First Time Home Owner Ideas</a></h3>
-								<div class="meta">
-									<span>by <a href="#">Kristin Watson</a></span> <span>on <a href="#">Dec 19, 2021</a></span>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="col-12 col-sm-6 col-md-4 mb-4 mb-md-0">
-						<div class="post-entry">
-							<a href="#" class="post-thumbnail"><img src="images/post-2.jpg" alt="Image" class="img-fluid"></a>
-							<div class="post-content-entry">
-								<h3><a href="#">How To Keep Your Furniture Clean</a></h3>
-								<div class="meta">
-									<span>by <a href="#">Robert Fox</a></span> <span>on <a href="#">Dec 15, 2021</a></span>
-								</div>
-							</div>
-						</div>
-					</div>
-
-					<div class="col-12 col-sm-6 col-md-4 mb-4 mb-md-0">
-						<div class="post-entry">
-							<a href="#" class="post-thumbnail"><img src="images/post-3.jpg" alt="Image" class="img-fluid"></a>
-							<div class="post-content-entry">
-								<h3><a href="#">Small Space Furniture Apartment Ideas</a></h3>
-								<div class="meta">
-									<span>by <a href="#">Kristin Watson</a></span> <span>on <a href="#">Dec 12, 2021</a></span>
-								</div>
-							</div>
-						</div>
-					</div>
-
-				</div>
-			</div>
-		</div> -->
-		<!-- End Blog Section -->	
 
 
 

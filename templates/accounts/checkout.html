@@ -82,17 +82,22 @@
         </div>
     </div>
     <!-- End Hero Section -->
+    
 
     <div class="untree_co-section">
         <div class="container">
             <div class="row mb-5">
-                <div class="col-md-12">
+                <div class="col-md-6">
                     <div class="border p-4 rounded" role="alert">
                         Returning customer? <a href="#">Click here</a> to login
                     </div>
                 </div>
+                <div class="col-md-6">
+                    <div class="border p-4 rounded" role="alert">
+                        {% include 'base/alert.html' %}
+                    </div>
+                </div>
             </div>
-
             <div class="row">
                
 
@@ -144,7 +149,7 @@
                         
                         <div class="quantity">
                             <button class="qty-button btn btn-primary ml-3" onclick="changeQuantity('{{ item.uid }}', 'minus')">-</button>
-                            <input type="number" class="qty-input" id="qty-{{ item.uid }}" value="{{ item.qty }}" style="width: 30px; text-align: center;">
+                            <input type="number" min="1" max="{{item.product.stock_quantity}}" class="qty-input" id="qty-{{ item.uid }}" value="{{ item.qty }}" style="width: 30px; text-align: center;">
                             <button class="qty-button btn btn-primary" onclick="changeQuantity('{{ item.uid }}', 'plus')">+</button>
                         </div>
                         
@@ -181,7 +186,7 @@
                     </div> -->
 
                     <!-- Your Order Section -->
-                    <div class="row mb-5">
+                    <div class="row mb-5 ">
                         <div class="col-md-12">
                             <h2 class="h3 mb-3 text-black">Your Order</h2>
                             <div class="p-3 p-lg-5 border bg-white" id="payment-section" disabled>
@@ -194,11 +199,22 @@
 
                                         <tr>
                                             <td class="text-black font-weight-bold"><strong>Cart Subtotal</strong></td>
-                                            <td class="text-black" id="grand-total">₹{{cart_total}}</td>
+                                            <td class="text-black" id="grand-total">₹ {{cart_total}}</td>
                                         </tr>
+                                        {% if cart_total < 999 %}
+                                        <tr>
+                                            <td class="text-black font-weight-bold"><strong>Delivery Charge</strong></td>
+                                            <td class="text-black" id="delivery-charge">₹ {{cart.delivery_charge}}</td>
+                                        </tr>
+                                        {% else %}
+                                        <tr>
+                                            <td class="text-black font-weight-bold"><strong>Delivery Charge</strong></td>
+                                            <td class="text-black" id="delivery-charge">₹ 0</td>
+                                        </tr>
+                                        {% endif %}
                                         <tr>
                                             <td class="text-black font-weight-bold" ><strong>Order Total</strong></td>
-                                            <td class="text-black font-weight-bold" id="grand-subtotal"><strong>₹{{cart_total}}</strong></td>
+                                            <td class="text-black font-weight-bold" id="grand-subtotal"><strong>₹ {{final_total}}</strong></td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -206,20 +222,22 @@
                                 {% for payment in payment_methods %}
                                 <!-- Payment Options -->
                                 <div class="border p-3 mb-5">
-                                    <h3 class="h6 mb-0"><a class="d-block" data-bs-toggle="collapse" href="#collapsebank" role="button" aria-expanded="false" aria-controls="collapsebank">{{payment.name}}</a></h3>
-                                    <div class="collapse" id="collapsebank">
+                                    <h3 class="h6 mb-0"><a class="d-block" data-bs-toggle="collapse" href="#collapsebank-{{payment.uid}}" role="button" aria-expanded="false" aria-controls="collapsebank-{{payment.uid}}">{{payment.name}}</a></h3>
+                                    <div class="collapse" id="collapsebank-{{payment.uid}}">
                                         <div class="py-2">
-                                            <p class="mb-0">Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order won’t be shipped until the funds have cleared in our account.</p>
+                                            <p class="mb-0">{{payment.description}}</p>
                                         </div>
                                 
                                         <!-- Button for "Use this payment method" -->
-                                        <button id="use-payment-method-button" class="btn btn-black btn-sm" onclick="usePaymentMethod('{{payment.uid}}')" disabled>Use this payment method</button>    </div>
+                                        <button id="use-payment-method-button-{{payment.uid}}" class="btn btn-black btn-sm" onclick="usePaymentMethod('{{payment.uid}}')" disabled>Use this payment method</button>    </div>
                                     </div>
                                 {% endfor %}
-                        
-                                <!-- Place Order Button -->
+
+
                                 <div class="form-group">
                                     <button class="btn btn-black btn-lg py-3 btn-block" id="place-order-btn" onclick="placeOrder()" disabled>Place Order</button>
+                                    <div id="razorpay-button" data-callback-url="{% url 'razorpay_callback' %}"></div>
+
                                 </div>
                             </div>
                         </div>
@@ -229,7 +247,25 @@
             </div>
         </div>
     </div>
+
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <!-- <script src="https://checkout.razorpay.com/v1/razorpay.js"></script> -->
+
+
+
+
+
+
+    <script>
+        const paymentMethods = [
+            {% for payment in payment_methods %}
+                { uid: "{{ payment.uid }}", name: "{{ payment.name }}", description: "{{ payment.description }}" },
+            {% endfor %}
+        ];
+    </script>
+
 
     <script>
 
@@ -259,13 +295,28 @@ function getCookie(name) {
 
         function enablePaymentSection() {
     // Enable the "Use this payment method" button
-    document.getElementById('use-payment-method-button').disabled = false;
 
     // Disable the "Continue" button to prevent multiple clicks
     document.getElementById('continue-button').disabled = true;
 
+    paymentMethods.forEach(payment => {
+            const buttonId = `use-payment-method-button-${payment.uid}`;
+            const paymentButton = document.getElementById(buttonId);
+
+            if (paymentButton) {
+                paymentButton.disabled = false;
+                paymentButton.addEventListener('click', function() {
+                selectedPaymentUid = payment.uid;
+            });
+                
+            } else {
+                console.error(`Element not found: ${buttonId}`);
+            }
+        });
+
     // Retrieve the cart_uid from the data attribute
     const cartUid = document.getElementById('continue-button').getAttribute('data-cart-uid');
+
 
     // Now you can use the cartUid in your further processing
     console.log('Cart UID:', cartUid);
@@ -276,10 +327,15 @@ function getCookie(name) {
 
 function usePaymentMethod(paymentUid) {
     // Enable the "Place Order" button
-    document.getElementById('place-order-btn').disabled = false;
+    const placeOrderBtn = document.getElementById('place-order-btn');
+    if (placeOrderBtn) {
+        placeOrderBtn.disabled = false;
+    } else {
+        console.error('Place Order button not found.');
+    }
 
     // Set the data-selected-payment-uid attribute on the "Use this payment method" button
-    const usePaymentMethodButton = document.getElementById('use-payment-method-button');
+    const usePaymentMethodButton = document.getElementById(`use-payment-method-button-${paymentUid}`);
     usePaymentMethodButton.setAttribute('data-selected-payment-uid', paymentUid);
 
     // You can perform any additional actions here, such as updating the order with the selected payment method
@@ -329,8 +385,10 @@ function usePaymentMethod(paymentUid) {
 }
 
 
+// ----------------------------function for placing order-----------------------------
+
+
 function placeOrder() {
-    // Display SweetAlert confirmation
     Swal.fire({
         title: 'Are you sure?',
         text: 'Do you want to place the order?',
@@ -343,41 +401,238 @@ function placeOrder() {
         if (result.isConfirmed) {
             // Gather data from the front end
             const selectedAddressUid = document.querySelector('input[name="selected-address"]:checked').value;
-            const selectedPaymentUid = document.getElementById('use-payment-method-button').getAttribute('data-selected-payment-uid');
+            const paymentUid = selectedPaymentUid;
             const selectedCartItemUid = document.getElementById('continue-button').getAttribute('data-cart-uid');
 
-            // Create an object with the collected data
-            const orderData = {
-                addressUid: selectedAddressUid,
-                paymentUid: selectedPaymentUid,
-                cartItemUid: selectedCartItemUid
-            };
+            const onlinePaymentUid = "{{ online_payment_uid }}"; 
+            const cashOnDeliveryUid = "{{ cash_on_delivery_uid }}";
+            const WalletPaymentUid = "{{ wallet_payment_uid }}"; 
 
-            // Fetch to the specified URL with the collected data
-            fetch("{% url 'save_order' %}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                body: JSON.stringify(orderData)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+            // Check the payment method
+            if (paymentUid === cashOnDeliveryUid ) {
+                console.log('Cash o D Payment')
+                const cartTotalElement = document.getElementById('grand-total');
+                const cartTotal = parseFloat(cartTotalElement.innerText.replace('₹', ''));
+                console.log(cartTotal)
+
+
+                if (cartTotal > 1000) {
+                    const paymentDiv = document.getElementById('payment-section');
+                    const errorSpan = document.createElement('span');
+                    errorSpan.innerText = 'Orders below ₹1000 can only do Cash on Delivery payment.';
+                    errorSpan.style.color = 'red';
+                    errorSpan.style.fontSize ='16px' ; 
+                    paymentDiv.appendChild(errorSpan);
+                        
+                    return;
+                    return Swal.showValidationMessage('Orders below ₹1000 can only do Cash on Delivery payment.');
                 }
-                return response.json();
-            })
-            .then(data => {
-                // Handle the response if needed
-                console.log('Order saved successfully:', data);
+                
 
-                // Redirect or perform other actions as needed
-                window.location.href = 'thankyou';
-            })
-            .catch(error => console.error('Error:', error));
+                handleCashOnDelivery(selectedAddressUid, cashOnDeliveryUid, selectedCartItemUid);
+            } else if (paymentUid === onlinePaymentUid) {
+                console.log('Online Payment')
+                handleOnlinePayment(selectedAddressUid, onlinePaymentUid, selectedCartItemUid);
+            } else if (paymentUid === WalletPaymentUid) {
+                console.log('Wallet Payment')
+
+                const paymentDiv = document.getElementById('payment-section');
+
+                const existingErrorSpan = paymentDiv.querySelector('.wallet-balance-error');
+
+                if (existingErrorSpan) {
+                    paymentDiv.removeChild(existingErrorSpan);
+                }
+
+
+                const walletBalance = parseFloat("{{ wallet_balance }}");
+                console.log(walletBalance)
+                console.log
+
+                const cartTotalElement = document.getElementById('grand-subtotal');
+                const cartTotal = parseFloat(cartTotalElement.innerText.replace('₹', ''));
+                console.log(cartTotal)
+                if (cartTotal > walletBalance) {
+                    const paymentDiv = document.getElementById('payment-section');
+                    const errorSpan = document.createElement('span');
+                    errorSpan.innerText = 'Insufficient wallet balance.';
+                    errorSpan.style.fontSize ='16px' ;
+                    errorSpan.style.color = 'red';
+                    errorSpan.classList.add('wallet-balance-error');
+                    paymentDiv.appendChild(errorSpan);
+
+                    return;
+                }
+
+
+                handleWalletPayment(selectedAddressUid, WalletPaymentUid, selectedCartItemUid);
+                
+            }
+             else {
+                console.error('Unknown payment method:', paymentUid);
+            }
         }
     });
+}
+
+
+// Function to handle Cash on Delivery
+function handleCashOnDelivery(selectedAddressUid, cashOnDeliveryUid, selectedCartItemUid) {
+    const orderData = {
+        addressUid: selectedAddressUid,
+        paymentUid: cashOnDeliveryUid,
+        cartItemUid: selectedCartItemUid,
+    };
+
+    // Fetch to the specified URL with the collected data
+    fetch("{% url 'save_order' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(orderData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Handle the response
+        console.log('Order saved successfully:', data);
+
+        if (data.status === 'error') {
+            // Redirect to the checkout page with an error message
+            Swal.fire({
+                title: 'Error',
+                text: data.message,
+                icon: 'error',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                window.location.reload();
+            });
+        } else {
+            // Redirect or perform other actions as needed
+            window.location.href = 'thankyou';
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+
+
+
+
+function handleOnlinePayment(selectedAddressUid, onlinePaymentUid, selectedCartItemUid) {
+
+
+
+    saveOrder(selectedAddressUid, onlinePaymentUid, selectedCartItemUid);
+
+}
+
+function handleWalletPayment(selectedAddressUid, WalletPaymentUid, selectedCartItemUid){
+    console.log('Function Called')
+
+    const orderData = {
+        addressUid: selectedAddressUid,
+        paymentUid: WalletPaymentUid,
+        cartItemUid: selectedCartItemUid,
+    };
+
+    // Fetch to the specified URL with the collected data
+    fetch("{% url 'save_order' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(orderData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Handle the response
+        console.log('Order saved successfully:', data);
+
+        if (data.status === 'error') {
+            // Redirect to the checkout page with an error message
+            Swal.fire({
+                title: 'Error',
+                text: data.message,
+                icon: 'error',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                window.location.reload();
+            });
+        } else {
+            // Redirect or perform other actions as needed
+            window.location.href = 'thankyou';
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+
+
+function saveOrder(selectedAddressUid, onlinePaymentUid, selectedCartItemUid) {
+    console.log('IS CALLED')
+    const orderData = {
+        addressUid: selectedAddressUid,
+        paymentUid: onlinePaymentUid,
+        cartItemUid: selectedCartItemUid
+    };
+
+    fetch("{% url 'save_order' %}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(orderData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Handle the response if needed
+        console.log('Order saved successfully:', data);
+        const razorpayOptions = {
+            "key": "{{api_key}}",
+             
+            "name": "Acme Corp", 
+            "description": "Test Transaction",
+            "image": "https://example.com/your_logo",
+            "order_id": "{{order_id}}", // This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+            "callback_url": "http://127.0.0.1:8000/accounts/payment-callback/",
+            "prefill": {
+                "name": "V S Sadique", // Your customer's name
+                "email": "vssadique785@gmail.com",
+                "contact": "9000090000" // Provide the customer's phone number for better conversion rates 
+            },
+            "notes": {
+                "address": "Razorpay Corporate Office"
+            },
+            "theme": {
+                "color": "#3399cc"
+            }
+        };
+        console.log('Setting up event listeners for Razorpay');
+            const rzp = new Razorpay(razorpayOptions);
+            rzp.open();
+
+
+    })
+    .catch(error => console.error('Error:', error));
 }
 
 
@@ -394,7 +649,20 @@ function changeQuantity(itemUid, action) {
       newQuantity++;
     } else if (action === 'minus' && newQuantity > 1) {
       newQuantity--;
-    }
+    }else {
+
+    return;
+  }
+
+  const minQuantity = parseInt(quantityElement.getAttribute('min'));
+  const maxQuantity = parseInt(quantityElement.getAttribute('max'));
+
+  if (newQuantity < minQuantity) {
+    newQuantity = minQuantity;
+  } else if (newQuantity > maxQuantity) {
+    newQuantity = maxQuantity;
+  }
+
     quantityElement.value = newQuantity;
 
     console.log(`Item UID: ${itemUid}, New Quantity: ${newQuantity}`);
@@ -432,17 +700,24 @@ function changeQuantity(itemUid, action) {
       const totalElement = document.getElementById(`total-${itemUid}`);
       const grandTotalElement = document.getElementById('grand-total');
       const grandSubTotalElement = document.getElementById('grand-subtotal');
+      const DeliveryCharge = document.getElementById('delivery-charge');
 
       if (totalElement) {
-        totalElement.textContent = `Price: ₹${data.newTotal}`;
+        totalElement.textContent = `Price: ₹ ${data.newTotal}`;
       }
 
       if (grandTotalElement) {
-        grandTotalElement.textContent = `₹${data.grand_total}`;
+        grandTotalElement.textContent = `₹ ${data.grand_total}`;
       }
       if (grandSubTotalElement) {
-        grandSubTotalElement.textContent = `₹${data.grand_total}`
+        grandSubTotalElement.textContent = `₹ ${data.final_total}`;
+        grandSubTotalElement.style.fontWeight = '900';
       }
+      if (DeliveryCharge) {
+        DeliveryCharge.textContent = `₹ ${data.delivery_charge}`;
+        
+      }
+
     })
     .catch(error => console.error('Error:', error));
   }

@@ -1,14 +1,80 @@
 {% extends 'base/real_base.html' %}
 
 {% block start %}
+<style>
+
+
+.pagination {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+    
+    justify-content: center;
+}
+
+.pagination li {
+    margin-right: 10px;
+    
+}
+
+.pagination a {
+    display: block;
+    padding: 10px;
+    border: 2px solid #333; /* Border color */
+    text-decoration: none;
+    color: #333; /* Text color */
+    transition: background-color 0.3s;
+    height: 45px;
+}
+
+.pagination a:hover {
+    background-color: #555; /* Hover background color */
+    color: #fff; /* Hover text color */
+}
+
+.pagination .active a {
+    background-color: #000; /* Selected page background color */
+    color: #fff; /* Selected page text color */
+}
+
+    @media only screen and (max-width: 1024px) {
+        .search-bar {
+            /* Adjust the width for iPad using percentage */
+            width: 100%; /* Adjust the percentage value as needed */
+        }
+        .sort-by{
+            margin-left: 40px;
+            margin-top: 10px;
+        }
+    }
+
+    @media only screen and (max-width: 767px) {
+        .search-bar {
+            /* Adjust the width for mobile using percentage */
+            width: 80%; /* Adjust the percentage value as needed */
+        }
+
+        .filterForm {
+           
+            order: 2;
+            margin-top: 10px;
+        }
+        .category-dropdown{
+            margin-left: 25px;
+            margin-top: 10px;
+        }
+    }
+</style>
 <!-- Start Navigation Bar -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid ">
-        <form class="d-flex me-auto">
-            <input class="form-control me-2 search-bar" type="search" placeholder="Search by Name, Authors, Categories . . . " aria-label="Search">
-            <button class="btn btn-outline-success search-btn "  type="submit">Search</button>
+        <form class="d-flex me-auto" method="get" action="{% url 'all_products' %}">
+            <input class="form-control me-2 search-bar" type="search" name="search" placeholder="Search by Name, Authors, Categories . . ." aria-label="Search">
+            <button class="btn btn-outline-success search-btn" type="submit">Search</button>
         </form>
-        <div class="dropdown me-2">
+        
+        <div class="dropdown me-2 category-dropdown">
             <select class="form-select" onchange="window.location.href=this.value;" style="margin-right: 50px;" aria-label="Select Category">
                 {% if category_option %}
                     <option value="{% url 'all_products_bycat' category_option.slug %}">
@@ -29,23 +95,29 @@
             
         </div>
         
-        <div class="d-flex align-items-center " >
-            <span class="me-2">Sort by:</span>
-            <div class="dropdown">
-                <select class="form-select" style="margin-right: 100px;" aria-label="Sort By">
-                    <option selected>Price</option>
-                    <option value="lowToHigh">Price Low to High</option>
-                    <option value="highToLow">Price High to Low</option>
-                    <option value="relevance">Relevance</option>
-                </select>
+        <form id="filterForm" method="POST" >
+            {% csrf_token %}
+            <div class="d-flex align-items-center sort-by">
+                <span class="me-2">Sort by:</span>
+                <div class="dropdown">
+                    <select name="sortOption" class="form-select " style="margin-right: 10px;" aria-label="Sort By">
+                        <option {% if filter_option is none %} selected {% endif %} disabled hidden>Price</option>
+                        <option value="lowToHigh" {% if filter_option == 'lowToHigh' %} selected {% endif %}>Price Low to High</option>
+                        <option value="highToLow" {% if filter_option == 'highToLow' %} selected {% endif %}>Price High to Low</option>
+                        <option value="relevance" {% if filter_option == 'relevance' %} selected {% endif %}>Relevance</option>
+                    </select>
+                    
+                </div>
+                <button type="submit" class="btn ml-3 "  style="padding: 5px 10px; font-size: 12px;" id="filterButton">Sort</button>
             </div>
-            
-        </div>
+        </form>
+        
+        
     </div>
 </nav>
 <!-- End Navigation Bar -->
 <div class="untree_co-section product-section before-footer-section">
-    <div class="container">
+    <div class="container ">
           <div class="row">
             {% for product in products %}
               <!-- Start Column 1 -->
@@ -53,7 +125,7 @@
                 <a class="product-item" href="{% url 'get_product' product.slug %}">
                     <img src="{{product.product_images.first.image.url}}" class="img-fluid product-thumbnail">
                     <h3 class="product-title">{{product.product_name}}</h3>
-                    <strong class="product-price">₹ {{product.promotional_price}}-{{product.price}}</strong>
+                    <strong class="product-price">₹ {{product.price}}</strong>
 
                     <span class="icon-cross">
                         <img src="/media/images/cross.svg" class="img-fluid">
@@ -63,6 +135,20 @@
             <!-- End Column 1 -->
 
             {% endfor %}
+
+            <div class="container mt-4">
+                <div class="row">
+                    <ul class="pagination">
+                        {% for i in products.paginator.page_range %}
+                            {% if i == products.number %}
+                                <li class="active"><a href="?page={{i}}">{{i}}</a></li>
+                            {% else %}
+                                <li><a href="?page={{i}}">{{i}}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
                 
 
           </div>

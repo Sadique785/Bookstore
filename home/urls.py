@@ -9,6 +9,7 @@ from .import views
 
 urlpatterns = [
 path('', views.index, name="index"),
+path('contact_us', views.contact_us, name="contact_us"),
 path('profile/', views.profile_page, name="profile"),
 path('manage_address/', views.manage_address, name="manage_address"),
 path('add_address/', views.add_address, name="add_address"),

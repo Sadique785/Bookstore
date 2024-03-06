@@ -1,4 +1,8 @@
 
+# from datetime import timezone
+from datetime import datetime
+from django.utils import timezone 
+
 from django.db import models
 from base.models import BaseModel
 from django.utils.text import slugify
@@ -85,6 +89,8 @@ class Product(BaseModel):
     is_category_listed = models.BooleanField(default = True)
     language_variant = models.ManyToManyField(LanguageVariant, blank=True)
     edition_variant = models.ManyToManyField(EditionVariant, blank=True)
+    stock_quantity = models.PositiveIntegerField(default = 0)
+    
 
 
     def save(self, *args, **kwargs):
@@ -103,6 +109,9 @@ class Product(BaseModel):
         except EditionVariant.DoesNotExist:
             return self.price
         
+    def has_stock(self):
+
+        return self.stock_quantity > 0
     
         
 
@@ -120,6 +129,30 @@ class ProductImage(BaseModel):
     product = models.ForeignKey(Product,on_delete = models.CASCADE, related_name = 'product_images' )
     image = models.ImageField(upload_to="product")
 
+
+class Coupon(BaseModel):
+    coupon_code = models.CharField(max_length = 10)
+    is_expired = models.BooleanField(default = False)
+    discount_price = models.IntegerField(default = 100)
+    minimum_amount = models.IntegerField(default = 500)
+    created_at = models.DateTimeField(auto_now_add=True )
+    coupon_count = models.IntegerField(default=10)
+    expiration_date = models.DateTimeField(default=timezone.now())
+    carts_used = models.ManyToManyField('accounts.Cart', blank=True, related_name='used_coupons')
+
+    def __str__(self) -> str:
+        return self.coupon_code
+    def save(self, *args, **kwargs):
+        # Convert expiration_date to a datetime object
+        if isinstance(self.expiration_date, str):
+            self.expiration_date = datetime.strptime(self.expiration_date, '%Y-%m-%dT%H:%M')
+        if timezone.is_naive(self.expiration_date):
+            self.expiration_date = timezone.make_aware(self.expiration_date, timezone.get_default_timezone())
+
+        # Check if the coupon has expired
+        self.is_expired = timezone.now() > self.expiration_date or self.coupon_count == 0
+
+        super().save(*args, **kwargs)
 class Audiobook(models.Model):
     product = models.OneToOneField(Product, on_delete=models.CASCADE)
     audio_link = models.URLField()

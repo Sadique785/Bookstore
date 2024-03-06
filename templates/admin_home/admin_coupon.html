@@ -1,0 +1,109 @@
+{% extends "base/new_base.html" %}
+
+
+{% block content %}
+
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Coupons</h2>
+        </div>
+        
+        <div>
+                
+            <a href="{% url 'admin_add_coupon' %}" class="btn btn-primary btn-sm rounded">Create new</a>
+        </div>
+    </div>
+    <div class="card mb-4">
+        <header class="card-header">
+            <div class="row align-items-center">
+                <div class="col col-check flex-grow-0">
+                    <div class="form-check ms-2">
+                        <input class="form-check-input" type="checkbox" value="">
+                    </div>
+                </div>
+                <!-- <div class="col-md-3 col-12 me-auto mb-md-0 mb-3">
+                    <select class="form-select">
+                        <option selected="">All category</option>
+                        <option>Electronics</option>
+                        <option>Clothes</option>
+                        <option>Automobile</option>
+                    </select>
+                </div> -->
+                <div class="col-md-2 col-6">
+                    <input type="date" value="02.05.2021" class="form-control">
+                </div>
+                <div class="col-md-2 col-6">
+                    <select class="form-select">
+                        <option selected="">Status</option>
+                        <option>Active</option>
+                        <option>Expired</option>
+                        <option>Show all</option>
+                    </select>
+                </div>
+                <div  class="col-md-5 col-6" >{% include 'base/alert.html' %}</div>
+            </div>
+        </header> <!-- card-header end// -->
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Coupon Code</th>
+                        <th scope="col">Minimum Amount</th>
+                        <th scope="col">Discount Price</th>
+                        <th scope="col">Coupon Count</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Expiry Date</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for coupon in coupons %}
+                    <tr>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td>{{ coupon.coupon_code }}</td>
+                        <td>{{ coupon.minimum_amount }}</td>
+                        <td>{{ coupon.discount_price }}</td>
+                        <td>{{ coupon.coupon_count }}</td>
+                        <td>
+                            {% if coupon.is_expired %}
+                                <span class="badge rounded-pill alert-danger">Expire</span>
+                            {% else %}
+                                <span class="badge rounded-pill alert-success">Active</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ coupon.expiration_date.date }}</td>
+                        <td>
+                            <a href="{% url 'admin_edit_coupon' coupon.uid %}" class="btn btn-sm font-sm rounded btn-brand">
+                                <i class="material-icons md-edit"></i> Edit
+                            </a>
+                            <a href="{% url 'admin_delete_coupon' coupon.uid %}" class="btn btn-sm font-sm btn-light rounded">
+                                <i class="material-icons md-delete_forever"></i> Delete
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div> <!-- card-body end// -->
+        
+    </div> <!-- card end// -->
+    <div class="pagination-area mt-30 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+                <li class="page-item active"><a class="page-link" href="#">01</a></li>
+                <li class="page-item"><a class="page-link" href="#">02</a></li>
+                <li class="page-item"><a class="page-link" href="#">03</a></li>
+                <li class="page-item"><a class="page-link dot" href="#">...</a></li>
+                <li class="page-item"><a class="page-link" href="#">16</a></li>
+                <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
+            </ul>
+        </nav>
+    </div>
+</section>
+
+{% endblock %}
+
+

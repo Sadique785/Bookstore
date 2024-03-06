@@ -9,6 +9,14 @@ admin.site.register(Category, CategoryAdmin)
 admin.site.register(SubCategory)
 
 
+class CouponAdmin(admin.ModelAdmin):
+    list_display = ('coupon_code', 'is_expired', 'discount_price', 'minimum_amount')
+    search_fields = ('coupon_code', 'is_expired')
+
+admin.site.register(Coupon, CouponAdmin)
+
+
+
 
 
 

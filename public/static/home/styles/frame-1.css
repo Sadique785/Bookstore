@@ -1,0 +1,376 @@
+
+html {
+	font-size:62.5%;
+}
+* {
+	margin: 0;
+	padding: 0;
+}
+ul, li {
+	list-style: none;
+}
+input {
+	border: none;
+}
+body {
+  width: 71.4rem;
+}.frame-1-6G7 {
+  box-sizing: border-box;
+  padding: 2.7rem 4.6rem 2.7rem 4.3rem;
+  width: 100%;
+  height: 80.7rem;
+  overflow: hidden;
+  position: relative;
+  background-color: #ffffff;
+}
+.frame-1-6G7 .group-3-sw5 {
+  margin-bottom: 6.2rem;
+  box-sizing: border-box;
+  padding: 2.481rem 1.3rem 0.9rem 2.216rem;
+  width: 100%;
+  height: 69.1rem;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 {
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX {
+  width: 100%;
+  display: flex;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu {
+  margin: 0rem 2.2rem 0.1rem 0rem;
+  width: 47.1845rem;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-vrtz-53V {
+  margin: 0rem 1rem 0.347rem 0.806rem;
+  width: calc(100% - 1.8056rem);
+  height: 2.6503rem;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-vrtz-53V .tax-invoice-tv3 {
+  margin: 0rem 2.271rem 0.117rem 0rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1.2125;
+  color: #000000;
+  font-family: Inter, 'Source Sans Pro';
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-vrtz-53V .auto-group-sylp-AsZ {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-vrtz-53V .auto-group-sylp-AsZ .order-id-od329825832079869100-7no {
+  margin-bottom: 0.4503rem;
+  font-size: 0.9rem;
+  font-weight: 400;
+  line-height: 1.2125;
+  color: #000000;
+  font-family: Inter, 'Source Sans Pro';
+  white-space: nowrap;
+  display: flex;
+  align-items: baseline;
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-vrtz-53V .auto-group-sylp-AsZ .order-id-od329825832079869100-7no .order-id-od329825832079869100-7no-sub-0 {
+  font-size: 0.9rem;
+  font-weight: 400;
+  line-height: 1.2125;
+  color: #000000;
+  font-family: Inter, 'Source Sans Pro';
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-vrtz-53V .auto-group-sylp-AsZ .order-id-od329825832079869100-7no .order-id-od329825832079869100-7no-sub-1 {
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-vrtz-53V .auto-group-sylp-AsZ .order-id-od329825832079869100-7no .order-id-od329825832079869100-7no-sub-2 {
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.2125;
+  color: #000000;
+  font-family: Inter, 'Source Sans Pro';
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-vrtz-53V .auto-group-sylp-AsZ .order-date-01-12-2023-09-26-am-oBm {
+  font-size: 0.9rem;
+  font-weight: 400;
+  line-height: 1.2125;
+  color: #000000;
+  font-family: Inter, 'Source Sans Pro';
+  white-space: nowrap;
+  display: flex;
+  align-items: baseline;
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-vrtz-53V .auto-group-sylp-AsZ .order-date-01-12-2023-09-26-am-oBm .order-date-01-12-2023-09-26-am-oBm-sub-0 {
+  font-size: 0.9rem;
+  font-weight: 400;
+  line-height: 1.2125;
+  color: #000000;
+  font-family: Inter, 'Source Sans Pro';
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-vrtz-53V .auto-group-sylp-AsZ .order-date-01-12-2023-09-26-am-oBm .order-date-01-12-2023-09-26-am-oBm-sub-1 {
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-vrtz-53V .auto-group-sylp-AsZ .order-date-01-12-2023-09-26-am-oBm .order-date-01-12-2023-09-26-am-oBm-sub-2 {
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.2125;
+  color: #000000;
+  font-family: Inter, 'Source Sans Pro';
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-vrtz-53V .auto-group-yx9d-sqq {
+  box-sizing: border-box;
+  padding: 0.019rem 0rem 0.019rem 1.808rem;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-vrtz-53V .auto-group-yx9d-sqq .line-2-c2j {
+  margin: 0.062rem 2.2rem 0rem 0rem;
+  width: 0.1rem;
+  height: 2.2738rem;
+  background-color: #8d8787;
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-vrtz-53V .auto-group-yx9d-sqq .auto-group-1fvo-hK5 {
+  margin-bottom: 0.0645rem;
+  height: 2.547rem;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-vrtz-53V .auto-group-yx9d-sqq .auto-group-1fvo-hK5 .invoice-no-fapmji2400027981-o7D {
+  margin-bottom: 0.347rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.2125;
+  color: #000000;
+  font-family: Inter, 'Source Sans Pro';
+  white-space: nowrap;
+  display: flex;
+  align-items: baseline;
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-vrtz-53V .auto-group-yx9d-sqq .auto-group-1fvo-hK5 .invoice-no-fapmji2400027981-o7D .invoice-no-fapmji2400027981-o7D-sub-0 {
+  font-size: 0.9rem;
+  font-weight: 300;
+  line-height: 1.2125;
+  color: #000000;
+  font-family: Inter, 'Source Sans Pro';
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-vrtz-53V .auto-group-yx9d-sqq .auto-group-1fvo-hK5 .invoice-no-fapmji2400027981-o7D .invoice-no-fapmji2400027981-o7D-sub-1 {
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-vrtz-53V .auto-group-yx9d-sqq .auto-group-1fvo-hK5 .invoice-date-01-12-2023-09-26-am-N3q {
+  font-size: 0.9rem;
+  font-weight: 500;
+  line-height: 1.2125;
+  color: #000000;
+  font-family: Inter, 'Source Sans Pro';
+  white-space: nowrap;
+  display: flex;
+  align-items: baseline;
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-vrtz-53V .auto-group-yx9d-sqq .auto-group-1fvo-hK5 .invoice-date-01-12-2023-09-26-am-N3q .invoice-date-01-12-2023-09-26-am-N3q-sub-0 {
+  font-size: 0.9rem;
+  font-weight: 300;
+  line-height: 1.2125;
+  color: #000000;
+  font-family: Inter, 'Source Sans Pro';
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-vrtz-53V .auto-group-yx9d-sqq .auto-group-1fvo-hK5 .invoice-date-01-12-2023-09-26-am-N3q .invoice-date-01-12-2023-09-26-am-N3q-sub-1 {
+  font-size: 0.9rem;
+  font-weight: 400;
+  line-height: 1.2125;
+  color: #000000;
+  font-family: Inter, 'Source Sans Pro';
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-vrtz-53V .auto-group-yx9d-sqq .auto-group-1fvo-hK5 .invoice-date-01-12-2023-09-26-am-N3q .invoice-date-01-12-2023-09-26-am-N3q-sub-2 {
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .line-1-HKD {
+  margin: 0rem 2.6rem 2.922rem 0rem;
+  width: 44.5844rem;
+  height: 0.1rem;
+  background-color: #888888;
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-ay4k-1FD {
+  margin-left: 1.8845rem;
+  display: flex;
+  align-items: flex-start;
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-ay4k-1FD .group-1-Whm {
+  margin: 0.2rem 1.7rem 0rem 0rem;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-ay4k-1FD .group-1-Whm .sold-by-Etf {
+  margin-bottom: 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.2125;
+  color: #000000;
+  font-family: Inter, 'Source Sans Pro';
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-ay4k-1FD .group-1-Whm .assiduus-distribution-private-limited-village-ghitorni-silver-oak-farms-road-no-2-newdelhi-110030-n9V {
+  max-width: 14.8rem;
+  font-size: 0.7rem;
+  font-weight: 400;
+  line-height: 1.2125;
+  color: #000000;
+  font-family: Inter, 'Source Sans Pro';
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-ay4k-1FD .auto-group-dhqh-4co {
+  margin: 0.1rem 2.4rem 0rem 0rem;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-ay4k-1FD .auto-group-dhqh-4co .shipping-address-CDD {
+  margin-bottom: 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.2125;
+  color: #000000;
+  font-family: Inter, 'Source Sans Pro';
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-ay4k-1FD .auto-group-dhqh-4co .v-s-sadique-mundakayam-po-mundakayam-kkroad-kottayamkk-road-opposite-tvs-show-room-kallepalam-kottayam-district-686513-in-kl-XWP {
+  max-width: 13.2rem;
+  font-size: 0.7rem;
+  font-weight: 400;
+  line-height: 1.2125;
+  color: #000000;
+  font-family: Inter, 'Source Sans Pro';
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-ay4k-1FD .auto-group-psib-QKH {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-ay4k-1FD .auto-group-psib-QKH .billing-address-ZT5 {
+  margin: 0rem 0rem 0.4rem 0.1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.2125;
+  color: #000000;
+  font-family: Inter, 'Source Sans Pro';
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .auto-group-tebh-kmu .auto-group-ay4k-1FD .auto-group-psib-QKH .v-s-sadique-mundakayam-po-mundakayam-kkroad-kottayamkk-road-opposite-tvs-show-room-kallepalam-kottayam-district-686513-in-kl-THZ {
+  max-width: 13.2rem;
+  font-size: 0.7rem;
+  font-weight: 400;
+  line-height: 1.2125;
+  color: #000000;
+  font-family: Inter, 'Source Sans Pro';
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-qufv-1JX .rectangle-3-wM9 {
+  width: 9.6rem;
+  height: 11.1rem;
+  background-color: #000000;
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-nwao-sVh {
+  box-sizing: border-box;
+  padding: 3.5rem 0rem 0rem 0.784rem;
+  width: 100%;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-nwao-sVh .rectangle-4-BWP {
+  margin-bottom: 2.8rem;
+  width: 100%;
+  height: 18.3rem;
+  background-color: #d9d9d9;
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-nwao-sVh .seller-registered-address-assiduus-distribution-private-limited-357-first-floor-san-deigo-building-6th-main-rd-1st-block-koramangala-opp-wipro-park-bangalore-560034-L8P {
+  margin: 0rem 21.7rem 0.9rem 0rem;
+  max-width: 36.5rem;
+  font-size: 0.7rem;
+  font-weight: 400;
+  line-height: 1.2125;
+  color: #000000;
+  font-family: Inter, 'Source Sans Pro';
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-nwao-sVh .declaration-the-goods-sold-are-intended-for-end-user-consumption-and-not-for-resale-fssai-license-number-11219334002365-L1u {
+  margin: 0rem 33.4rem 5.6rem 0rem;
+  max-width: 24.4rem;
+  font-size: 0.7rem;
+  font-weight: 400;
+  line-height: 1.2125;
+  color: #000000;
+  font-family: Inter, 'Source Sans Pro';
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-nwao-sVh .declaration-the-goods-sold-are-intended-for-end-user-consumption-and-not-for-resale-fssai-license-number-11219334002365-L1u .declaration-the-goods-sold-are-intended-for-end-user-consumption-and-not-for-resale-fssai-license-number-11219334002365-L1u-sub-0 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.2125;
+  color: #000000;
+  font-family: Inter, 'Source Sans Pro';
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-nwao-sVh .declaration-the-goods-sold-are-intended-for-end-user-consumption-and-not-for-resale-fssai-license-number-11219334002365-L1u .declaration-the-goods-sold-are-intended-for-end-user-consumption-and-not-for-resale-fssai-license-number-11219334002365-L1u-sub-1 {
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-nwao-sVh .declaration-the-goods-sold-are-intended-for-end-user-consumption-and-not-for-resale-fssai-license-number-11219334002365-L1u .declaration-the-goods-sold-are-intended-for-end-user-consumption-and-not-for-resale-fssai-license-number-11219334002365-L1u-sub-2 {
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.2125;
+  color: #000000;
+  font-family: Inter, 'Source Sans Pro';
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-nwao-sVh .declaration-the-goods-sold-are-intended-for-end-user-consumption-and-not-for-resale-fssai-license-number-11219334002365-L1u .declaration-the-goods-sold-are-intended-for-end-user-consumption-and-not-for-resale-fssai-license-number-11219334002365-L1u-sub-3 {
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-nwao-sVh .ordered-through-assiduus-distribution-private-limited-authorized-signature-hYb {
+  margin: 0rem 0rem 9.9rem 39.1rem;
+  max-width: 19.1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.2125;
+  color: #000000;
+  font-family: Inter, 'Source Sans Pro';
+  flex-shrink: 0;
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-nwao-sVh .ordered-through-assiduus-distribution-private-limited-authorized-signature-hYb .ordered-through-assiduus-distribution-private-limited-authorized-signature-hYb-sub-0 {
+  font-size: 0.9rem;
+  font-weight: 400;
+  line-height: 1.2125;
+  color: #000000;
+  font-family: Inter, 'Source Sans Pro';
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-nwao-sVh .ordered-through-assiduus-distribution-private-limited-authorized-signature-hYb .ordered-through-assiduus-distribution-private-limited-authorized-signature-hYb-sub-1 {
+}
+.frame-1-6G7 .group-3-sw5 .group-2-gn3 .auto-group-nwao-sVh .historia-1-DvF {
+  margin-right: 4.4rem;
+  width: 6.8rem;
+  height: 3.8rem;
+  object-fit: cover;
+  vertical-align: top;
+  flex-shrink: 0;
+}

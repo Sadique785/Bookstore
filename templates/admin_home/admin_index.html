@@ -11,7 +11,7 @@
             <p>Whole data about your business here</p>
         </div>
         <div>
-            <a href="#" class="btn btn-primary"><i class="text-muted material-icons md-post_add"></i>Create report</a>
+            <a href="{% url 'export_data_to_excel' %}" class="btn btn-primary"><i class="text-muted material-icons md-post_add"></i>Create report</a>
         </div>
     </div>
     <div class="row">
@@ -21,7 +21,7 @@
                     <span class="icon icon-sm rounded-circle bg-primary-light"><i class="text-primary material-icons md-monetization_on"></i></span>
                     <div class="text">
                         <h6 class="mb-1 card-title">Revenue</h6>
-                        <span>$13,456.5</span>
+                        <span>&#8377;{{ total_revenue }}</span>
                         <span class="text-sm">
                             Shipping fees are not included
                         </span>
@@ -34,7 +34,7 @@
                 <article class="icontext">
                     <span class="icon icon-sm rounded-circle bg-success-light"><i class="text-success material-icons md-local_shipping"></i></span>
                     <div class="text">
-                        <h6 class="mb-1 card-title">Orders</h6> <span>53.668</span>
+                        <h6 class="mb-1 card-title">Orders</h6> <span>{{total_count}}</span>
                         <span class="text-sm">
                             Excluding orders in transit
                         </span>
@@ -47,9 +47,9 @@
                 <article class="icontext">
                     <span class="icon icon-sm rounded-circle bg-warning-light"><i class="text-warning material-icons md-qr_code"></i></span>
                     <div class="text">
-                        <h6 class="mb-1 card-title">Products</h6> <span>9.856</span>
+                        <h6 class="mb-1 card-title">Products</h6> <span>{{product_count}}</span>
                         <span class="text-sm">
-                            In 19 Categories
+                            In {{category_count}} Categories
                         </span>
                     </div>
                 </article>
@@ -60,65 +60,80 @@
                 <article class="icontext">
                     <span class="icon icon-sm rounded-circle bg-info-light"><i class="text-info material-icons md-shopping_basket"></i></span>
                     <div class="text">
-                        <h6 class="mb-1 card-title">Monthly Earning</h6> <span>$6,982</span>
+                        <h6 class="mb-1 card-title">Monthly Earning</h6> <span>&#8377; {{monthly_revenue}}</span>
                         <span class="text-sm">
                             Based in your local time.
                         </span>
                     </div>
                 </article>
-            </div>
+            </div><!-- Add this script to your HTML file -->
+
+            
         </div>
     </div>
     <div class="row">
-        <div class="col-xl-8 col-lg-12">
-            <div class="card mb-4">
-                <article class="card-body">
-                    <h5 class="card-title">Sale statistics</h5>
-                    <canvas id="myChart" height="120px"></canvas>
-                </article>
-            </div>
+        <div class="card mb-4">
+            <article class="card-body">
+                <h5 class="card-title">Sale statistics</h5>
+                <div class="row col-12">
+                    <!-- Filter dropdown on the left -->
+                    <div class="col-md-4 col-6">
+                        <label for="filter">Filter:</label>
+                        <select id="filter" class="form-control" onchange="updateChart()">
+                            <option value="monthly">Monthly</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="daily">Daily</option>
+                        </select>
+                    </div>
+                                        <!-- Date input field on the right -->
+                                        <div class="col-md-4 col-6 ml-auto  " >
+                        
+                                        </div>
+        
+                    <!-- Date input field and button on the right -->
+                    <div class="col-md-4 col-6 ml-auto">
+                        <label for="newcustomDate">Select Date:</label>
+                        <div class="input-group">
+                            <input type="date" id="newcustomDate" class="form-control" >
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary " style="margin-left: 30px;" type="button" onclick="fetchData()">Fetch</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+                <canvas id="myChart" height="120px"></canvas>
+            </article>
+        </div>
+        
+        
+               <div class="col-xl-8 col-lg-12">
+
             <div class="row">
                 <div class="col-lg-5">
                     <div class="card mb-4">
                         <article class="card-body">
                             <h5 class="card-title">New Members</h5>
                             <div class="new-member-list">
-                                <div class="d-flex align-items-center justify-content-between mb-4">
-                                    <div class="d-flex align-items-center">
-                                        <img src="assets/imgs/people/avatar4.jpg" alt="" class="avatar">
-                                        <div>
-                                            <h6>Patric Adams</h6>
-                                            <p class="text-muted font-xs">
-                                                Sanfrancisco
-                                            </p>
+                                {% for profile in new_profiles %}
+                                    <div class="d-flex align-items-center justify-content-between mb-4">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-user-circle fa-2x mr-2"></i> <!-- Font Awesome user icon -->
+                                            <div>
+                                                <a href="">
+                                                    <h6>{{ profile.user.get_full_name }}</h6>
+                                                </a>
+                                                {% if profile.country %}
+                                                    <p class="text-muted font-xs">{{ profile.country }}</p>
+                                                {% endif %}
+                                            </div>
                                         </div>
+                                        <a href="#" class="btn btn-xs"><i class="material-icons md-add"></i> Add</a>
                                     </div>
-                                    <a href="#" class="btn btn-xs"><i class="material-icons md-add"></i> Add</a>
-                                </div>
-                                <div class="d-flex align-items-center justify-content-between mb-4">
-                                    <div class="d-flex align-items-center">
-                                        <img src="assets/imgs/people/avatar2.jpg" alt="" class="avatar">
-                                        <div>
-                                            <h6>Dilan Specter</h6>
-                                            <p class="text-muted font-xs">
-                                                Sanfrancisco
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <a href="#" class="btn btn-xs"><i class="material-icons md-add"></i> Add</a>
-                                </div>
-                                <div class="d-flex align-items-center justify-content-between mb-4">
-                                    <div class="d-flex align-items-center">
-                                        <img src="assets/imgs/people/avatar3.jpg" alt="" class="avatar">
-                                        <div>
-                                            <h6>Tomas Baker</h6>
-                                            <p class="text-muted font-xs">
-                                                Sanfrancisco
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <a href="#" class="btn btn-xs"><i class="material-icons md-add"></i> Add</a>
-                                </div>
+                                {% endfor %}
+
+                            
+
                             </div>
                         </article>
                     </div>
@@ -210,12 +225,7 @@
             </div>
         </div>
         <div class="col-xl-4 col-lg-12">
-            <div class="card mb-4">
-                <article class="card-body">
-                    <h5 class="card-title">Revenue Base on Area</h5>
-                    <canvas id="myChart2" height="217"></canvas>
-                </article>
-            </div>
+
             <div class="card mb-4">
                 <article class="card-body">
                     <h5 class="card-title">Marketing Chanel</h5>
@@ -243,234 +253,478 @@
             </div>
         </div>
     </div>
+
+
+
+    <!-- ----------------------------------best Products----------------------->
+
+
+
+
     <div class="card mb-4">
         <header class="card-header">
-            <h4 class="card-title">Latest orders</h4>
-            <div class="row align-items-center">
-                <div class="col-md-3 col-12 me-auto mb-md-0 mb-3">
-                    <div class="custom_select">
-                        <select class="form-select select-nice">
-                            <option selected>All Categories</option>
-                            <option>Women's Clothing</option>
-                            <option>Men's Clothing</option>
-                            <option>Cellphones</option>
-                            <option>Computer & Office</option>
-                            <option>Consumer Electronics</option>
-                            <option>Jewelry & Accessories</option>
-                            <option>Home & Garden</option>
-                            <option>Luggage & Bags</option>
-                            <option>Shoes</option>
-                            <option>Mother & Kids</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-2 col-6">
-                    <input type="date" value="02.05.2021" class="form-control">
-                </div>
-                <div class="col-md-2 col-6">
-                    <div class="custom_select">
-                        <select class="form-select select-nice">
-                            <option selected>Status</option>
-                            <option>All</option>
-                            <option>Paid</option>
-                            <option>Chargeback</option>
-                            <option>Refund</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
+            <h4 class="card-title">Best Selling Products</h4>
         </header>
         <div class="card-body">
             <div class="table-responsive">
-                <div class="table-responsive">
-                    <table class="table align-middle table-nowrap mb-0">
-                        <thead class="table-light">
+                <table class="table align-middle table-nowrap mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="align-middle" scope="col">Product Name</th>
+                            <th class="align-middle" scope="col">Total Revenue</th>
+                            <th class="align-middle" scope="col">Total Quantity</th>
+                            <th class="align-middle" scope="col">View Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product_info in best_products %}
                             <tr>
-                                <th scope="col" class="text-center">
-                                    <div class="form-check align-middle">
-                                        <input class="form-check-input" type="checkbox" id="transactionCheck01">
-                                        <label class="form-check-label" for="transactionCheck01"></label>
-                                    </div>
-                                </th>
-                                <th class="align-middle" scope="col">Order ID</th>
-                                <th class="align-middle" scope="col">Billing Name</th>
-                                <th class="align-middle" scope="col">Date</th>
-                                <th class="align-middle" scope="col">Total</th>
-                                <th class="align-middle" scope="col">Payment Status</th>
-                                <th class="align-middle" scope="col">Payment Method</th>
-                                <th class="align-middle" scope="col">View Details</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="text-center">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="transactionCheck02">
-                                        <label class="form-check-label" for="transactionCheck02"></label>
-                                    </div>
-                                </td>
-                                <td><a href="#" class="fw-bold">#SK2540</a> </td>
-                                <td>Neal Matthews</td>
+                                <td>{{ product_info.0.product_name }}</td>
+                                
+                                <td>&#8377; {{ product_info.2 }}</td>
+                                <td>{{ product_info.1 }}</td>
                                 <td>
-                                    07 Oct, 2021
-                                </td>
-                                <td>
-                                    $400
-                                </td>
-                                <td>
-                                    <span class="badge badge-pill badge-soft-success">Paid</span>
-                                </td>
-                                <td>
-                                    <i class="material-icons md-payment font-xxl text-muted mr-5"></i> Mastercard
-                                </td>
-                                <td>
-                                    <a href="#" class="btn btn-xs"> View details</a>
+                                    <a href="" class="btn btn-xs"> View details</a>
                                 </td>
                             </tr>
-                            <tr>
-                                <td class="text-center">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="transactionCheck03">
-                                        <label class="form-check-label" for="transactionCheck03"></label>
-                                    </div>
-                                </td>
-                                <td><a href="#" class="fw-bold">#SK2541</a> </td>
-                                <td>Jamal Burnett</td>
-                                <td>
-                                    07 Oct, 2021
-                                </td>
-                                <td>
-                                    $380
-                                </td>
-                                <td>
-                                    <span class="badge badge-pill badge-soft-danger">Chargeback</span>
-                                </td>
-                                <td>
-                                    <i class="material-icons md-payment font-xxl text-muted mr-5"></i> Visa
-                                </td>
-                                <td>
-                                    <a href="#" class="btn btn-xs"> View details</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="text-center">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="transactionCheck04">
-                                        <label class="form-check-label" for="transactionCheck04"></label>
-                                    </div>
-                                </td>
-                                <td><a href="#" class="fw-bold">#SK2542</a> </td>
-                                <td>Juan Mitchell</td>
-                                <td>
-                                    06 Oct, 2021
-                                </td>
-                                <td>
-                                    $384
-                                </td>
-                                <td>
-                                    <span class="badge badge-pill badge-soft-success">Paid</span>
-                                </td>
-                                <td>
-                                    <i class="material-icons md-payment font-xxl text-muted mr-5"></i> Paypal
-                                </td>
-                                <td>
-                                    <a href="#" class="btn btn-xs"> View details</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="text-center">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="transactionCheck05">
-                                        <label class="form-check-label" for="transactionCheck05"></label>
-                                    </div>
-                                </td>
-                                <td><a href="#" class="fw-bold">#SK2543</a> </td>
-                                <td>Barry Dick</td>
-                                <td>
-                                    05 Oct, 2021
-                                </td>
-                                <td>
-                                    $412
-                                </td>
-                                <td>
-                                    <span class="badge badge-pill badge-soft-success">Paid</span>
-                                </td>
-                                <td>
-                                    <i class="material-icons md-payment font-xxl text-muted mr-5"></i> Mastercard
-                                </td>
-                                <td>
-                                    <a href="#" class="btn btn-xs"> View details</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="text-center">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="transactionCheck06">
-                                        <label class="form-check-label" for="transactionCheck06"></label>
-                                    </div>
-                                </td>
-                                <td><a href="#" class="fw-bold">#SK2544</a> </td>
-                                <td>Ronald Taylor</td>
-                                <td>
-                                    04 Oct, 2021
-                                </td>
-                                <td>
-                                    $404
-                                </td>
-                                <td>
-                                    <span class="badge badge-pill badge-soft-warning">Refund</span>
-                                </td>
-                                <td>
-                                    <i class="material-icons md-payment font-xxl text-muted mr-5"></i> Visa
-                                </td>
-                                <td>
-                                    <a href="#" class="btn btn-xs"> View details</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="text-center">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="transactionCheck07">
-                                        <label class="form-check-label" for="transactionCheck07"></label>
-                                    </div>
-                                </td>
-                                <td><a href="#" class="fw-bold">#SK2545</a> </td>
-                                <td>Jacob Hunter</td>
-                                <td>
-                                    04 Oct, 2021
-                                </td>
-                                <td>
-                                    $392
-                                </td>
-                                <td>
-                                    <span class="badge badge-pill badge-soft-success">Paid</span>
-                                </td>
-                                <td>
-                                    <i class="material-icons md-payment font-xxl text-muted mr-5"></i> Paypal
-                                </td>
-                                <td>
-                                    <a href="#" class="btn btn-xs"> View details</a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div> <!-- table-responsive end// -->
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-    <div class="pagination-area mt-30 mb-50">
-        <nav aria-label="Page navigation example">
-            <ul class="pagination justify-content-start">
-                <li class="page-item active"><a class="page-link" href="#">01</a></li>
-                <li class="page-item"><a class="page-link" href="#">02</a></li>
-                <li class="page-item"><a class="page-link" href="#">03</a></li>
-                <li class="page-item"><a class="page-link dot" href="#">...</a></li>
-                <li class="page-item"><a class="page-link" href="#">16</a></li>
-                <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
-            </ul>
-        </nav>
+
+
+
+     <!-- ----------------------------------best Categories----------------------->
+
+    <div class="card mb-4">
+        <header class="card-header">
+            <h4 class="card-title">Best Selling Categories </h4>
+        </header>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table align-middle table-nowrap mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="align-middle" scope="col">Category Name</th>
+                            <th class="align-middle" scope="col">Total Revenue</th>
+                            <th class="align-middle" scope="col">Total Quantity</th>
+                            <th class="align-middle" scope="col">View Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for category, info in best_categories.items %}
+                            <tr>
+                                <td>{{ category }}</td>
+                                
+                                <td>&#8377; {{ info.total_revenue }}</td>
+                                <td>{{ info.total_quantity }}</td>
+                                <td>
+                                    <a href="" class="btn btn-xs"> View details</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
+    
+
 </section> <!-- content-main end// -->
+<!-- Include jQuery -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+<!-- Your existing script -->
+<script>
+
+function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+
+
+   
+
+    var ctx = document.getElementById('myChart').getContext('2d');
+    var chart;
+    
+
+
+    $(document).ready(function () {
+        (function ($) {
+            "use strict";
+
+            // Sample data for demonstration
+            var monthlyData = {{ monthly_data|safe }};
+
+            var weeklyData = {{ weekly_data|safe }};
+            var dailyData = {{ daily_data|safe }};
+
+            
+
+            // Initial data (monthly)
+            var initialData = {
+                labels: {{month_labels|safe}},
+                datasets: [{
+                    label: 'Sales',
+                    tension: 0.3,
+                    fill: true,
+                    backgroundColor: 'rgba(44, 120, 220, 0.2)',
+                    borderColor: 'rgba(44, 120, 220)',
+                    data: monthlyData.order_count,
+                },
+                {
+                        label: 'Visitors',
+                        tension: 0.3,
+                        fill: true,
+                        backgroundColor: 'rgba(4, 209, 130, 0.2)',
+                        borderColor: 'rgb(4, 209, 130)',
+                        data: monthlyData.user_count,
+                    },
+                    {
+                        label: 'Products',
+                        tension: 0.3,
+                        fill: true,
+                        backgroundColor: 'rgba(380, 200, 230, 0.2)',
+                        borderColor: 'rgb(380, 200, 230)',
+                        data: monthlyData.product_count,
+                        
+                    }
+                ]
+            };
+
+            // Initial chart creation
+            createChart(ctx, initialData);
+
+            // Function to create or update the chart based on the selected filter
+            function updateChart() {
+                var filter = $('#filter').val();
+                var newData;
+
+                switch (filter) {
+                    case 'monthly':
+                        newData = {
+                            labels: {{month_labels|safe}},                            
+                            datasets: [{
+                    label: 'Sales',
+                    tension: 0.3,
+                    fill: true,
+                    backgroundColor: 'rgba(44, 120, 220, 0.2)',
+                    borderColor: 'rgba(44, 120, 220)',
+                    data: monthlyData.order_count,
+                },
+                {
+                        label: 'Visitors',
+                        tension: 0.3,
+                        fill: true,
+                        backgroundColor: 'rgba(4, 209, 130, 0.2)',
+                        borderColor: 'rgb(4, 209, 130)',
+                        data: monthlyData.user_count,
+                    },
+                    {
+                        label: 'Products',
+                        tension: 0.3,
+                        fill: true,
+                        backgroundColor: 'rgba(380, 200, 230, 0.2)',
+                        borderColor: 'rgb(380, 200, 230)',
+                        data: monthlyData.product_count,
+                        
+                    },
+                        ]
+                        };
+                        break;
+                    case 'weekly':
+                        newData = {
+                            labels: {{week_labels|safe}},
+                            datasets: [{
+                    label: 'Sales',
+                    tension: 0.3,
+                    fill: true,
+                    backgroundColor: 'rgba(44, 120, 220, 0.2)',
+                    borderColor: 'rgba(44, 120, 220)',
+                    data: weeklyData.order_count,
+                },
+                {
+                        label: 'Visitors',
+                        tension: 0.3,
+                        fill: true,
+                        backgroundColor: 'rgba(4, 209, 130, 0.2)',
+                        borderColor: 'rgb(4, 209, 130)',
+                        data: weeklyData.user_count,
+                    },
+                    {
+                        label: 'Products',
+                        tension: 0.3,
+                        fill: true,
+                        backgroundColor: 'rgba(380, 200, 230, 0.2)',
+                        borderColor: 'rgb(380, 200, 230)',
+                        data: weeklyData.product_count,
+                        
+                    },]
+                        };
+                        break;
+                        case 'daily':
+                            newData = {
+                                labels: {{day_labels|safe}},
+                                datasets: [{
+                        label: 'Sales',
+                        tension: 0.3,
+                        fill: true,
+                        backgroundColor: 'rgba(44, 120, 220, 0.2)',
+                        borderColor: 'rgba(44, 120, 220)',
+                        data: dailyData.order_count,
+                    },
+                    {
+                            label: 'Visitors',
+                            tension: 0.3,
+                            fill: true,
+                            backgroundColor: 'rgba(4, 209, 130, 0.2)',
+                            borderColor: 'rgb(4, 209, 130)',
+                            data: dailyData.user_count,
+                        },
+                        {
+                            label: 'Products',
+                            tension: 0.3,
+                            fill: true,
+                            backgroundColor: 'rgba(380, 200, 230, 0.2)',
+                            borderColor: 'rgb(380, 200, 230)',
+                            data: dailyData.product_count,
+
+                    },]
+                        };
+                        break;
+                    default:
+                        // Default to monthly data
+                        newData = initialData;
+                        break;
+                }
+
+                createChart(ctx, newData);
+            }
+
+            // Function to create the chart
+            function createChart(ctx, data) {
+                if (chart) {
+                    // If chart exists, destroy it before creating a new one
+                    chart.destroy();
+                }
+
+                chart = new Chart(ctx, {
+                    type: 'line',
+                    data: data,
+                    options: {
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    usePointStyle: true,
+                                },
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Attach the updateChart function to the change event of the filter dropdown
+            $('#filter').change(updateChart);
+
+        })(jQuery);
+
+
+
+       });
+
+
+       function createChart(ctx, data) {
+        if (chart) {
+            // If chart exists, destroy it before creating a new one
+            chart.destroy();
+        }
+
+        chart = new Chart(ctx, {
+            type: 'line',
+            data: data,
+            options: {
+                plugins: {
+                    legend: {
+                        labels: {
+                            usePointStyle: true,
+                        },
+                    }
+                }
+            }
+        });
+    }
+
+
+       function fetchData() {
+    var selectedDate = document.getElementById('newcustomDate').value;
+    var csrftoken = getCookie('csrftoken');
+
+    fetch("{% url 'filter_chart' %}", {
+        method: 'POST', 
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken, 
+        },
+        body: JSON.stringify({ date: selectedDate }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+
+        var filter = $('#filter').val();
+        var newData;
+
+        switch (filter) {
+            case 'monthly':
+                newData = {
+                    labels: data.month_labels,
+                    datasets: [{
+                        label: 'Sales',
+                        tension: 0.3,
+                        fill: true,
+                        backgroundColor: 'rgba(44, 120, 220, 0.2)',
+                        borderColor: 'rgba(44, 120, 220)',
+                        data: data.monthly_data.order_count,
+                    },
+                    {
+                        label: 'Visitors',
+                        tension: 0.3,
+                        fill: true,
+                        backgroundColor: 'rgba(4, 209, 130, 0.2)',
+                        borderColor: 'rgb(4, 209, 130)',
+                        data: data.monthly_data.user_count,
+                    },
+                    {
+                        label: 'Products',
+                        tension: 0.3,
+                        fill: true,
+                        backgroundColor: 'rgba(380, 200, 230, 0.2)',
+                        borderColor: 'rgb(380, 200, 230)',
+                        data: data.monthly_data.product_count,
+                    }]
+                };
+                break;
+            case 'weekly':
+            newData = {
+                    labels: data.weekly_labels,
+                    datasets: [{
+                        label: 'Sales',
+                        tension: 0.3,
+                        fill: true,
+                        backgroundColor: 'rgba(44, 120, 220, 0.2)',
+                        borderColor: 'rgba(44, 120, 220)',
+                        data: data.weekly_data.order_count,
+                    },
+                    {
+                        label: 'Visitors',
+                        tension: 0.3,
+                        fill: true,
+                        backgroundColor: 'rgba(4, 209, 130, 0.2)',
+                        borderColor: 'rgb(4, 209, 130)',
+                        data: data.weekly_data.user_count,
+                    },
+                    {
+                        label: 'Products',
+                        tension: 0.3,
+                        fill: true,
+                        backgroundColor: 'rgba(380, 200, 230, 0.2)',
+                        borderColor: 'rgb(380, 200, 230)',
+                        data: data.weekly_data.product_count,
+                    }]
+                };
+                
+                break;
+            case 'daily':
+            newData = {
+                    labels: data.day_labels,
+                    datasets: [{
+                        label: 'Sales',
+                        tension: 0.3,
+                        fill: true,
+                        backgroundColor: 'rgba(44, 120, 220, 0.2)',
+                        borderColor: 'rgba(44, 120, 220)',
+                        data: data.daily_data.order_count,
+                    },
+                    {
+                        label: 'Visitors',
+                        tension: 0.3,
+                        fill: true,
+                        backgroundColor: 'rgba(4, 209, 130, 0.2)',
+                        borderColor: 'rgb(4, 209, 130)',
+                        data: data.daily_data.user_count,
+                    },
+                    {
+                        label: 'Products',
+                        tension: 0.3,
+                        fill: true,
+                        backgroundColor: 'rgba(380, 200, 230, 0.2)',
+                        borderColor: 'rgb(380, 200, 230)',
+                        data: data.daily_data.product_count,
+                    }]
+                };
+                break;
+            default:
+            newData = {
+                    labels: data.month_labels,
+                    datasets: [{
+                        label: 'Sales',
+                        tension: 0.3,
+                        fill: true,
+                        backgroundColor: 'rgba(44, 120, 220, 0.2)',
+                        borderColor: 'rgba(44, 120, 220)',
+                        data: data.monthly_data.order_count,
+                    },
+                    {
+                        label: 'Visitors',
+                        tension: 0.3,
+                        fill: true,
+                        backgroundColor: 'rgba(4, 209, 130, 0.2)',
+                        borderColor: 'rgb(4, 209, 130)',
+                        data: data.monthly_data.user_count,
+                    },
+                    {
+                        label: 'Products',
+                        tension: 0.3,
+                        fill: true,
+                        backgroundColor: 'rgba(380, 200, 230, 0.2)',
+                        borderColor: 'rgb(380, 200, 230)',
+                        data: data.monthly_data.product_count,
+                    }]
+                };
+                break;
+        }
+
+        createChart(ctx, newData); // Assuming ctx is the chart context variable
+
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+    
+
+
+   
+
+
+</script>
 
 
 

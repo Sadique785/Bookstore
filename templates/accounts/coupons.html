@@ -1,0 +1,104 @@
+{% extends 'base/personal_base.html' %}
+
+{% block start %}
+    <section class="content-main flex-grow-1">
+        <div class="content-header">
+            <h2 class="content-title text-center pt-4 pb-4">Coupons</h2>
+        </div>
+        <div class="card border-0  flex-grow-1">
+            <div class="card-body">
+                <div class="card border-0">
+                    <div class="card-body border-0">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <header class="border-bottom mb-4 pb-4">
+                                    <div class="row">
+                                        <div class="col-lg-5 col-6 me-auto">
+                                            <input type="text" placeholder="Search..." class="form-control" />
+                                        </div>
+                                    </div>
+                                </header>
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Coupon Code</th>
+                                                <th>Discount Price</th>
+                                                <th>Minimum Amount</th>
+                                                <th>Expiration Date</th>
+                                                <th>Expired</th>
+                                                <th class="text-end">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% if coupons %}
+                                                {% for coupon in coupons %}
+                                                    <tr>
+                                                        <td>{{ coupon.coupon_code }}</td>
+                                                        <td>${{ coupon.discount_price }}</td>
+                                                        <td>${{ coupon.minimum_amount }}</td>
+                                                        <td>{{ coupon.expiration_date|date:"d.m.Y" }}</td>
+                                                        <td>
+                                                            {% if not coupon.is_expired %}
+                                                                <span class="badge bg-success">Available</span>
+                                                            {% else %}
+                                                                <span class="badge bg-danger">Expired</span>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <button class="btn btn-sm btn-light font-sm rounded copy-btn" data-clipboard-text="{{ coupon.coupon_code }}">Copy Code</button>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            {% else %}
+                                                <tr>
+                                                    <td colspan="6"><p>No coupons available.</p></td>
+                                                </tr>
+                                            {% endif %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- <aside class="col-lg-3">
+                                <div class="box bg-light" style="min-height: 80%">
+                                    <p class="text-center text-muted my-5">
+                                        Please select a Coupon <br />
+                                        to see details
+                                    </p>
+                                </div>
+                            </aside> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="pagination-area border-0 mt-auto mb-3">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+                <!-- Pagination links go here -->
+            </ul>
+        </nav>
+    </div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var clipboard = new ClipboardJS('.copy-btn');
+    
+            clipboard.on('success', function (e) {
+                alert('Coupon code copied to clipboard!');
+                e.clearSelection();
+            });
+    
+            clipboard.on('error', function (e) {
+                console.error('Unable to copy to clipboard. Please try manually.');
+            });
+        });
+    </script>
+
+
+
+{% endblock %}

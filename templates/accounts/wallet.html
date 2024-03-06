@@ -1,0 +1,304 @@
+{% extends 'base/personal_base.html' %}
+
+{% block start %}
+    <style>
+        .wallet-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .wallet-heading {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .wallet-balance, .add-money-container {
+            width: 80%;
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #ffffff; /* You can change the border color */
+            background-color: #ecf0f1;
+            box-shadow: 0 4px 8px rgba(37, 36, 36, 0.1);
+        }
+
+        .total-balance, .amount {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .total-balance {
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(37, 36, 36, 0.1); /* Add box shadow */
+    padding: 15px; /* Increased padding for a better shadow effect */
+}
+
+        .total-balance p, .amount p {
+            margin: 0;
+            /* Remove default margin from paragraphs */
+        }
+
+        hr {
+            margin: 10px 0; /* Add margin to the HR element */
+            border: 0;
+            height: 1px;
+            background-color: #bdc3c7; /* You can change the color of the line */
+        }
+
+        .add-money-container {
+    background-color: #ecf0f1; /* You can change the background color */
+    box-shadow: 0 4px 8px rgba(16, 15, 15, 0.1); /* Add box shadow */
+    padding: 15px; /* Increased padding for a better shadow effect */
+}
+
+        .add-money-form {
+            text-align: left;
+        }
+
+        .add-money-heading {
+            font-size: 18px; /* Reduced font size */
+            font-weight: bold;
+            margin-bottom: 10px;
+            margin-left: 10px; /* Added margin to the left */
+        }
+
+        .amount-label {
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .amount-input {
+    width: 100%;
+    margin-bottom: 15px;
+    box-sizing: border-box;
+    border: 1px solid #ffffff; /* Changed border color to white */
+    border-radius: 10px;
+}
+
+.amount-value {
+    width: calc(100%); /* Adjusted width */
+    padding: 8px;
+    border: none;
+    box-sizing: border-box;
+    border-radius: 10px;
+}
+
+#add-money-button {
+    background: linear-gradient(to right, #82958a, #364f43); /* Gradient color */
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Add transition for smooth hover effect */
+}
+
+#add-money-button:hover {
+    background: linear-gradient(to left, #82958a, #364f43); /* Gradient color *//* Change color on hover */
+}
+
+.error-message {
+            color: red;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none; /* Initially hide the error message */
+        }
+
+
+    </style>
+
+    <div class="wallet-container">
+        <!-- Wallet Heading -->
+        <div class="wallet-heading">Wallet</div>
+
+        <!-- Existing Wallet Balance -->
+        <div class="wallet-balance">
+            <div class="total-balance">
+                <p>Total Balance:</p>
+                <p>₹ {{balance}}</p>
+            </div>
+            <hr>
+            <div class="amount">
+                <p>Wallet:</p>
+                <p>₹ {{wallet}}</p>
+            </div>
+            <div class="amount">
+                <p>Refund:</p>
+                <p>₹{{refund}}</p>
+            </div>
+            <div class="amount">
+                <p>Gift cards:</p>
+                <p>₹0.00</p>
+            </div>
+        </div>
+
+        <!-- Add Money to Wallet -->
+        <div class="add-money-container">
+            <form action="" method="POST">
+                {% csrf_token %}
+            <div class="add-money-form">
+                <h2 class="add-money-heading">Add Money...</h2>
+                <!-- Add your add money form HTML code here -->
+                <label for="amount" class="amount-label">Enter the amount</label>
+                <div class="amount-input">
+                    <input class="amount-value" type="number" id="amount" name="amount" value="1000" required>
+                </div>
+                <span id="error-message"  class="error-message">Please enter an amount less than 10,000.</span>
+
+                <button id="add-money-button" type="button" >Add Money</button>
+                <input type="hidden" id="user_id" name="user_id" value="{{ user_id }}">
+            </div>
+        </form>
+        </div>
+    </div>
+
+
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <script>
+
+
+function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+    console.log('DOMContentLoaded event triggered 1');
+
+    var addMoneyButton = document.getElementById('add-money-button');
+    var errorMessage = document.getElementById('error-message');
+    var amountInput = document.getElementById('amount');
+    var userId = document.getElementById('user_id');
+
+    if (addMoneyButton && errorMessage && amountInput ) {
+        addMoneyButton.addEventListener('click', async function (event) { // Add 'event' parameter here
+    var amountValue = parseInt(amountInput.value);
+    userId = parseInt(userId.value);
+
+    if (amountValue < 10000) {
+        errorMessage.style.display = 'none';
+        console.log('Amount to be added:', amountValue);
+        console.log('DOMContentLoaded event triggered 2');
+
+        try {
+            const response = await fetch("{% url 'create_razorpay_order' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    // Add any other necessary headers
+                },
+                body: new URLSearchParams({
+                    'amount': amountValue,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to create Razorpay order.');
+            }
+
+            const { order_id, api_key } = await response.json();
+            console.log('Working');
+
+            const razorpayOptions = {
+                "key": api_key,
+                "name": "Historia",
+                "description": "Test Transaction",
+                "order_id": order_id,
+                "callback_url": `http://127.0.0.1:8000/accounts/add-money/?amount=${amountValue}&userid=${userId}`,
+                "prefill": {
+                    "name": "V S Sadique",
+                    "email": "vssadique785@gmail.com",
+                    "contact": "9000090000"
+                },
+                "notes": {
+                    "address": "Razorpay Corporate Office"
+                },
+                "theme": {
+                    "color": "#3399cc"
+                }
+                // ... other options
+            };
+
+            console.log('Setting up event listeners for Razorpay');
+            const rzp = new Razorpay(razorpayOptions);
+            rzp.open();
+
+        } catch (error) {
+            console.error('Error:', error.message);
+            errorMessage.style.display = 'block';
+        }
+
+    } else {
+       // Include 'event' here
+        errorMessage.style.display = 'block';
+    }
+});
+
+    }
+});
+
+
+
+    function redirectToRazorpay() {
+        console.log('DOMContentLoaded event triggered 3');
+
+       
+}
+
+
+
+    </script>
+{% endblock %}
+const razorpayOptions = {
+    "key": "{{api_key}}",
+    "name": "Historia", // Your business name
+    "description": "Test Transaction",
+    "image": "https://example.com/your_logo",
+    // ... (other options)
+
+    // Assuming you have an order_id, replace "{{order_id}}" with the actual order_id
+    "order_id": "{{order_id}}",
+    "callback_url": "https://eneqd3r9zrjok.x.pipedream.net/",
+    "prefill": {
+            "name": "V S Sadique", // Your customer's name
+            "email": "vssadique785@gmail.com",
+            "contact": "9000090000" // Provide the customer's phone number for better conversion rates 
+        },
+        "notes": {
+            "address": "Razorpay Corporate Office"
+        },
+        "theme": {
+            "color": "#3399cc"
+        }
+};
+console.log('DOMContentLoaded event triggered 4');
+razorpayOptions.amount = amount * 100;
+
+
+const rzp = new Razorpay(razorpayOptions);
+console.log('DOMContentLoaded event triggered 5');
+
+
+console.log('Setting up event listeners for Razorpay');
+
+// Trigger Razorpay checkout
+rzp.open();
+event.preventDefault();
