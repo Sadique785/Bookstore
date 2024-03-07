@@ -56,15 +56,15 @@
       <div> <a ><img id="pr_image" src="/media/{{product.product_images.first.image}}"></a></div>
     </div> <!-- slider-product.// -->
     <div class="thumbs-wrap">
-        {% for image in product.product_images.all %}
-        {% if forloop.first %}
-          <a  class="item-thumb highlighted" onclick="changeMainImage(this, '/media/{{image.image}}')">
+        {% for image in product_images %}
+        {% if image.uid == product.product_images.first.uid %}
+            <a class="item-thumb highlighted" onclick="changeMainImage(this, '/media/{{image.image}}')">
         {% else %}
-          <a  class="item-thumb" onclick="changeMainImage(this, '/media/{{image.image}}')">
+            <a class="item-thumb" onclick="changeMainImage(this, '/media/{{image.image}}')">
         {% endif %}
-          <img src="/media/{{image.image}}">
+            <img src="/media/{{image.image}}">
         </a>
-      {% endfor %}
+    {% endfor %}
     
     </div> <!-- slider-nav.// -->
     </article> <!-- gallery-wrap .end// -->
@@ -117,33 +117,7 @@
     
     <hr>
         <div class="form-row">
-          <!-- <div class="form-group col-md flex-grow-0">
-            <label>Quantity</label>
-            <div class="input-group mb-3 input-spinner">
-                <div class="input-group-prepend">
-                    <button class="btn btn-light" type="button" id="button-plus"> + </button>
-                </div>
-                <input type="text" class="form-control" id="quantity" value="1">
-                <div class="input-group-append">
-                    <button class="btn btn-light" type="button" id="button-minus"> − </button>
-                </div>
-            </div>
-        </div>     -->
-
-        <!-- {% if product.language_variant.count %}
-        <div class="form-group col-md">
-            <label>Select Language</label>
-            <div class="mt-1">
-                {% for language in product.language_variant.all %}
-                <label class="custom-control custom-radio custom-control-inline">
-                  <input type="radio" onchange="get_correct_language_price('{{language.name}}')" name="select_language" {% if selected_language == language.name %} checked {% endif %} class="custom-control-input">
-                  <div class="custom-control-label">{{language.name}}</div>
-                </label>
-                {% endfor %}
-
-            </div>
-    </div> 
-        {% endif %} -->
+          
 
 
         {% if product.edition_variant.count %}

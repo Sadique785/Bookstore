@@ -9,13 +9,16 @@ from django.shortcuts import get_object_or_404
 from .constants import COUNTRY_CHOICES
 from django.contrib.auth.decorators import login_required
 from home.models import Banner
+from django.views.decorators.cache import cache_control
+
+
 
 
 
 
 # Create your views here.
 
-
+@cache_control(no_cache=True, must_revalidate=True, no_store=True, max_age=0)
 def index(request):
     products = Product.objects.filter(is_listed = True, is_category_listed = True)
     new_products = Product.objects.filter(is_listed = True, is_category_listed = True).order_by('-created_at')
@@ -26,10 +29,6 @@ def index(request):
     else:
         banners = Banner.objects.all().order_by('-created_at')
 
-
-   
-
-
     context = {
         'products': products,
         'new_products':new_products,
@@ -37,6 +36,7 @@ def index(request):
         }
     
     return render(request, 'home/real_index.html', context)
+
 
 @login_required
 def profile_page(request):
@@ -75,12 +75,6 @@ def profile_page(request):
         
         if form.is_valid():
             form.save()
-
-
-            # if not form.is_valid():
-            #     messages.warning(request, 'Form submission failed. Please check the form data.')
-            #     context['form_errors'] = form.errors
-            #     return render(request, 'home/profile_page.html', context)
             
             
             messages.success(request, f'{form_type.capitalize()}  saved successfully.')
@@ -88,16 +82,18 @@ def profile_page(request):
         else:
             messages.warning(request, 'Form submission failed. Please check the form data.')
             
-            context['form_errors'] = form.errors  # Correct indentation
+            context['form_errors'] = form.errors
             return render(request, 'home/profile_page.html', context)
         
 
 
     return render(request, 'home/profile_page.html', context)
 
+
+
+
 @login_required
 def manage_address(request):
-    # form = ManageAddress()
     user = request.user
     user_addresses = UserAddress.objects.filter(user=user)
     other_addresses =UserAddress.objects.filter(user=user).exclude(is_default = True)
@@ -108,6 +104,7 @@ def manage_address(request):
                "default_address": default_address,
                }
     return render(request, 'home/manage_address.html', context)
+
 
 
 @login_required
@@ -125,7 +122,7 @@ def add_address(request):
             user_address = UserAddress(
                 user=request.user,
                 address=address,
-                is_default=is_default # Set is_default based on the form data
+                is_default=is_default 
             )
             user_address.save()
 
@@ -147,6 +144,10 @@ def add_address(request):
     
     
     return render(request, 'home/add_address.html', context)
+
+
+
+
 
 
 @login_required
@@ -188,11 +189,11 @@ def new_address(request):
     return render(request, 'home/new_address.html', context)
 
 
+
+
 @login_required
 def edit_address(request, address_uid):
     user = request.user
-    # print(user)
-    # print(address_uid)
     user_address = UserAddress.objects.get(address = address_uid )
 
     address = user_address.address 

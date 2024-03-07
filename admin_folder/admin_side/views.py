@@ -31,12 +31,10 @@ from home.models import Banner
 from django.db import transaction
 import pandas as pd
 from django.core.paginator import Paginator,PageNotAnInteger, EmptyPage
-# from .your_data_fetch_module import fetch_data
 
 
 
 
-# Create your views here.
 # ------------------------------------------------ACCOUNTS-------------------------------------------------------------
 def is_superuser(user):
     return user.is_authenticated and user.is_superuser
@@ -55,7 +53,7 @@ def admin_login(request):
         username = request.POST.get('username_admin')
         password = request.POST.get('password')
 
-        if not (username and password):  # Check if email and password are not empty
+        if not (username and password):  
             messages.warning(request, "Please enter email and password")
             return HttpResponseRedirect(request.path_info)
 
@@ -80,10 +78,10 @@ def admin_login(request):
             return redirect('admin_login')
 
     return render(request, 'admin_accounts/admin_login.html')
+
     
 def admin_logout(request):
 
-    
     logout(request)
     return redirect('admin_login')
 
@@ -94,17 +92,10 @@ def admin_logout(request):
 
 
 def best_selling_products():
-    best_selling_product_name = OrderItem.objects.filter(is_paid = True).values('product_name','price').annotate(total_quantity = Sum('quantity')).order_by('-total_quantity')[:5]
-    print(best_selling_product_name)
-    # list_of_items = [[item['product_name'], item['total_quantity']] for item in best_selling_product_name]
-    # print(list_of_items)
+    best_selling_product_name = OrderItem.objects.filter(is_paid = True).values('product_name','price').annotate(total_quantity = Sum('quantity')).order_by('-total_quantity')[:5]   
     best_selling_product_names = [entry['product_name'] for entry in best_selling_product_name]
     best_selling_quantities = [entry['total_quantity'] for entry in best_selling_product_name]
     best_selling_prices = [entry['price'] for entry in best_selling_product_name]
-    print(best_selling_product_names)
-    print(best_selling_quantities)
-    print(best_selling_prices)
-
     list_of_items = []
 
     for name, quantity, price in zip(best_selling_product_names, best_selling_quantities, best_selling_prices):
@@ -113,7 +104,6 @@ def best_selling_products():
         if name :
             revenue = price * quantity
             list_of_items.append([product, quantity, revenue])
-    print(list_of_items)
 
     return list_of_items
 
@@ -148,8 +138,9 @@ def best_selling_categories():
                     'total_revenue': total_revenue,
                 }
 
-    print(best_selling_categories)
     return best_selling_categories
+
+
 
 # ----------------------------------------------------HOME------------------------------
 @user_passes_test(is_superuser, login_url='admin_login')
@@ -162,7 +153,6 @@ def admin_index(request):
     category_count = Category.objects.all().count()
     best_products = best_selling_products()
     best_categories = best_selling_categories()
-    print(best_categories)
 
 
     if total_count > 0:
@@ -181,21 +171,14 @@ def admin_index(request):
     if category_count is None:
         category_count = 0
 
-    print(total_revenue)
-    print(total_count)
-    print(product_count)
-    print(category_count)
 
 
-    # Assuming the custom year is 2023
     custom_year = 2024
 
 
-# ------------------Monthly data-------------------------
     today = timezone.now()
     last_12_months = [today - relativedelta(months=i) for i in range(11, -1, -1)]
 
-    # Use the custom year for the date range
     last_12_months_custom_year = [
         timezone.datetime(custom_year, month.month, 1, tzinfo=pytz.UTC) 
         for month in last_12_months
@@ -219,7 +202,6 @@ def admin_index(request):
         user_count_for_month = Profile.objects.filter(created_at__range=(start_date, end_date)).count()
         user_count_data.append(user_count_for_month)
 
-    print(products_count_data)
 
     monthly_data ={'product_count': products_count_data,
         'order_count': order_items_count_data,
@@ -266,7 +248,6 @@ def admin_index(request):
 
 
 # ---------------------------------------daily_data------------------------
-    # Get daily data
 
     selected_week = 3
     selected_week_start = selected_month_start + relativedelta(weeks=selected_week - 1)
@@ -333,13 +314,10 @@ def admin_index(request):
 
 
 def calculate_selected_week(selected_day):
-    # Define the week ranges
     week_ranges = [
         (1, 8), (9, 15), (16, 22), (23, 31)
-        # Add more ranges if needed
     ]
 
-    # Find the week based on the day
     for week, (start_day, end_day) in enumerate(week_ranges, start=1):
         if start_day <= selected_day <= end_day:
             return week
@@ -352,7 +330,6 @@ def filter_chart(request):
 
 
     if request.method == 'POST':
-        print("view called")
         
         data = json.loads(request.body.decode('utf-8'))
         selected_date = data.get('date')
@@ -362,7 +339,6 @@ def filter_chart(request):
         selected_datetime = datetime.strptime(selected_date, "%Y-%m-%d")
         print(selected_datetime)
 
-        # Extract year, month, and day
         custom_year = selected_datetime.year
         selected_month = selected_datetime.month
         selected_day = selected_datetime.day
@@ -383,7 +359,6 @@ def filter_chart(request):
         today = timezone.now()
         last_12_months = [today - relativedelta(months=i) for i in range(11, -1, -1)]
 
-        # Use the custom year for the date range
         last_12_months_custom_year = [
             timezone.datetime(custom_year, month.month, 1, tzinfo=pytz.UTC) 
             for month in last_12_months
@@ -407,7 +382,6 @@ def filter_chart(request):
             user_count_for_month = Profile.objects.filter(created_at__range=(start_date, end_date)).count()
             user_count_data.append(user_count_for_month)
 
-        print(products_count_data)
 
         monthly_data ={'product_count': products_count_data,
             'order_count': order_items_count_data,
@@ -454,7 +428,6 @@ def filter_chart(request):
 
 
     # ---------------------------------------daily_data------------------------
-        # Get daily data
 
         selected_week = 3
         selected_week_start = selected_month_start + relativedelta(weeks=selected_week - 1)
@@ -486,12 +459,7 @@ def filter_chart(request):
             'order_count': daily_order_items_count_data,
             'user_count': daily_user_count_data,
         }
-        print(month_labels )
-        print(monthly_data)
-        print(weekly_data)
-        print(week_labels)
-        print(day_labels)
-        print(daily_data)
+
         
         return JsonResponse({
                 'month_labels': month_labels,
@@ -511,12 +479,14 @@ def filter_chart(request):
 
 
 # -----------------------------------------------USERS-------------------------------
+    
+
+
 @user_passes_test(is_superuser, login_url='admin_login')
 def admin_users(request):
     query_set = User.objects.filter(profile__isnull=False)
     search_term = request.GET.get('search')
     
-    print(request.GET)
 
     if search_term and search_term.lower() != 'none':
         query_set = query_set.filter(
@@ -524,12 +494,14 @@ def admin_users(request):
         )
 
     status_filter = request.GET.get('status')
-    print(f"Search term: {search_term}, Status filter: {status_filter}")
 
     if status_filter == 'active':
         query_set = query_set.filter(is_active=True)
     elif status_filter == 'blocked':
         query_set = query_set.filter(is_active=False)
+    else:
+      
+        status_filter = 'all'
 
 
     page = request.GET.get('page', 1)
@@ -541,7 +513,6 @@ def admin_users(request):
     except EmptyPage:
         query_set = paginator.page(paginator.num_pages)
 
-    print(f"Query set after filtering: {query_set}")
 
 
     context = {'profiles': query_set, 'search_term': search_term, 'status_filter': status_filter}
@@ -555,13 +526,10 @@ def admin_users(request):
 def admin_user_details(request, details_pk):
     profile = get_object_or_404(Profile, user_id=details_pk)
     user = profile.user
-    print(f"User ID: {user.id}")
 
     orders = Order.objects.filter(user_id=user.id)
-    print(f"Orders: {orders}")
 
     order_items = OrderItem.objects.filter(order__in=orders)
-    print(f"Order Items: {order_items}")
 
     context = {'user':profile,
                'user_obj':user, 
@@ -586,29 +554,23 @@ def block_unblock_user(request, block_pk):
     for session in sessions: 
         data = session.get_decoded() 
         data["session_key"] = session.session_key
-        print(data)
-        
-         # normally the data doesn't include the session key, so add it
-    
 
-
-    # lista = [s for s in Session.objects.all() if s.get_decoded().get('_auth_user_id') == user.id]
-    # print(lista)
     user.is_active = not user.is_active
     user.save()
-    # if not user.is_active:
-    #     logout(user)
-    
+
     
     return redirect('admin_users')
 # ---------------------------------------CATEGORIES-----------------------------------
+
+
+
+
 @user_passes_test(is_superuser, login_url='admin_login')
 def admin_category(request):
     if request.method == "POST":
         new_category = request.POST.get('category')
         description = request.POST.get('description')
-        print(new_category)
-        print(description)
+
         try:
             if new_category is not None and description is not None:
                 cleaned_category_name = re.sub(r'[^A-Za-z]', '', new_category).strip()
@@ -638,7 +600,6 @@ def admin_category(request):
 
 
     search_term = request.GET.get('search')
-    print(search_term)
 
     if search_term:
         cleaned_search_term = re.sub(r'[^A-Za-z]', '', search_term)
@@ -651,16 +612,16 @@ def admin_category(request):
     return render(request, 'admin_home/admin_category.html', context)
 
 
+
+
 @user_passes_test(is_superuser, login_url='admin_login')
 def unlist_category(request):
     try:
-        # Decode JSON data from request body
         data = json.loads(request.body.decode('utf-8'))
         category_slug = data.get('category_slug', None)
 
         if category_slug is not None:
             category = Category.objects.get(slug=category_slug)
-            print(category)
             category.is_listed = not category.is_listed
             category.save()
 
@@ -687,7 +648,6 @@ def admin_category_detail(request, slug):
     query_set = SubCategory.objects.filter(category = category)
 
     search_term = request.GET.get('search')
-    print(search_term)
 
     if search_term:
         
@@ -732,7 +692,6 @@ def admin_category_detail(request, slug):
     }
     return render(request, 'admin_home/admin_category_detail.html', context)
 
-# views.py
 # --------------------------------------------------SUBCATEGORY-----------------------------
 
 @user_passes_test(is_superuser, login_url='admin_login')
@@ -782,6 +741,9 @@ def admin_subcategory(request, slug):
     return render(request, 'admin_home/admin_subcategory.html', context)
 
 # -------------------------------------VARIANCES------------------------------------------------
+
+
+
 @user_passes_test(is_superuser, login_url='admin_login')
 def admin_variance(request):
     if request.method == 'POST':
@@ -879,11 +841,7 @@ def admin_edit_variant(request, uid):
     if request.method == "POST":
         variant_name = request.POST.get('variant_name')
         price = request.POST.get('price')
-        print(request.POST)
 
-        print(variant_name)
-        print(price)
-        
         language_variant = LanguageVariant.objects.filter(uid = uid).first()
         if language_variant:
             if not re.match(r'^[a-zA-Z\s]+$', variant_name):
@@ -909,7 +867,6 @@ def admin_edit_variant(request, uid):
 
 
         edition_variant = EditionVariant.objects.filter(uid = uid).first()
-        print(edition_variant)
         if edition_variant:
 
             if not re.match(r'^[a-zA-Z\s]+$', variant_name):
@@ -963,7 +920,6 @@ def delete_variant(request, uid):
 @user_passes_test(is_superuser, login_url='admin_login')
 def admin_order(request):
     orders = Order.objects.all().order_by('-created_at')
-    print(f"Number of orders: {orders.count()}")
 
     order_items_dict = {}  
 
@@ -1049,8 +1005,6 @@ def update_order_item_status(request):
             data = json.loads(request.body)
             item_uid = data.get('item_uid')
             new_status = data.get('new_status')
-            print(item_uid)
-            print(new_status)
 
             item = OrderItem.objects.get(uid=item_uid)
             item.order_status = new_status
@@ -1061,14 +1015,7 @@ def update_order_item_status(request):
                 item.is_delivered = True
                 item.save()
 
-            # all_orders = item.order.order_items.all()
-            # all_items_delivered = all( order.is_delivered for order in all_orders)
 
-            # if all_items_delivered:
-            #     item.order.is_delivered = True
-            #     item.order.save()
-
-            # print(item.order.is_delivered)
             all_items_delivered = not item.order.order_items.filter(is_delivered=False).exists()
 
             if all_items_delivered:
@@ -1104,9 +1051,7 @@ def admin_cancel_order(request):
 
     order = get_object_or_404(Order, uid=order_uid)
     user = order.user
-    print(user)
     wallet = Wallet.objects.filter(user = user).first()
-    print(wallet)
     if order.is_active:
         order.is_active = False
         order.save()
@@ -1117,16 +1062,13 @@ def admin_cancel_order(request):
         total_price = 0
         for item in order_items:
             item.is_active = False
-            print(item.is_active)
             price = item.get_total()
             total_price += price
-            # wallet.balance += price
-            # wallet.save()
+
             Wallet.objects.filter(uid=wallet.uid).update(balance=F('balance') + price)
             Wallet.objects.filter(uid=wallet.uid).update(refund=F('refund') + price)
 
             item.save()
-            print(item)
 
 
         transaction = Transaction.objects.create(
@@ -1158,11 +1100,9 @@ def admin_cancel_item(request):
         return JsonResponse({'success': False, 'message': 'Invalid JSON data'})
 
     order_item = get_object_or_404(OrderItem, uid=item_uid)
-    print('Ho')
     order = order_item.order
     user = order.user
     wallet = Wallet.objects.filter(user = user).first()
-    print(wallet)
 
     if order_item.is_active:
         order_item.is_active = False
@@ -1173,25 +1113,23 @@ def admin_cancel_item(request):
         Wallet.objects.filter(uid=wallet.uid).update(refund=F('refund') + price)
 
 
-        print('helloooooooooooooooooooooooooooooooo')
-        print(order_item.order.total_amount)
+
         order_item.order.total_amount -= order_item.get_total()
         order_item.order.save()
-        print(order_item.order.total_amount)
+
 
 
 
         all_orders = order_item.order.order_items.all()
-        print(all_orders)
+
         
         all_items_cancelled = all(not order.is_active for order in all_orders)
-        print(all_items_cancelled)
+
         
         if all_items_cancelled:
             order_item.order.is_active = False
             order_item.order.save()
         
-        print(order_item.order.is_active)
 
         transaction = Transaction.objects.create(
                         wallet=wallet,
@@ -1216,33 +1154,15 @@ def admin_cancel_item(request):
 
 
 
-# def admin_product(request):
-#     category = Category.objects.all()
-#     products = Product.objects.all()
 
-#     context = {
-#         'categories':category,
-#         "products": products 
-#     }
-#     return render(request, 'admin_home/admin_product.html', context)
-
-# def products_by_category(request, slug):
-#     category = Category.objects.get(slug = slug)
-#     products = Product.objects.filter(category = category)
-#     context = {
-#          "products": products, 
-#          'category_option':category
-#          }
-#     return render(request, 'admin_home/admin_product.html', context)
 
 @user_passes_test(is_superuser, login_url='admin_login')
 def admin_product(request, slug=None):
-    print(request.GET)
     search_term = request.GET.get('search')
     category_options = request.GET.getlist('categories')  # Use getlist to get multiple selected categories
     categories = Category.objects.all()
 
-    # Initial query set with all products
+
     query_set = Product.objects.all().order_by('product_name')
 
     if category_options and 'all' not in category_options:
@@ -1250,7 +1170,7 @@ def admin_product(request, slug=None):
         query_set = query_set.filter(category__category_name__in=category_options)
 
     if search_term:
-        # If search term is provided, filter products based on the search term
+       
         query_set = query_set.filter(Q(product_name__icontains=search_term) | Q(category__category_name__icontains=search_term))
 
     page = request.GET.get('page', 1)
@@ -1288,9 +1208,7 @@ def admin_add_product(request):
         stock_quantity = request.POST.get('stock')
 
         selected_editions = EditionVariant.objects.filter(name__in = edition_variant_names)
-        print(product_name)
-        print(category_id)
-        print(subcategory_id)
+
 
         category = Category.objects.get(category_name=category_id)
         subcategory = SubCategory.objects.get(subcategory_name=subcategory_id)
@@ -1375,7 +1293,7 @@ def admin_edit_product(request, product_slug):
 
 
     if request.method == 'POST':
-        print(request.POST)
+
         product.product_name = request.POST.get('product_name')
         product.product_description = request.POST.get('product_description')
         product.price = request.POST.get('regular_price')
@@ -1385,11 +1303,10 @@ def admin_edit_product(request, product_slug):
         category_id = request.POST.get('category') 
         subcategory_id = request.POST.get('sub_category')
         product.stock_quantity = request.POST.get('stock')
-        print(category_id)
-        print(subcategory_id)
+
 
         selected_editions = request.POST.getlist('edition_variant')
-        print(selected_editions)
+
 
         if selected_editions:
             product.edition_variant.clear()
@@ -1463,27 +1380,16 @@ def admin_change_image(request):
 import os
 def admin_delete_image(request):
     if request.method == 'POST':
-        print('HHHHIIIIII')
+
         data = json.loads(request.body.decode('utf-8'))
 
         image_uid = data['imageUid']
-        print(image_uid)
         image_object = ProductImage.objects.filter(uid = image_uid).first()
 
         image_path = os.path.join('your_image_directory', image_uid)
-        print(image_object)
         image_object.delete()
-        print(image_path)
-
-        # try:
-            
-        #     os.remove(image_path)
-        # except OSError as e:
-            
-        #     return JsonResponse({'success': False, 'message': f'Error deleting image: {str(e)}'})
 
 
-        
         
         return JsonResponse({'success': True, 'message': 'Image Deleted successfully'})
 
@@ -1500,7 +1406,6 @@ def get_sub_categories(request):
         else:
             c=Category.objects.get(category_name=cat)
             sub_categories=c.category.all()
-            print(sub_categories)
             sub_categories_list = list(sub_categories.values())
             data={'sub_categories':sub_categories_list}
     else:
@@ -1540,7 +1445,6 @@ def admin_add_coupon(request):
         coupon_count = request.POST.get('coupon_count')
         expiration_date = request.POST.get('expiration_date')
         expire_checkbox = request.POST.get('expireCheckbox')
-        print(expire_checkbox)
 
 
         if not coupon_code:
@@ -1558,7 +1462,7 @@ def admin_add_coupon(request):
             minimum_amount=minimum_amount,
             coupon_count=coupon_count,
             expiration_date=expiration_date,
-            is_expired=bool(expire_checkbox),  # Convert string to boolean
+            is_expired=bool(expire_checkbox), 
         )
         coupon.save()
 
@@ -1575,7 +1479,6 @@ def admin_add_coupon(request):
 
 def admin_edit_coupon(request, coupon_uid):
     coupon = Coupon.objects.filter(uid = coupon_uid).first()
-    print(coupon)
     context = {'coupon':coupon}
 
     if request.method == 'POST':
@@ -1627,9 +1530,7 @@ def admin_banner(request):
     if request.method == 'POST':
         title = request.POST.get('title')
         image = request.FILES.get('image')
-        print(title)
-        print(image)
-        print(request.POST)
+
 
 
 
@@ -1660,7 +1561,7 @@ def admin_banner(request):
 @require_POST
 @user_passes_test(is_superuser, login_url='admin_login')
 def delete_banner(request):
-    print('view is running')
+
     data = json.loads(request.body.decode('utf-8'))
     uid = data.get('uid')
      

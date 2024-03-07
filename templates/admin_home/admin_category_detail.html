@@ -25,7 +25,9 @@
                 <div class="col-md-3">
                     <form method="POST">
                         {% csrf_token %}
-                        {% include "base/alert.html" %}
+                        <div class="alert-message mt-5" id="alert-message">
+                            {% include "base/alert.html" %}
+                           </div>
                         <div class="mb-4">
                             <label for="product_name"  class="form-label">Name</label>
                             <input type="text" placeholder="Type here" value="{{category.category_name}}" class="form-control" name="category_name" id="category_name">
@@ -105,6 +107,18 @@
         </div> <!-- card body .// -->
     </div> <!-- card .// -->
 </section>
+
+<script>
+        document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(function () {
+            var alertMessage = document.getElementById('alert-message');
+            if (alertMessage) {
+                alertMessage.style.display = 'none';
+                console.log('action done')
+            }
+        }, 5000);
+    });
+</script>
 
 {% endblock %}
 

@@ -38,7 +38,9 @@
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary ">Create category</button>
                         </div>
-                        {% include "base/alert.html" %}
+                        <div class="alert-message mt-5" id="alert-message">
+                            {% include "base/alert.html" %}
+                           </div>
                     </form>
                 </div>
                 <div class="col-md-9">
@@ -95,6 +97,18 @@
         </div> <!-- card body .// -->
     </div> <!-- card .// -->
 </section>
+
+<script>
+        document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(function () {
+            var alertMessage = document.getElementById('alert-message');
+            if (alertMessage) {
+                alertMessage.style.display = 'none';
+                console.log('action done')
+            }
+        }, 5000);
+    });
+</script>
 
 {% endblock %}
 

@@ -55,7 +55,9 @@
                                     <label class="form-check-label" for="expireCheckbox">Expire Coupon</label>
                                 </div>
                             </div> -->
-                            {% include 'base/alert.html' %}
+                            <div class="alert-message mt-5" id="alert-message">
+                                {% include "base/alert.html" %}
+                               </div>
                             
                         </div> <!-- col.// -->
                     </div> <!-- row.// -->
@@ -132,6 +134,16 @@
         // If all validations pass, the form will be submitted
         return true;
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(function () {
+            var alertMessage = document.getElementById('alert-message');
+            if (alertMessage) {
+                alertMessage.style.display = 'none';
+                console.log('action done')
+            }
+        }, 5000);
+    });
 </script>
 
 {% endblock %}

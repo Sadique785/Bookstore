@@ -27,7 +27,8 @@ import razorpay
 from django.conf import settings
 from django.views.decorators.cache import cache_control
 from django.db.models import Count, F, Q
-
+from django.core.cache import cache
+from django.views.decorators.cache import cache_control
 
 
 
@@ -186,6 +187,12 @@ def activate_email(request, email_token):
 
 
 def add_to_cart(request, uid):
+    if not request.user.is_authenticated:
+        product = Product.objects.get(uid = uid)
+        messages.warning(request, 'Please login to add items to your cart.')
+        return redirect('get_product', product.slug)
+
+
     variant = request.GET.get('variant')
 
     product = Product.objects.get(uid = uid)
@@ -406,7 +413,7 @@ def order_product_detail(request, uid):
 
 
 
-
+@cache_control(no_cache=True, must_revalidate=True, no_store=True, max_age=0)
 @login_required
 def checkout(request):
     user = request.user
@@ -457,7 +464,7 @@ def checkout(request):
     return render(request, 'accounts/checkout.html', context)
 
 
-
+@cache_control(no_cache=True, must_revalidate=True, no_store=True, max_age=0)
 @require_POST
 def save_order(request):
     user = request.user
@@ -561,7 +568,7 @@ def save_order(request):
 
 
 
-
+@cache_control(no_cache=True, must_revalidate=True, no_store=True, max_age=0)
 @csrf_exempt
 def razorpay_callback(request):
     if request.method == 'POST':
@@ -700,6 +707,8 @@ def add_money(request):
                     description='Added money to wallet',
                 )
                 transaction.save()
+                messages.success(request, 'Money added successfully')
+
                 return redirect('wallet')
 
             else:
@@ -712,6 +721,7 @@ def add_money(request):
                     description='Added money to wallet',
                 )
                 transaction.save()
+                messages.success(request, 'Money added successfully')
                 return redirect('wallet')
 
     return redirect('wallet')
@@ -746,7 +756,7 @@ def coupons(request):
     try:
         user_cart = Cart.objects.get(user=request.user)
     except Cart.DoesNotExist:
-        messages.warning(request, 'You do not have a cart. Redirecting to the Profile')
+        messages.warning(request, 'You Dont have a cart. Redirected to the Profile')
         return redirect('profile')  
 
     all_coupons = Coupon.objects.all()
@@ -840,7 +850,7 @@ def failed_payment(request):
 
         except:
             messages.warning(request, 'Payment Failed Please Try again')
-            return redirect('order_product_detail')
+            return redirect('order_product_detail',uid)
 
     return redirect('order_product_detail', uid)
 
@@ -859,123 +869,8 @@ def invoice(request, item_uid):
         'invoice_date':invoice_date,
         
     }
-    print(order_item)
     return render(request, 'accounts/invoice.html',context)
 
 
 
 
-
-
-# @require_POST
-# def save_order_address(request):
-#     url = reverse('save_order_address')
-#     print(f'URL: {url}')
-#     try:
-#         data = json.loads(request.body.decode('utf-8'))
-#         selected_address_uid = data.get('selected_address_uid')
-#         selected_address = Address.objects.get(uid=selected_address_uid)
-
-#         order_instance = Order.objects.create(
-#             user=request.user,
-#             total_amount=0,
-#         )
-#         order_instance.save()
-
-#         order_address = OrderAddress.objects.create(
-#             order=order_instance,
-#             name=selected_address.name,
-#             city=selected_address.city,
-#             country=selected_address.country,
-#             state=selected_address.state,
-#             postal_code=selected_address.postal_code,
-#             street_address=selected_address.street_address,
-#             mobile=selected_address.mobile,
-#             is_billing_address=False,
-#             is_shipping_address=False,
-#         )
-
-#         return JsonResponse({
-#             'order_uid': order_instance.uid,
-#             'selected_address_uid': selected_address_uid,
-#         })
-
-#     except Exception as e:
-#         return JsonResponse({'error': str(e)}, status=500)
-            
-
-
-# class SaveOrderAddressView(View):
-#     print('First')
-#     @transaction.atomic
-#     def post(self, request, *args, **kwargs):
-#         try:
-#             data = json.loads(request.body.decode('utf-8'))
-
-#             selected_address_uid = data.get('selected_address_uid')
-
-            
-#             selected_address = Address.objects.get(uid=selected_address_uid)
-#             print(selected_address)
-#             print('second')
-#             # Start a database transaction
-#             with transaction.atomic():
-#                 order_address = OrderAddress(
-#                     name=selected_address.name,
-#                     city=selected_address.city,
-#                     country=selected_address.country,
-#                     state=selected_address.state,
-#                     postal_code=selected_address.postal_code,
-#                     street_address=selected_address.street_address,
-#                     mobile=selected_address.mobile,
-                    
-#                     is_billing_address=False,
-#                     is_shipping_address=False,
-#                 )
-#                 order_address.save()
-
-#                 order_instance = Order(
-#                     user=request.user,
-#                     total_amount=0,
-#                 )
-#                 print(order_instance)
-#                 order_instance.save()
-
-#                 order_address.order = order_instance
-#                 order_address.save()
-
-
-
-#                 transaction.on_commit(lambda: self.handle_transaction_success(order_instance, selected_address_uid))
-
-#             return JsonResponse({'order_uid': order_instance.uid, 'selected_address_uid': selected_address_uid, })
-
-#         except Exception as e:
-#             print('error')
-#             print(f"Error: {str(e)}")
-#             return JsonResponse({'error': str(e)}, status=500)
-
-
-#     def handle_transaction_success(self, order_instance, selected_address_uid):
-#         print(f"Order {order_instance.uid} created successfully.")
-#         print(f"Selected address with UID {selected_address_uid} processed successfully.")
-
-# def otp_verification(request):
-#     if request.method == 'POST':
-#         entered_otp = request.POST.get('otp')
-#         stored_otp = get_otp_from_session(request)
-
-#         if stored_otp and stored_otp == entered_otp:
-#             hashed_password=make_password(request.session['password'])
-#             user=User.objects.create(username=request.session['username'],password=hashed_password, email=request.session['email'])
-#             profile=Profile.objects.create(user=user,mobile_number=request.session['mob']) 
-#             Cart.objects.create(user=user)           
-#             request.session['username'] = user.username
-#             request.session['email'] = None
-#             request.session['password'] = None
-#             request.session['mob'] = None
-#             return redirect('account:login')
-#         else:
-#             messages.error(request, 'Invalid OTP. Please try again.')
-#             return redirect('account:otp_verification')
-#     return render(request, 'account/otp.html')

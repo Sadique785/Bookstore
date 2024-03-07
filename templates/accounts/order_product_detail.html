@@ -34,7 +34,7 @@
 }
 
 </style>
-<div>
+<div id="alert-message">
     {% include 'base/alert.html' %}
 </div>
 
@@ -176,77 +176,77 @@
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     
     <script>
-
-
+        
+        
 function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
             }
         }
-        return cookieValue;
     }
+    return cookieValue;
+}
 
 
-        document.addEventListener('DOMContentLoaded', function () {
-            // Add an event listener to the Cancel button click
-            document.addEventListener('click', function (event) {
-                // Check if the clicked element is a Cancel button
-                if (event.target && event.target.matches('.cancel-button')) {
-                    // Get the itemUid from the data attribute
-                    itemUid = event.target.getAttribute('data-item-uid');
-                    
-                    // Call the cancelOrderItem function with the itemUid
-                    cancelOrderItem(itemUid);
-                }
-            });
-    
-            function cancelOrderItem(itemUid) {
-                // Make an asynchronous request to the Django view using fetch
-                fetch("{% url 'cancel_item' %}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken'),  // Include CSRF token for security
-                    },
-                    body: JSON.stringify({ 'item_uid': itemUid }),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Handle success, e.g., show a success message or update UI
-                        alert('Order item successfully cancelled!');
-                        location.reload();  // Reload the page or update the UI as needed
-                    } else {
-                        // Handle failure, e.g., show an error message
-                        alert('Failed to cancel the order item. ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    // Handle other errors, e.g., show a generic error message
-                    alert('An error occurred. Please try again later.');
-                });
-            }
-
+document.addEventListener('DOMContentLoaded', function () {
+    // Add an event listener to the Cancel button click
+    document.addEventListener('click', function (event) {
+        // Check if the clicked element is a Cancel button
+        if (event.target && event.target.matches('.cancel-button')) {
+            // Get the itemUid from the data attribute
+            itemUid = event.target.getAttribute('data-item-uid');
             
-// Razorpay integration
-const razorpayButton = document.getElementById('razorpay-button');
-if (razorpayButton) {
-    const itemUid = razorpayButton.getAttribute('data-item-uid');
+            // Call the cancelOrderItem function with the itemUid
+            cancelOrderItem(itemUid);
+        }
+    });
+    
+    function cancelOrderItem(itemUid) {
+        // Make an asynchronous request to the Django view using fetch
+        fetch("{% url 'cancel_item' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),  // Include CSRF token for security
+            },
+            body: JSON.stringify({ 'item_uid': itemUid }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Handle success, e.g., show a success message or update UI
+                alert('Order item successfully cancelled!');
+                location.reload();  // Reload the page or update the UI as needed
+            } else {
+                // Handle failure, e.g., show an error message
+                alert('Failed to cancel the order item. ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // Handle other errors, e.g., show a generic error message
+            alert('An error occurred. Please try again later.');
+        });
+    }
+    
+    
+    // Razorpay integration
+    const razorpayButton = document.getElementById('razorpay-button');
+    if (razorpayButton) {
+        const itemUid = razorpayButton.getAttribute('data-item-uid');
         const razorpay = new Razorpay({
             key: '{{ api_key }}',
             "name": "Acme Corp", 
             "description": "Test Transaction",
             "image": "https://example.com/your_logo",
             order_id: '{{ order_id }}',
-              
+            
             "callback_url": "http://127.0.0.1:8000/accounts/failed-payment/?uid=" + itemUid,
             "prefill": {
                 "name": "V S Sadique", // Your customer's name
@@ -259,26 +259,38 @@ if (razorpayButton) {
             "theme": {
                 "color": "#3399cc"
             },
-
+            
+            
+            
+            
+        });
         
-            
-            
+        razorpayButton.setAttribute('data-item-uid', '{{ item.uid }}');
+        razorpayButton.addEventListener('click', function () {
+            const itemUid = razorpayButton.getAttribute('data-item-uid');
+            console.log('Uid of item:', itemUid);
+            razorpay.open();
         });
-
-            razorpayButton.setAttribute('data-item-uid', '{{ item.uid }}');
-            razorpayButton.addEventListener('click', function () {
-                const itemUid = razorpayButton.getAttribute('data-item-uid');
-                console.log('Uid of item:', itemUid);
-                razorpay.open();
-            });
-        }
-
-
-
-            
-        });
-    </script>
+    }
     
-        
+    
+    
+    
+});
+
+
+document.addEventListener('DOMContentLoaded', function () {
+setTimeout(function () {
+var alertMessage = document.getElementById('alert-message');
+if (alertMessage) {
+    alertMessage.style.display = 'none';
+}
+}, 5000);
+});
+
+
+</script>
+
+
 
 {% endblock %}

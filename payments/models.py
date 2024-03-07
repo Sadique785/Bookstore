@@ -1,5 +1,4 @@
 from django.db import models
-# from orders.models import Order
 from base.models import BaseModel
 
 # Create your models here.
@@ -25,7 +24,6 @@ class Payment(BaseModel):
         (PENDING, 'Pending'),
         (PAID, 'Paid'),
         (FAILED, 'Failed'),
-        # Add more choices as needed
     ]
 
     amount = models.DecimalField(max_digits=10, decimal_places=2)

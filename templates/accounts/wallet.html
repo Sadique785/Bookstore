@@ -154,6 +154,9 @@
             </div>
         </form>
         </div>
+        <div class="alert-message mt-5" id="alert-message">
+            {% include "base/alert.html" %}
+           </div>
     </div>
 
 
@@ -262,43 +265,17 @@ function getCookie(name) {
 
        
 }
+document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(function () {
+            var alertMessage = document.getElementById('alert-message');
+            if (alertMessage) {
+                alertMessage.style.display = 'none';
+            }
+        }, 5000);
+    });
 
 
 
     </script>
 {% endblock %}
-const razorpayOptions = {
-    "key": "{{api_key}}",
-    "name": "Historia", // Your business name
-    "description": "Test Transaction",
-    "image": "https://example.com/your_logo",
-    // ... (other options)
 
-    // Assuming you have an order_id, replace "{{order_id}}" with the actual order_id
-    "order_id": "{{order_id}}",
-    "callback_url": "https://eneqd3r9zrjok.x.pipedream.net/",
-    "prefill": {
-            "name": "V S Sadique", // Your customer's name
-            "email": "vssadique785@gmail.com",
-            "contact": "9000090000" // Provide the customer's phone number for better conversion rates 
-        },
-        "notes": {
-            "address": "Razorpay Corporate Office"
-        },
-        "theme": {
-            "color": "#3399cc"
-        }
-};
-console.log('DOMContentLoaded event triggered 4');
-razorpayOptions.amount = amount * 100;
-
-
-const rzp = new Razorpay(razorpayOptions);
-console.log('DOMContentLoaded event triggered 5');
-
-
-console.log('Setting up event listeners for Razorpay');
-
-// Trigger Razorpay checkout
-rzp.open();
-event.preventDefault();

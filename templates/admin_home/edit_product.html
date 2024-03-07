@@ -42,11 +42,19 @@
                 <div class="card-header">
                     <h4>Basic</h4>
                 </div>
+                <div class="alert-message mt-5" id="alert-message">
+                    {% include "base/alert.html" %}
+                   </div>
                 <div class="card-body">
                     <form method="POST" onsubmit="return validateProductForm()" enctype="multipart/form-data">
 
                         {% csrf_token %}
-                        {% include 'base/alert.html ' %}
+
+
+                        
+
+
+
                         <div class="mb-4">
                             <label for="product_name"  class="form-label">Product title</label>
                             <input name="product_name" type="text" value="{{product.product_name}}" placeholder="Type here" class="form-control" id="product_name">
@@ -197,6 +205,15 @@
 </section>
 
 <script>
+        document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(function () {
+            var alertMessage = document.getElementById('alert-message');
+            if (alertMessage) {
+                alertMessage.style.display = 'none';
+                console.log('action done')
+            }
+        }, 5000);
+    });
     document.addEventListener("DOMContentLoaded", function () {
         const imageLinks = document.querySelectorAll(".image-link");
 
@@ -493,78 +510,5 @@ function deleteImageOnServer(imageUid) {
 
 
 
-
-<!-- //     document.addEventListener('DOMContentLoaded',function(){ -->
-    <!-- //         $("#pop").on("click", function() {
-    //    $('#imagepreview').attr('src', $('#imageresource').attr('src')); here asign the image to the modal when the user click the enlarge link
-    // $('#imagemodal').modal('show');
-    //     $('#imagemodal').modal('show'); 
-    // imagemodal is the id attribute assigned to the bootstrap modal, then i use the show function
-    //         });
-    //         })
-         -->
-
-<!-- <script>
-        
-    
-    document.addEventListener("DOMContentLoaded", function () {
-        // Attach click event to image links
-        const imageLinks = document.querySelectorAll(".image-link");
-        imageLinks.forEach(function (link) {
-            link.addEventListener("click", function (event) {
-                event.preventDefault();
-             
-           
-           console.log( $('#modalImage').attr('src', $('.image-link').attr('data-image')))  // here asign the image to the modal when the user click the enlarge link
-                $('#imageModal').modal('show');
-              
-
- 
-                // const imageUrl = this.getAttribute("data-image");
-                // console.log(imageUrl)
-                // displayImageModal(imageUrl);
-            });
-        });
-
-
-       
-
-        // Function to display image modal
-// Function to display image modal
-function displayImageModal(imageUrl) {
-    const modalImage = document.getElementById("modalImage");
-    const editImageBtn = document.getElementById("editImageBtn");
-    const modals = document.getElementById("imageModal");
-    if (!modals || !modalImage || !editImageBtn) {
-        console.error("Modal elements not found.");
-        return;
-    }
-    // Create a new Image object and set the src attribute
-    const preloadImage = new Image();
-    preloadImage.src = imageUrl;
-
-    // Once the image is loaded, update the modal
-    // preloadImage.onload = function () {
-    //     // Set the image source
-    //     modalImage.src = imageUrl;
-
-    //     // Attach click event to the "Edit Image" button
-    //     editImageBtn.addEventListener("click", function () {
-    //         // Add your logic to handle editing the image
-    //         alert("Editing the image: " + imageUrl);
-    //     });
-
-    //     // Show the modal
-    //     
-    // };
-    // $("#imageModal").modal("show");
-    // Handle errors if the image fails to load
-    preloadImage.onerror = function () {
-        alert("Error loading the image: " + imageUrl);
-    };
-}
-
-    });
-</script> -->
 
 {% endblock %}

@@ -109,7 +109,9 @@
         
 
         <input type="submit" class="btn btn-primary" value="Update Address">
-        {% include "base/alert.html" %}
+        <div class="alert-message mt-5" id="alert-message">
+            {% include "base/alert.html" %}
+           </div>
         {% if form_errors %}
              <div class="alert alert-danger">
                <strong>Error:</strong>
@@ -121,5 +123,17 @@
 
     </form>
 </div>
+
+
+<script>
+        document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(function () {
+            var alertMessage = document.getElementById('alert-message');
+            if (alertMessage) {
+                alertMessage.style.display = 'none';
+            }
+        }, 5000);
+    }); 
+</script>
 
 {% endblock %}

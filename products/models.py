@@ -115,12 +115,6 @@ class Product(BaseModel):
     
         
 
-    # def get_product_by_language(self,language):
-    #     try:
-    #         language_variant = LanguageVariant.objects.get(name=language)
-    #         return self.price + language_variant.price
-    #     except EditionVariant.DoesNotExist:
-    #         return self.price
     
 
 
@@ -143,13 +137,13 @@ class Coupon(BaseModel):
     def __str__(self) -> str:
         return self.coupon_code
     def save(self, *args, **kwargs):
-        # Convert expiration_date to a datetime object
+        
         if isinstance(self.expiration_date, str):
             self.expiration_date = datetime.strptime(self.expiration_date, '%Y-%m-%dT%H:%M')
         if timezone.is_naive(self.expiration_date):
             self.expiration_date = timezone.make_aware(self.expiration_date, timezone.get_default_timezone())
 
-        # Check if the coupon has expired
+        
         self.is_expired = timezone.now() > self.expiration_date or self.coupon_count == 0
 
         super().save(*args, **kwargs)
@@ -164,7 +158,7 @@ class Audiobook(models.Model):
 class Ebook(models.Model):
     product = models.OneToOneField(Product, on_delete=models.CASCADE, related_name='ebook')
     ebook_file = models.FileField(upload_to='ebooks')
-    # Add any other fields relevant to the eBook
+    
 
     def __str__(self):
         return f"Ebook for {self.product.product_name}"

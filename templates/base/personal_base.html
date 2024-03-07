@@ -461,7 +461,7 @@ body {
                     <i class="fas fa-user"></i>
                 </div>
                 <div class="greeting">
-                    <p>Hi, username</p>
+                    <p>Hi, {{request.user.first_name}} {{request.user.last_name}}</p>
                 </div>
             </div>
 
@@ -517,7 +517,7 @@ body {
                     <i class="fas fa-user"></i>
                 </div>
                 <div class="greeting">
-                    <p>Hi, username</p>
+                    <p>Hi, {{request.user.first_name}} {{request.user.last_name}}</p>
                 </div>
             </div>
 

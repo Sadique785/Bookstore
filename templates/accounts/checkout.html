@@ -93,9 +93,10 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="border p-4 rounded" role="alert">
+                    <div class="border p-4 rounded alert-message" id="alert-message" role="alert">
                         {% include 'base/alert.html' %}
                     </div>
+
                 </div>
             </div>
             <div class="row">
@@ -722,7 +723,14 @@ function changeQuantity(itemUid, action) {
     .catch(error => console.error('Error:', error));
   }
 
-
+  document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(function () {
+            var alertMessage = document.getElementById('alert-message');
+            if (alertMessage) {
+                alertMessage.style.display = 'none';
+            }
+        }, 5000);
+    });
 
     </script>
 {% endblock %}

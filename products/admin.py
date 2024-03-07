@@ -54,12 +54,12 @@ class EbookAdmin(admin.ModelAdmin):
 class ProductInline(admin.TabularInline):
     model = Product
     extra = 0
-    fields = ('product_name', 'category', 'sub_category', 'has_audiobook')  # Fields to display in the inline
+    fields = ('product_name', 'category', 'sub_category', 'has_audiobook')  
 
 class AuthorAdmin(admin.ModelAdmin):
-    list_display = ('name', 'bio')  # Displayed columns in the author list
-    search_fields = ('name',)  # Enable search by author name
-    inlines = [ProductInline]  # Show associated products in author detail page
+    list_display = ('name', 'bio')  
+    search_fields = ('name',)  
+    inlines = [ProductInline] 
 
 admin.site.register(Author, AuthorAdmin)
 
@@ -67,4 +67,3 @@ admin.site.register(Product, ProductAdmin)
 admin.site.register(Audiobook, AudiobookAdmin)
 admin.site.register(Ebook, EbookAdmin)
 
-# admin.site.register(ProductImage, ProductImageAdmin)

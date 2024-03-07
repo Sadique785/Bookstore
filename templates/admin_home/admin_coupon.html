@@ -42,7 +42,7 @@
                         <option>Show all</option>
                     </select>
                 </div>
-                <div  class="col-md-5 col-6" >{% include 'base/alert.html' %}</div>
+                <div  class="col-md-5 col-6" id="alert-message" >{% include 'base/alert.html' %}</div>
             </div>
         </header> <!-- card-header end// -->
         <div class="card-body">
@@ -103,6 +103,18 @@
         </nav>
     </div>
 </section>
+
+<script>
+        document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(function () {
+            var alertMessage = document.getElementById('alert-message');
+            if (alertMessage) {
+                alertMessage.style.display = 'none';
+                console.log('action done')
+            }
+        }, 5000);
+    });
+</script>
 
 {% endblock %}
 

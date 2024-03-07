@@ -32,13 +32,7 @@ class Order(BaseModel):
     def __str__(self):
         return f"Order {self.uid} - Status: {self.order_status} - Total: ${self.total_amount}"
     
-    # def save(self, *args, **kwargs):
-
-    #     all_items_paid = all(item.is_paid for item in self.order_items.all())
-
-    #     self.is_paid = all_items_paid
-
-    #     super().save(*args, **kwargs)
+  
     
     def get_order_status_choices():
         return Order.ORDER_STATUS_CHOICES
@@ -134,8 +128,6 @@ class OrderAddress(BaseModel):
     postal_code = models.CharField(max_length=20)
     street_address = models.TextField()
     mobile = models.CharField(max_length=20)
-
-    # Additional fields
     email = models.EmailField()
     is_billing_address = models.BooleanField(default=False)
     is_shipping_address = models.BooleanField(default=False)
@@ -150,7 +142,6 @@ class OrderPayment(BaseModel):
     order = models.OneToOneField(Order, on_delete=models.CASCADE)
     payment_method = models.ForeignKey(PaymentMethod, on_delete=models.CASCADE)
     
-    # Additional fields 
     card_number = models.CharField(max_length=20, blank=True)
     expiration_date = models.DateField(blank=True, null=True)
     cvv = models.CharField(max_length=4, blank=True)
@@ -173,4 +164,3 @@ class OrderProduct(BaseModel):
     
 
 
-    # ... (Same as above)

@@ -48,14 +48,9 @@
                                 <input name="expiration_date" type="datetime-local" value="{{ coupon.expiration_date|date:'Y-m-d\TH:i' }}" class="form-control">
                                 <span id="expirationDateError" class="text-danger"></span>
                             </div>
-                            <!-- <div class="mb-4">
-                                <label class="form-label">Set Coupon to Expire</label>
-                                <div class="form-check">
-                                    <input name="expireCheckbox" class="form-check-input" {% if coupon.is_expired %} checked {% endif %} type="checkbox" id="expireCheckbox">
-                                    <label class="form-check-label" for="expireCheckbox">Expire Coupon</label>
-                                </div>
-                            </div> -->
-                            {% include 'base/alert.html' %}
+                            <div class="alert-message mt-5" id="alert-message">
+                                {% include "base/alert.html" %}
+                               </div>
                             
                         </div> <!-- col.// -->
                     </div> <!-- row.// -->
@@ -132,6 +127,16 @@
         // If all validations pass, the form will be submitted
         return true;
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(function () {
+            var alertMessage = document.getElementById('alert-message');
+            if (alertMessage) {
+                alertMessage.style.display = 'none';
+                console.log('action done')
+            }
+        }, 5000);
+    });
 </script>
 
 {% endblock %}

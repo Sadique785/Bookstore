@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from products.models import Product, Category, SubCategory, EditionVariant, LanguageVariant
 from accounts.models import Cart, CartItem
 from django.core.paginator import Paginator,PageNotAnInteger, EmptyPage
+from django.db.models import Q
 
 # Create your views here.
 
@@ -13,7 +14,11 @@ def get_product(request, product_slug):
     
     try:
         product = Product.objects.get(slug = product_slug)
-        context = {'product':product }
+        product_images = product.product_images.all()
+        print(product_images)
+        context = {'product':product,
+                   'product_images':product_images }
+        
 
         if request.GET.get('edition'):
             edition = request.GET.get('edition')
@@ -23,18 +28,6 @@ def get_product(request, product_slug):
             context['updated_price'] = price
 
             print(price)
-
-        # if request.GET.get('language'):
-        #     language = request.GET.get('language')
-        #     new_price = product.get_product_by_language(language)
-
-        #     context['selected_language'] = language
-        #     context['new_price'] = new_price
-
-        #     print(new_price)
-            
-
-        
 
         return render(request, 'home/product.html', context = context)
     
@@ -48,7 +41,7 @@ def get_product(request, product_slug):
 
 
 
-from django.db.models import Q
+
 
 def all_products(request, category_slug = None):
     search_term = request.GET.get('search')
@@ -58,7 +51,6 @@ def all_products(request, category_slug = None):
         category = get_object_or_404(Category, slug=category_slug)
         queryset = Product.objects.filter(category = category, is_listed = True,is_category_listed = True)
         if request.method == "POST":
-            print('METHOD IS POST', request.POST)
             filter = request.POST.get('sortOption')
             if filter == 'lowToHigh':
                 queryset = queryset.order_by('price')
@@ -84,7 +76,6 @@ def all_products(request, category_slug = None):
          categories  = Category.objects.all()
          queryset = Product.objects.filter(is_listed = True, is_category_listed = True)
          if request.method == "POST":
-            print('METHOD IS POST', request.POST)
             filter = request.POST.get('sortOption')
             if filter == 'lowToHigh':
                 queryset = queryset.order_by('price')
@@ -124,9 +115,6 @@ def all_products(request, category_slug = None):
         'category_option': category,
         
     }
-    
-
-    
     
     return render(request, 'home/shop.html', context)
 

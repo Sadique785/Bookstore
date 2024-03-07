@@ -41,7 +41,6 @@ class InfoSecond(forms.ModelForm):
         except ValidationError:
             raise ValidationError("Enter a valid email address.")
 
-        # Update username to the new email
         self.instance.username = email
         self.instance.save()
 
@@ -68,10 +67,10 @@ class ManageAddress(forms.ModelForm):
     
 
     is_default = forms.BooleanField(
-        required=False,  # Make it optional
-        initial=False,  # Default value
-        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),  # Optional: Add a class for styling
-        label='Set as Default Address'  # Label for the checkbox
+        required=False, 
+        initial=False,  
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),  
+        label='Set as Default Address'  
     )
 
     country = forms.ChoiceField(choices = COUNTRY_CHOICES, widget=forms.Select(attrs={'class': 'form-control'}))

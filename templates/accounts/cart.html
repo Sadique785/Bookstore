@@ -98,7 +98,9 @@
 
   <!-- ------------------------------------------------------Coupon sect------------------------------------------ -->
 <form method="POST">
-{% include 'base/alert.html' %}
+  <div class="alert-message mt-5" id="alert-message">
+    {% include "base/alert.html" %}
+   </div>
   {% csrf_token %}
   <div class="row">
     <div class="col-md-12">
@@ -266,6 +268,18 @@
     })
     .catch(error => console.error('Error:', error));
   }
+
+
+  document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(function () {
+            var alertMessage = document.getElementById('alert-message');
+            if (alertMessage) {
+                alertMessage.style.display = 'none';
+            }
+        }, 5000);
+    });
+
+    
 </script>
 
 
