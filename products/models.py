@@ -60,6 +60,7 @@ class Author(models.Model):
 class LanguageVariant(BaseModel):
     name = models.CharField(max_length = 100)
     price = models.IntegerField(default=0)
+    stock_quantity = models.PositiveIntegerField(default = 0)
 
     def __str__(self) -> str:
         return self.name
@@ -67,6 +68,7 @@ class LanguageVariant(BaseModel):
 class EditionVariant(BaseModel):
     name = models.CharField(max_length = 100)
     price = models.IntegerField(default=0)
+    stock_quantity = models.PositiveIntegerField(default = 0)
     
     def __str__(self) -> str:
         return self.name
@@ -113,7 +115,15 @@ class Product(BaseModel):
 
         return self.stock_quantity > 0
     
-        
+
+
+class ProductVariant(BaseModel):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_variants', null=True, blank=True)
+    variant = models.ForeignKey(EditionVariant, on_delete=models.CASCADE, related_name='product_variants', null=True, blank=True)
+    stock_quantity = models.PositiveIntegerField(default=0)
+
+    def has_stock(self):
+        return self.stock_quantity > 0 
 
     
 

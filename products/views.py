@@ -1,7 +1,7 @@
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 
 from django.shortcuts import get_object_or_404, render, redirect
-from products.models import Product, Category, SubCategory, EditionVariant, LanguageVariant
+from products.models import Product, Category, SubCategory, EditionVariant, LanguageVariant, ProductVariant
 from accounts.models import Cart, CartItem
 from django.core.paginator import Paginator,PageNotAnInteger, EmptyPage
 from django.db.models import Q
@@ -10,28 +10,29 @@ from django.db.models import Q
 
 def get_product(request, product_slug):
 
-
     
     try:
         product = Product.objects.get(slug = product_slug)
         product_images = product.product_images.all()
-        print(product_images)
         context = {'product':product,
                    'product_images':product_images }
+        
+        
         
 
         if request.GET.get('edition'):
             edition = request.GET.get('edition')
             price = product.get_product_by_edition(edition)
-
+            edition_obj = EditionVariant.objects.filter(name = edition).first()
+            product_variant = ProductVariant.objects.filter(product = product, variant = edition_obj).first()
+            stock = product_variant.stock_quantity
+            
+            
             context['selected_edition'] = edition
             context['updated_price'] = price
-
-            print(price)
+            context['stock'] = stock
 
         return render(request, 'home/product.html', context = context)
-    
-        
     
     except Exception as e:
         print(e)

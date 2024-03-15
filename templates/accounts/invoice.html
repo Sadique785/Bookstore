@@ -165,7 +165,7 @@
             <!-- Display total quantity and total price below the table -->
             <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 20px; padding: 0 10px;">
                 <div style="padding: 10px; text-align: left; font-weight: bold;">Total Quantity: {{order_item.quantity}}</div>
-                <div style="padding: 10px; text-align: right; font-weight: bold;">Total Price: ₹ {{ order_item.price }}</div>
+                <div style="padding: 10px; text-align: right; font-weight: bold;">Total Price: ₹ {{ order_item.get_total }}</div>
             </div>
         </div>
         

@@ -42,6 +42,9 @@ urlpatterns = [
     path('admin_delete_coupon/<coupon_uid>',views.admin_delete_coupon, name="admin_delete_coupon"),
     path('export_data_to_excel/',views.export_data_to_excel, name="export_data_to_excel"),
     path('delete_banner/',views.delete_banner, name="delete_banner"),
+    path('admin_stock/',views.admin_stock, name="admin_stock"),
+    path('admin_add_stock/<slug>',views.admin_add_stock, name="admin_add_stock"),
+  
     
 
 

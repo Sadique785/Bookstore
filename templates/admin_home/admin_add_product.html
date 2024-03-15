@@ -26,6 +26,14 @@
         background-color: #fff;
         z-index: 1;
     }
+
+    .error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
+    display: block;
+}
+
 </style>
 
 
@@ -46,20 +54,20 @@
                     <form method="POST" onsubmit="return validateProductForm()" enctype="multipart/form-data">
 
                         {% csrf_token %}
-                        {% include 'base/alert.html ' %}
+                        {% include 'base/alert.html' %}
                         <div class="mb-4">
                             <label for="product_name"  class="form-label">Product title</label>
                             <input name="product_name" type="text" placeholder="Type here" class="form-control" id="product_name">
                         </div>
                         <div class="form-group">
-                            <span id="productNameError"></span>
+                            <span id="productNameError" class="error-message"></span>
                         </div>
                         <div class="mb-4">
                             <label  class="form-label"  >Full description</label>
                             <textarea name="product_description" placeholder="Type here" class="form-control" id="product_description" rows="4"></textarea>
                         </div>
                         <div class="form-group">
-                            <span id="productDescriptionError"></span>
+                            <span id="productDescriptionError" class="error-message"></span>
                         </div>
                         <div class="row">
                             <div class="col-lg-4">
@@ -69,7 +77,7 @@
                                         <input placeholder="$" name="regular_price" id="regular_price" type="text" class="form-control">
                                     </div>
                                     <div class="form-group">
-                                        <span id="regularPriceError"></span>
+                                        <span id="regularPriceError" class="error-message"></span>
                                     </div>
                                 </div>
                             </div>
@@ -79,13 +87,13 @@
                                     <input placeholder="$" name="promotional_price" id="promotional_price" type="text" class="form-control">
                                 </div>
                                 <div class="form-group">
-                                    <span id="promotionalPriceError"></span>
+                                    <span id="promotionalPriceError" class="error-message"></span>
                                 </div>
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">Currency</label>
                                 <select name="currency" class="form-select">
-                                    <option  id="currency"> INR </option>
+                                    <option  id="currency" class="error-message"> INR </option>
                                  
                                 </select>
                             </div>
@@ -95,7 +103,7 @@
                             <input type="text" id="tax_rate" name="tax_rate" placeholder="%" class="form-control" >
                         </div>
                         <div class="form-group">
-                            <span id="taxRateError"></span>
+                            <span id="taxRateError" class="error-message"></span>
                         </div>
                         <div class="col-lg-5">
                             <div class="card mb-4">
@@ -114,7 +122,7 @@
    
                         </div>
                         <div class="form-group">
-                            <span id="imageError"></span>
+                            <span id="imageError" class="error-message"></span>
                         </div>
                             <!-- Category Dropdown -->
     <div class="mb-4">
@@ -127,7 +135,7 @@
         </select>
     </div>
     <div class="form-group">
-        <span id="categoryError"></span>
+        <span id="categoryError" class="error-message"></span>
     </div>
     
     <!-- Subcategory Dropdown -->
@@ -139,7 +147,7 @@
         </select>
     </div>
     <div class="form-group">
-        <span id="subcategoryError"></span>
+        <span id="subcategoryError" class="error-message"></span>
     </div>
 
 <!-- Edition Variant Dropdown -->
@@ -155,18 +163,12 @@
     </div>
 </div>
 
-<div class="mb-4">
-    <label class="form-label">Stock</label>
-    <input type="number" id="stock" name="stock" placeholder="Stock" class="form-control" min="0" >
-</div>
-<div class="form-group">
-    <span id="stockError"></span>
-</div>
+
 
 
                         <div class="row justify-content-md-center">
                             <div class="col-md-auto">
-                                <button type="submit" class="btn btn-primary">Submit</button>
+                                <button  type="submit" class="btn btn-primary">Submit</button>
                             </div>
                         </div>
                     </form>
@@ -208,14 +210,118 @@
 
                 if (validExtensions.indexOf(extension) === -1) {
                     errorSpan.innerHTML = 'Please select only JPG or PNG images.';
-                    input.value = ''; // Clear the input
+                    input.value = ''; 
                     return;
                 }
             }
         }
 
-        errorSpan.innerHTML = ''; // Clear any previous errors
+        errorSpan.innerHTML = ''; 
     }
+ 
+
+
+    function validateProductForm() {
+        console.log('ettrtr')
+        event.preventDefault()
+
+
+var productName = document.getElementById('product_name').value;
+var productDescription = document.getElementById('product_description').value;
+var regularPrice = document.getElementsByName('regular_price')[0].value;
+var promotionalPrice = document.getElementsByName('promotional_price')[0].value;
+var taxRate = document.getElementsByName('tax_rate')[0].value;
+var input = document.getElementById('images');
+var category = document.getElementById('category').value;
+var subcategory = document.getElementById('sub_category').value;
+
+
+
+
+var productNameError = document.getElementById('productNameError');
+var productDescriptionError = document.getElementById('productDescriptionError');
+var regularPriceError = document.getElementById('regularPriceError');
+var promotionalPriceError = document.getElementById('promotionalPriceError');
+var taxRateError = document.getElementById('taxRateError');
+var errorSpan = document.getElementById('imageError');
+var categoryError = document.getElementById('categoryError');
+var subcategoryError = document.getElementById('subcategoryError');
+
+var validExtensions = ['jpg', 'jpeg', 'png'];
+
+productNameError.innerHTML = '';
+productDescriptionError.innerHTML = '';
+regularPriceError.innerHTML = '';
+promotionalPriceError.innerHTML = '';
+taxRateError.innerHTML = '';
+
+errorSpan.innerHTML = '';
+categoryError.innerHTML = '';
+subcategoryError.innerHTML = '';
+
+if (productName === '') {
+    productNameError.innerHTML = 'Product name is required';
+    return false;
+}
+
+if (productDescription === '') {
+    productDescriptionError.innerHTML = 'Product description is required';
+    return false;
+}
+
+if (regularPrice === '') {
+    regularPriceError.innerHTML = 'Regular price is required';
+    return false;
+}
+else if (parseFloat(regularPrice) <= 0 || isNaN(parseFloat(regularPrice))) {
+    regularPriceError.innerHTML = 'Regular price must be a positive value';
+    return false;
+}
+if (promotionalPrice === '') {
+    promotionalPriceError.innerHTML = 'Promotional price is required';
+    return false;
+}
+else if (parseFloat(promotionalPrice) < 0 || isNaN(parseFloat(promotionalPrice))) {
+    promotionalPriceError.innerHTML = 'Promotional price must be a positive value';
+    return false;
+}
+if (taxRate === '') {
+    taxRateError.innerHTML = 'Tax rate is required';
+    return false;
+}else if (parseFloat(taxRate) < 0 || isNaN(parseFloat(taxRate))) {
+    taxRateError.innerHTML = 'Tax rate must be must be a positive value';
+    return false;
+}
+if (input.files.length > 0) {
+        for (var i = 0; i < input.files.length; i++) {
+            var fileName = input.files[i].name;
+            var extension = fileName.split('.').pop().toLowerCase();
+
+            if (validExtensions.indexOf(extension) === -1) {
+                errorSpan.innerHTML = 'Please select only JPG or PNG images.';
+                input.value = ''; // Clear the input
+                return;
+            }
+        }
+    }
+
+if (category === 'Select Category') {
+    categoryError.innerHTML = 'Please select a category';
+    return false;
+}
+if (subcategory === 'Select Subcategory') {
+    subcategoryError.innerHTML = 'Please select a subcategory';
+    return false;
+}
+
+
+
+
+
+return true; 
+}
+
+
 </script>
     
 
@@ -225,24 +331,3 @@
 {% endblock %}
 
 
-            <!-- <div class="card mb-4">
-                <div class="card-header">
-                    <h4>Organization</h4>
-                </div>
-                <div class="card-body">
-                    <div class="row gx-2">
-                        <div class="col-sm-6 mb-3">
-                            <label class="form-label">Category</label>
-                            
-                        {% if product %}
-                            
-                            <a href="{% url 'get_subcategories' product.slug %}" class="btn btn-primary">Category</a>
-                        {% else %}
-                           
-                            <a href="{% url 'get_subcategories' 0 %}" class="btn btn-primary">Category</a>
-                        {% endif %}
-                        </div>
-
-                    </div> 
-                </div>
-            </div>  -->

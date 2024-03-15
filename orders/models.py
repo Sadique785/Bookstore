@@ -68,7 +68,7 @@ class OrderItem(BaseModel):
         (SHIPPED, 'Shipped'),
         (DELIVERED, 'Delivered'),
     ]
-    order_status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default=PROCESSING)
+    order_status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default=PROCESSING, null = True)
 
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items')
     product_name = models.CharField(max_length=255)

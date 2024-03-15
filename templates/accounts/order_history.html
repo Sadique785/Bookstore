@@ -107,7 +107,11 @@
                                         </td>
                                         <td class="d-none d-sm-table-cell" >₹{{ order_item.get_total }}</td>
                                         <td class="d-none d-sm-table-cell">{{ order_item.quantity }}</td>
-                                        <td class="d-none d-sm-table-cell">{{ order_item.order_status }}</td>
+                                        {% if order_item.is_active %}
+                                        <td>{{order_item.order_status}}</td>
+                                        {% else %}
+                                        <td> Cancelled </td>
+                                        {% endif %}
                                     </tr>
                                 {% endfor %}
                             {% endfor %}
@@ -193,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 </td>
                 <td>₹${order_item.get_total}</td>
                 <td>${order_item.quantity}</td>
-                <td>${order_item.order_status}</td>
+                <td>${order_item.order_status !== null ? order_item.order_status : 'Cancelled'}</td>
             </tr>`;
 
         orderTableBody.innerHTML += html;

@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.sessions.models import Session
 from accounts.models import Profile, Transaction, Wallet
-from products.models import Product, Category, SubCategory, ProductImage, LanguageVariant, EditionVariant, Coupon
+from products.models import Product, Category, SubCategory, ProductImage, LanguageVariant, EditionVariant, Coupon, ProductVariant
 from .forms import LanguageVariantForm, EditionVariantForm
 from django.http import Http404, HttpResponseRedirect, HttpResponse
 from django.contrib.auth import authenticate,login, logout
@@ -31,7 +31,7 @@ from home.models import Banner
 from django.db import transaction
 import pandas as pd
 from django.core.paginator import Paginator,PageNotAnInteger, EmptyPage
-
+from django.core.exceptions import ObjectDoesNotExist
 
 
 
@@ -156,7 +156,7 @@ def admin_index(request):
 
 
     if total_count > 0:
-        monthly_revenue = total_revenue / total_count
+        monthly_revenue = total_revenue // total_count
     else:
         monthly_revenue = 0
 
@@ -484,21 +484,22 @@ def filter_chart(request):
 
 @user_passes_test(is_superuser, login_url='admin_login')
 def admin_users(request):
-    query_set = User.objects.filter(profile__isnull=False)
+    query_set = Profile.objects.filter(user__isnull=False, is_email_verified = True)
     search_term = request.GET.get('search')
+    query_set = query_set.order_by('-created_at')
     
 
     if search_term and search_term.lower() != 'none':
         query_set = query_set.filter(
-            Q(first_name__icontains=search_term) | Q(last_name__icontains=search_term) | Q(email__icontains=search_term)
+            Q(user__first_name__icontains=search_term) | Q(user__last_name__icontains=search_term) | Q(user__email__icontains=search_term)
         )
 
     status_filter = request.GET.get('status')
 
     if status_filter == 'active':
-        query_set = query_set.filter(is_active=True)
+        query_set = query_set.filter(user__is_active=True)
     elif status_filter == 'blocked':
-        query_set = query_set.filter(is_active=False)
+        query_set = query_set.filter(user__is_active=False)
     else:
       
         status_filter = 'all'
@@ -1062,6 +1063,9 @@ def admin_cancel_order(request):
         total_price = 0
         for item in order_items:
             item.is_active = False
+            if item.order_status is not None:
+                item.order_status = None  
+            
             price = item.get_total()
             total_price += price
 
@@ -1106,6 +1110,7 @@ def admin_cancel_item(request):
 
     if order_item.is_active:
         order_item.is_active = False
+        order_item.order_status = None  
         order_item.save()
         price = order_item.get_total()
             
@@ -1194,6 +1199,74 @@ def admin_product(request, slug=None):
 
 
 @user_passes_test(is_superuser, login_url='admin_login')
+def admin_stock(request):
+    query_set = Product.objects.all().order_by('product_name')
+    page = request.GET.get('page', 1)
+    paginator = Paginator(query_set, 8)
+    try:
+        query_set = paginator.page(page)
+    except PageNotAnInteger:
+        query_set = paginator.page(page)
+    except EmptyPage:
+        query_set = paginator.page(paginator.num_pages)
+
+
+    context = {
+        'products':query_set,
+    }
+    return render(request, 'admin_home/admin_stock.html', context)
+
+def admin_add_stock(request, slug):
+    product = Product.objects.filter(slug = slug).first()
+
+    try:
+        variants = product.edition_variant.all()
+    except ObjectDoesNotExist:
+        variants = None
+
+
+    if request.method == "POST":
+
+        normal_stock = request.POST.get('normal_stock')
+
+        if normal_stock is None or normal_stock == '':
+            messages.warning(request, 'Please enter the stock quantity for the main product.')
+            return redirect('admin_add_stock', slug=slug)
+        
+
+        product.stock_quantity = normal_stock
+        product.save()
+
+        if variants:
+            for variant in variants:
+                variant_stock = request.POST.get(f"{variant.name}_stock")
+
+
+                if variant_stock is None or variant_stock == '':
+                    messages.warning(request, f'Please enter the stock quantity for {variant.name}.')
+                    return redirect('admin_add_stock', slug=slug)
+                
+
+                try:
+                    existing_stock = ProductVariant.objects.get(product=product, variant=variant)
+                    existing_stock.stock_quantity = variant_stock
+                    existing_stock.save()
+                except ProductVariant.DoesNotExist:
+                    
+                    ProductVariant.objects.create(product=product, variant=variant, stock_quantity=variant_stock)
+        messages.success(request, 'Stock Successfully Updated')
+        return redirect('admin_add_stock',slug)
+
+    context = {
+        'product':product,
+        'variants':variants,
+    }
+    
+    return render(request,'admin_home/admin_add_stock.html',context)
+
+
+
+@user_passes_test(is_superuser, login_url='admin_login')
 def admin_add_product(request):
     if request.method == 'POST':
         product_name = request.POST.get('product_name')
@@ -1205,7 +1278,7 @@ def admin_add_product(request):
         category_id = request.POST.get('category')
         subcategory_id = request.POST.get('sub_category')
         edition_variant_names = request.POST.getlist('edition_variant')
-        stock_quantity = request.POST.get('stock')
+        # stock_quantity = request.POST.get('stock')
 
         selected_editions = EditionVariant.objects.filter(name__in = edition_variant_names)
 
@@ -1228,7 +1301,7 @@ def admin_add_product(request):
             tax_rate = tax_rate,
             category = category,
             sub_category = subcategory,
-            stock_quantity = stock_quantity,
+            # stock_quantity = stock_quantity,
             
         
         )
@@ -1238,6 +1311,9 @@ def admin_add_product(request):
         else:
             new_product.edition_variant.add(*selected_editions)
             new_product.save()
+            for variant in selected_editions:
+                product_variant = ProductVariant.objects.create(product = new_product, variant = variant)
+                product_variant.save()
 
         
         messages.success(request, 'Product added successfully!')
@@ -1260,6 +1336,9 @@ def admin_add_product(request):
                    }
         
         return render(request, 'admin_home/admin_add_product.html', context)
+    
+
+    
     categories = Category.objects.all()
     subcategories = SubCategory.objects.all()
     editions = EditionVariant.objects.all()
@@ -1302,7 +1381,7 @@ def admin_edit_product(request, product_slug):
         product.currency = request.POST.get('currency')
         category_id = request.POST.get('category') 
         subcategory_id = request.POST.get('sub_category')
-        product.stock_quantity = request.POST.get('stock')
+        # product.stock_quantity = request.POST.get('stock')
 
 
         selected_editions = request.POST.getlist('edition_variant')
@@ -1346,6 +1425,9 @@ def admin_edit_product(request, product_slug):
     
 
     return render(request,'admin_home/edit_product.html', context)
+
+
+
 
 
 

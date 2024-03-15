@@ -30,6 +30,9 @@ urlpatterns = [
     path('create_razorpay_order/', views.create_razorpay_order, name='create_razorpay_order'),
     path('cancel_item/', views.cancel_item, name='cancel_item'),
     path('invoice/<item_uid>', views.invoice, name='invoice'),
+    path('email_verify/', views.email_verify, name='email_verify'),
+    path('confirm_email/', views.confirm_email, name='confirm_email'),
+
 
     
 ]

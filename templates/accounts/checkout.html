@@ -110,7 +110,8 @@
                     </div>
                     
                     <!-- Display all addresses with radio buttons for selection -->
-                    <div class="other-addresses mt-5">
+                    <div class="p-3 p-lg-5 border bg-white address-wrap">
+                    <div class="other-addresses mt-5 ">
                         {% for address in addresses %}
                         <!-- Display details of other addresses in a loop -->
                         <div class="address-card">
@@ -124,6 +125,9 @@
                     <input type="hidden" id="selected-address-uid" name="selected-address-uid" value="">
 
                     <a href="{% url 'new_address' %}">Add a new address</a>
+
+                    </div>
+
                     
                     <!-- Delivery button -->
                     <div class="text-center mt-3">
@@ -135,7 +139,7 @@
 <!-- Order Summary Section -->
 <div class="col-md-6">
     <h2 class="h3 mb-3 text-black">Order Summary</h2>
-    <div class="p-3 p-lg-5 border bg-white" id="order-summary-section" disabled>
+    <div class="p-3 p-lg-5 border bg-white mt-5"  id="order-summary-section" disabled>
         {% for item in order_items %}
             <div class="order-item-wrapper">
                 <div class="order-item">
@@ -150,7 +154,7 @@
                         
                         <div class="quantity">
                             <button class="qty-button btn btn-primary ml-3" onclick="changeQuantity('{{ item.uid }}', 'minus')">-</button>
-                            <input type="number" min="1" max="{{item.product.stock_quantity}}" class="qty-input" id="qty-{{ item.uid }}" value="{{ item.qty }}" style="width: 30px; text-align: center;">
+                            <input type="number" min="1" max="{% if item.edition_variant %}{% for variant in item.product.product_variants.all %}{% if variant.variant == item.edition_variant %}{{ variant.stock_quantity }}{% endif %}{% endfor %}{% else %}{{ item.product.stock_quantity }}{% endif %}" class="qty-input" id="qty-{{ item.uid }}" value="{{ item.qty }}" style="width: 50px; text-align: center;">
                             <button class="qty-button btn btn-primary" onclick="changeQuantity('{{ item.uid }}', 'plus')">+</button>
                         </div>
                         
@@ -168,7 +172,7 @@
 </div>
 
 
-                <!-- Right Column - Coupon and Your Order Section -->
+                
                 <div class="col-md-6">
                     <!-- Coupon Section -->
                     <!-- <div class="row mb-5">

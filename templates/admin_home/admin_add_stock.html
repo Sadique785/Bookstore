@@ -1,0 +1,152 @@
+{% extends "base/new_base.html" %}
+
+
+{% block content %}
+<style>
+    .custom-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+
+    .selected-option {
+        padding: 10px;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        min-width: 200px; /* Set a fixed width */
+    }
+
+     .edition_select {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        border: 1px solid #ccc;
+        border-top: none;
+        display: none;
+        background-color: #fff;
+        z-index: 1;
+    }
+</style>
+
+
+<section class="content-main">
+    <div class="row">
+        <div class="col-9">
+            <div class="content-header">
+                <h2 class="content-title">Add Stock</h2>
+
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Basic</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST"  enctype="multipart/form-data">
+
+                        {% csrf_token %}
+                        <div class=" alert-message" id="alert-message" role="alert">
+                            {% include 'base/alert.html' %}
+                        </div>
+                        <div class="mb-4">
+                            <label for="product_name"  class="form-label">Product title</label>
+                            <input name="product_name" type="text" placeholder="Type here" class="form-control" value="{{product.product_name}}" readonly id="product_name">
+                        </div>
+
+
+
+<div class="mb-4">
+    <label class="form-label">Normal Stock</label>
+    <input type="number" id="normal_stock" name="normal_stock" placeholder="Normal Stock" class="form-control" min="0" >
+</div>
+<div class="form-group">
+    <span id="normalstockError"></span>
+</div>
+
+
+{% if variants != None %}
+{% for variant in variants %}
+<div class="mb-4">
+    <label class="form-label">{{variant.name}} Stock</label>
+    <input type="number" id="{{variant.name}}_stock" name="{{variant.name}}_stock" placeholder="{{variant.name}} Stock" class="form-control" min="0" >
+</div>
+<div class="form-group">
+    <span id="{{variant.name}}stockError"></span>
+</div>
+{% endfor %}
+{% endif %}
+
+
+
+                        <div class="row justify-content-md-center">
+                            <div class="col-md-auto">
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div> <!-- card end// -->
+
+        </div>
+
+    </div>
+</section>
+
+
+<script>
+    function toggleDropdown(dropdownId) {
+        var dropdown = document.getElementById(dropdownId);
+        dropdown.style.display = (dropdown.style.display === 'none') ? 'block' : 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var dropdown = document.getElementById('edition_variant');
+        dropdown.addEventListener('change', function() {
+            var selectedOptions = Array.from(this.selectedOptions).map(option => option.value);
+            var selectedOptionText = selectedOptions.length > 0 ? selectedOptions.join(', ') : 'Select Edition Variant';
+            document.querySelector('.custom-dropdown .selected-option').textContent = selectedOptionText;
+        });
+    });
+
+
+
+    function validateImage() {
+        var input = document.getElementById('images');
+        var errorSpan = document.getElementById('imageError');
+        var validExtensions = ['jpg', 'jpeg', 'png'];
+
+        if (input.files.length > 0) {
+            for (var i = 0; i < input.files.length; i++) {
+                var fileName = input.files[i].name;
+                var extension = fileName.split('.').pop().toLowerCase();
+
+                if (validExtensions.indexOf(extension) === -1) {
+                    errorSpan.innerHTML = 'Please select only JPG or PNG images.';
+                    input.value = ''; 
+                    return;
+                }
+            }
+        }
+
+        errorSpan.innerHTML = ''; 
+    }
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(function () {
+            var alertMessage = document.getElementById('alert-message');
+            if (alertMessage) {
+                alertMessage.style.display = 'none';
+            }
+        }, 5000);
+    });
+</script>
+    
+
+
+
+
+{% endblock %}
+
+

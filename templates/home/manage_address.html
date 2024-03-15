@@ -6,13 +6,13 @@
         display: flex;
         flex-wrap: wrap;
         gap: 20px;
-        justify-content: space-evenly;
+        justify-content: flex-start; 
     }
 
     .address-card {
         flex: 1;
         min-width: 300px;
-        max-width: 400px;
+        max-width: 300px;
         padding: 15px; /* Reduced padding for tighter layout */
         border: 2px dotted #ccc;
         cursor: pointer;
@@ -29,7 +29,7 @@
     .add-address-card {
         flex: 1;
         min-width: 300px;
-        max-width: 400px;
+        max-width: 300px;
         padding: 15px; /* Reduced padding for tighter layout */
         border: 2px dashed #aaa;
         display: flex;
@@ -119,13 +119,14 @@
                     {% csrf_token %}
                     <a href="#" onclick="showDeleteConfirmation('{{ address.uid }}')">Delete</a>
                 </form>
-                <div class="make-default-option">
-                    <button   type="submit">Make Default</button>
-                </div>
+                
             </div>
         </div>
     {% endfor %}
 </div>
+<div class="alert-message mt-5" id="alert-message">
+    {% include "base/alert.html" %}
+   </div>
 
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
@@ -148,8 +149,18 @@
             }
         });
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(function () {
+            var alertMessage = document.getElementById('alert-message');
+            if (alertMessage) {
+                alertMessage.style.display = 'none';
+                console.log('action done')
+            }
+        }, 5000);
+    });
 </script>
 
 
-{% include "base/alert.html" %}
+
 {% endblock %}

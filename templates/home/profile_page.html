@@ -3,6 +3,49 @@
 {% block start %}
 
 <style>
+ .modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+  background-color: #fefefe;
+  margin: auto; /* Center horizontally and vertically */
+  margin-top: 50vh; /* Adjust vertical position */
+  padding: 20px;
+  border: 1px solid #888;
+  max-width: 400px; /* Maximum width */
+}
+/* The Close Button */
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Style for error message */
+#errorMessage {
+  color: red;
+  font-size: 14px;
+  margin-top: 5px; /* Add some space between error message and other content */
+}
+
     /* CSS for mobile responsiveness */
     @media only screen and (max-width: 768px) {
         #personal-info-form {
@@ -21,29 +64,47 @@
 
     <button type="button" id="cancel-btn" style="display: none; color: blue; background-color: white; border: none; padding: 5px 10px;" onclick="toggleEdit()">Cancel</button>
 
-    <form method="post" action="" style="width: 100%;">
+    <form method="post" action="" style="width: 100%;" onsubmit="return nameValidate()">
         {% csrf_token %}
         <input type="hidden" name="form_type" value="personal_info">
         <div class="form-group" style="width: 40%; display: inline-block; margin-top: 20px;">
             <label for="{{ form_first.first_name.id_for_label }}" style="margin-bottom: 5px;">First Name:</label>
-            <input type="text" name="{{ form_first.first_name.name }}" value="{{ form_first.first_name.value }}" readonly placeholder="{{ form_first.first_name.value }}" class="form-control" />
+            <input type="text" id="first_name" name="{{ form_first.first_name.name }}" value="{{ form_first.first_name.value }}" readonly placeholder="{{ form_first.first_name.value }}" class="form-control" />
+            
         </div>
 
         <div class="form-group" style="width: 40%; display: inline-block; margin-top: 20px;">
             <label for="{{ form_first.last_name.id_for_label }}" style="margin-bottom: 5px;">Last Name:</label>
             <input type="text" name="{{ form_first.last_name.name }}" value="{{ form_first.last_name.value }}" readonly placeholder="{{ form_first.last_name.value }}" class="form-control" />
+            
         </div>
-        <button type="submit" id="submit-btn" style="display: none; color: blue; background-color: white; border: none; padding: 5px 10px; margin-top: 10px;">Save</button>
 
+        <button type="submit" id="submit-btn" style="display: none; color: blue; background-color: white; border: none; padding: 5px 10px; margin-top: 10px;">Save</button>
+        <div><span id="first-name-error" style="color: red;"></span>
+            <span id="last-name-error" style="color: red;"></span></div>
     </form>
 </div>
 
+
+
+
+
+<!-- The Modal -->
+<div id="otpModal" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h3>Enter OTP</h3>
+      <input type="text" id="otpInput" placeholder="Enter OTP" />
+      <button onclick="closeModalAndConfirmRequest()">Submit OTP</button>
+    </div>
+  </div>
 
 <!-- Form 2 -->
 <!-- Form 2 -->
 <div class="other-form" id="email-form" style="width: 100%; box-sizing: border-box; padding: 15px;">
     <h3 style="display: inline-block; margin-right: 10px;">Email</h3>
-    <button id="edit-btn-email" type="button" onclick="toggleEditEmail()" style="display: inline-block; color: blue; background-color: white; border: none; padding: 5px 10px; cursor: pointer;">Edit</button>
+    <button id="edit-btn-email" type="button" onclick="openModalAndSendRequest()" style="display: inline-block; color: blue; background-color: white; border: none; padding: 5px 10px; cursor: pointer;">Edit</button>
   
     <button type="button" id="cancel-btn-email" style="display: none; color: blue; background-color: white; border: none; padding: 5px 10px;" onclick="toggleEditEmail()">Cancel</button>
   
@@ -54,10 +115,13 @@
         <label for="{{ form_second.email.id_for_label }}" style="margin-bottom: 5px;">Email:</label>
         <input type="text" name="{{ form_second.email.name }}" id="email-input" value="{{ form_second.email.value }}" readonly placeholder="{{ form_second.email.value }}" class="form-control" />
       </div>
+      <span id="otpError" style="color: red;"></span>
+      
       
       <button type="submit" id="submit-btn-email" style="display: none; color: blue; background-color: white; border: none; padding: 5px 10px; margin-top: 10px;">Save</button>
     </form>
 </div>
+
 
 <!-- Form 3 -->
 <div class="other-form" id="form3" style="width: 100%; box-sizing: border-box; padding: 15px;">
@@ -66,7 +130,7 @@
 
     <button type="button" id="cancel-btn-form3" style="display: none; color: blue; background-color: white; border: none; padding: 5px 10px;" onclick="toggleEditForm('form3')">Cancel</button>
 
-    <form method="post" action="" style="width: 100%;">
+    <form method="post" action="" style="width: 100%;" onsubmit="return mobileValidation()">
         {% csrf_token %}
         <input type="hidden" name="form_type" value="mobile">
         <div class="form-group" style="width: 40%; display: inline-block; margin-top: 20px;">
@@ -76,6 +140,7 @@
         <button type="submit" id="submit-btn-form3" style="display: none; color: blue; background-color: white; border: none; padding: 5px 10px; margin-top: 10px;">Save</button>
     </form>
 </div>
+<span id="mobile-number-error" style="color: red; "></span>
 
 <div class="alert-message mt-5" id="alert-message">
     {% include "base/alert.html" %}
@@ -94,6 +159,163 @@
 
 
   <script>
+
+function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+
+
+    function nameValidate() {
+        var firstNameInput = document.querySelector('[name="{{ form_first.first_name.name }}"]');
+        var lastNameInput = document.querySelector('[name="{{ form_first.last_name.name }}"]'); 
+        var firstName = document.querySelector('[name="{{ form_first.first_name.name }}"]').value.trim();
+        var lastName = document.querySelector('[name="{{ form_first.last_name.name }}"]').value.trim();
+        var firstNameError = document.getElementById('first-name-error');
+        var lastNameError = document.getElementById('last-name-error');
+        
+        // Clear previous errors
+        firstNameError.textContent = '';
+        lastNameError.textContent = '';
+        
+        // Validation logic
+        var isValid = true;
+        if (firstName === '') {
+            firstNameError.textContent = 'First name is required.';
+            
+            isValid = false;
+            firstNameInput.value = "{{ form_first.first_name.value }}";
+        }
+        if (lastName === '') {
+            lastNameError.textContent = 'Last name is required.';
+            isValid = false;
+            lastNameInput.value = "{{ form_first.last_name.value }}";
+        }
+        setTimeout(function() {
+            firstNameError.style.display = 'none';
+            lastNameError.style.display = 'none';
+        }, 5000);
+        
+        return isValid;
+    }
+
+
+    function mobileValidation() {
+    var mobile = document.getElementById('mobile-input').value.trim();
+    
+    
+    
+    var mobileError = document.getElementById('mobile-number-error');
+    var isValid = true;
+
+    mobileError.textContent = '';
+
+    // Validation logic
+    if (mobile === '') {
+        mobileError.textContent = 'Mobile number is required.';
+        isValid = false;
+        
+    } else if (mobile.length !== 10) {
+    mobileError.textContent = 'Mobile number should be exactly 10 digits.';
+    
+    isValid = false;
+    
+}
+
+    
+    setTimeout(function() {
+        mobileError.style.display = 'none';
+    }, 5000);
+
+    return isValid;
+}
+
+
+
+function openModal() {
+  var modal = document.getElementById('otpModal');
+  modal.style.display = 'block';
+}
+
+
+function closeModal() {
+  var modal = document.getElementById('otpModal');
+  modal.style.display = 'none';
+}
+
+function openModalAndSendRequest() {
+  var email = document.getElementById('email-input').value;
+
+
+  fetch("{% url 'email_verify' %}", {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken')
+    },
+    body: JSON.stringify({ email: email })
+  })
+  .then(response => {
+    if (response.ok) {
+        console.log('success')
+      openModal();
+    } else {
+      console.error('Error:', response.statusText);
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+}
+
+
+
+
+function closeModalAndConfirmRequest() {
+  var otp = document.getElementById('otpInput').value;
+
+
+  fetch("{% url 'confirm_email' %}", {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken')
+    },
+    body: JSON.stringify({ otp: otp })
+  })
+  .then(response => {
+    if (response.ok) {
+        console.log('success verified')
+      closeModal();
+      document.getElementById('otpError').textContent = '';
+      toggleEditEmail()
+
+    } else {
+        return response.json().then(data => {
+        closeModal();
+        document.getElementById('otpError').textContent = data.error;
+      });
+        
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+}
+
+
     function toggleEditForm(formId) {
         var form = document.getElementById(formId);
         var editBtn = document.getElementById('edit-btn-' + formId);

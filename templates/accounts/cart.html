@@ -48,30 +48,77 @@
                 <td class="product-name">
                   <h2 class="h5 text-black">{{ item.product.product_name }}</h2>
                   {% if item.edition_variant %}
-                    <p>Edition: {{ item.edition_variant.name }}</p>
-                  {% endif %}
-                  {% if item.product.stock_quantity <= 5 %}
-                  <p>Only {{item.product.stock_quantity}} available </p>
-                  {% endif %}
+                    
+                    {% for variant in item.product.product_variants.all %}
+                    {% if variant.variant == item.edition_variant %}
+                        <p>Edition: {{ variant.variant.name }}</p>
+                        {% if variant.stock_quantity <= 5 %}
+                            <p>Only {{ variant.stock_quantity }} available </p>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
 
+                    
+
+                  {% endif %}
+                 
                 </td>
-                {% if item.product.has_stock %}
+
+
+               {% if item.edition_variant %}
+                {% for variant in item.product.product_variants.all %}
+                {% if variant.variant == item.edition_variant %}
+                {% if variant.stock_quantity > 0  %}
                 <td>₹{{ item.get_product_intial_price }}</td>
-                <td>
-                  <div class="quantity-container" style="max-width: 120px;">
-                    <button class="btn btn-outline-black" id="button-minus" type="button" onclick="changeQuantity('{{ item.uid }}', 'minus')">−</button>
-                    <input type="number" min="1" max="{{ item.product.stock_quantity }}" class="form-control text-center quantity-amount" value="{{ item.qty }}" aria-label="Quantity" aria-describedby="button-addon1">
-                    <button class="btn btn-outline-black" id="button-plus" type="button" onclick="changeQuantity('{{ item.uid }}', 'plus')">+</button>
-                  </div>
-                </td>
-                <td class="product-total" id="total-{{ item.uid }}">₹{{ item.get_product_price }}</td>
-                {% else %}
-                 <td colspan="3" class="text-center">
-                  <div class="alert alert-danger" role="alert">
-                     Out of Stock
-                   </div>
-                     </td>
+               <td  >
+                 <div class="quantity-container" style="max-width: 120px; margin-left: 30px;">
+                   <button class="btn btn-outline-black" id="button-minus" type="button" onclick="changeQuantity('{{ item.uid }}', 'minus')">−</button>
+                   <input type="number" min="1" max="{% if item.edition_variant %}{% for variant in item.product.product_variants.all %}{% if variant.variant == item.edition_variant %}{{ variant.stock_quantity }}{% endif %}{% endfor %}{% else %}{{ item.product.stock_quantity }}{% endif %}"
+                class="form-control text-center quantity-amount "  value="{{ item.qty }}" aria-label="Quantity" aria-describedby="button-addon1">
+                   <button class="btn btn-outline-black" id="button-plus" type="button" onclick="changeQuantity('{{ item.uid }}', 'plus')">+</button>
+                 </div>
+               </td>
+               <td class="product-total" id="total-{{ item.uid }}">₹{{ item.get_product_price }}</td>
+               {% else %}
+               <td colspan="3" class="text-center">
+                <div class="alert alert-danger" role="alert">
+                   Out of Stock
+                 </div>
+                   </td>
+                
                 {% endif %}
+                {% endif %}
+                {% endfor %}
+
+               {% else %}
+
+
+               {% if item.product.has_stock %}
+               <td>₹{{ item.get_product_intial_price }}</td>
+               <td  >
+                 <div class="quantity-container" style="max-width: 120px; margin-left: 30px;">
+                   <button class="btn btn-outline-black" id="button-minus" type="button" onclick="changeQuantity('{{ item.uid }}', 'minus')">−</button>
+                   <input type="number" min="1" max="{% if item.edition_variant %}{% for variant in item.product.product_variants.all %}{% if variant.variant == item.edition_variant %}{{ variant.stock_quantity }}{% endif %}{% endfor %}{% else %}{{ item.product.stock_quantity }}{% endif %}"
+                class="form-control text-center quantity-amount "  value="{{ item.qty }}" aria-label="Quantity" aria-describedby="button-addon1">
+                   <button class="btn btn-outline-black" id="button-plus" type="button" onclick="changeQuantity('{{ item.uid }}', 'plus')">+</button>
+                 </div>
+               </td>
+               <td class="product-total" id="total-{{ item.uid }}">₹{{ item.get_product_price }}</td>
+               {% else %}
+                <td colspan="3" class="text-center">
+                 <div class="alert alert-danger" role="alert">
+                    Out of Stock
+                  </div>
+                    </td>
+               {% endif %}
+
+
+
+
+               {% endif %}
+                
+
+                
 
                 <td><a href="{% url 'remove_cart' item.uid %}" class="btn btn-black btn-sm">X</a></td>
               </tr>
@@ -86,12 +133,7 @@
     <div class="row">
       <div class="col-md-6">
         <div class="row mb-5">
-          <div class="col-md-6 mb-3 mb-md-0">
-            <button class="btn btn-black btn-sm btn-block">Update Cart</button>
-          </div>
-          <div class="col-md-6">
-            <button class="btn btn-outline-black btn-sm btn-block">Continue Shopping</button>
-          </div>
+
         </div>
 
 

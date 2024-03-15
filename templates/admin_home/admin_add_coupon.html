@@ -48,13 +48,7 @@
                                 <input name="expiration_date" type="datetime-local" class="form-control">
                                 <span id="expirationDateError" class="text-danger"></span>
                             </div>
-                            <!-- <div class="mb-4">
-                                <label class="form-label">Set Coupon to Expire</label>
-                                <div class="form-check">
-                                    <input name="expireCheckbox" class="form-check-input" type="checkbox" id="expireCheckbox">
-                                    <label class="form-check-label" for="expireCheckbox">Expire Coupon</label>
-                                </div>
-                            </div> -->
+
                             <div class="alert-message mt-5" id="alert-message">
                                 {% include "base/alert.html" %}
                                </div>
@@ -96,7 +90,14 @@
         if (couponCode === '') {
             couponCodeError.innerHTML = 'Coupon code is required.';
             return false;
+        } else if (couponCode.trim() === '') {
+            couponCodeError.innerHTML = 'Empty spaces are not allowed.';
+            return false;
         }
+        else if (couponCode.length > 10) {
+        couponCodeError.innerHTML = 'Coupon code must be 10 characters or less.';
+        return false;
+         }
 
         if (discountPrice === '' || isNaN(discountPrice)) {
             discountPriceError.innerHTML = 'Invalid discount price.';

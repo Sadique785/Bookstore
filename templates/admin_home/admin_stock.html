@@ -1,0 +1,92 @@
+
+
+{% extends "base/new_base.html" %}
+
+
+{% block content %}
+
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Our Books</h2>
+            <p>"Books: Portals to endless learning and boundless imagination."</p>
+        </div>
+        
+    </div>
+    <div class="card mb-4">
+        <header class="card-header">
+            <!-- <form method="get" action="{% url 'admin_product' %}">
+                <div class="row gx-3">
+                    <div class="col-lg-6 col-md-6 text-end">
+                        <select name="categories" class="form-select">
+                            <option value="all">All Categories</option>
+                            {% for category in categories %}
+                                <option value="{{ category.category_name }}" {% if category.category_name in category_options %}selected{% endif %}>
+                                    {{ category.category_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-lg-6 col-md-6">
+                        <div class="input-group">
+                            <input type="text" name="search" placeholder="Search..." {% if search_term  %} value="{{search_term}}" {% endif %} class="form-control">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                    </div>
+                </div>
+            </form> -->
+        </header>  
+        
+        <div class="card-body">
+            <div class="row gx-3">
+                {% for product in products %}
+                <div class="col-3">
+                    <div class="card card-product-grid">
+                        <a href="#" class="img-wrap">
+                            <img src="{{ product.product_images.first.image.url }}" alt="Product">
+                        </a>
+                        <div class="info-wrap mt-4">
+                            <a href="#" class="title text-truncate">{{product.product_name}}</a>
+                            <a href="{% url 'admin_add_stock' product.slug %}" class="btn btn-sm mt-5 font-sm rounded btn-brand">
+                                <i class="material-icons md-edit"></i> Add Stock
+                            </a>
+                            
+                        
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+
+    </div> <!-- card end// -->
+
+    
+    <div class="pagination-area mt-15 mb-50">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination justify-content-start">
+                {% for i in products.paginator.page_range %}
+                    {% if i == products.number %}
+                        <li class="page-item active"><a class="page-link" href="?page={{i}}">{{i}}</a></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{i}}">{{i}}</a></li>
+                    {% endif %}
+                {% endfor %}
+                <li class="page-item"><a class="page-link dot" href="#">...</a></li>
+                <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
+            </ul>
+        </nav>
+    </div>
+    
+
+
+</section>
+
+
+
+
+{% endblock %}
+
+

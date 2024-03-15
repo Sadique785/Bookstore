@@ -15,7 +15,7 @@ from django.contrib.auth.decorators import login_required
 from base.emails import generate_otp, send_otp_email
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.hashers import make_password
-from products.models import Product, EditionVariant, LanguageVariant, Coupon
+from products.models import Product, EditionVariant, LanguageVariant, Coupon, ProductVariant
 from django.views.decorators.http import require_POST
 from home.models import Address, UserAddress
 from django.views import View
@@ -68,7 +68,7 @@ def login_page(request):
 
         if not user.is_active:
             messages.warning(request, "Your account is blocked. Contact the admin for more information.")
-            return render(request, 'home/login.html')
+            return redirect('login')
         
 
         if hasattr(user, 'profile'):
@@ -108,6 +108,7 @@ def forgot_password(request):
             hashed_password=make_password(password)
             user.password=hashed_password
             user.save()
+            del request.session['otp']
             messages.warning(request,'Password reset done. Login with this password.')
             return redirect('forgot_password')
         else:
@@ -116,7 +117,6 @@ def forgot_password(request):
     return render(request, 'home/forgot_password.html')
 
 def verify(request):
-    print('works')
     if request.method=='POST':
         Data=json.loads(request.body)
 
@@ -126,11 +126,9 @@ def verify(request):
             request.session['otp'] = otp
             send_otp_email(email, otp)
             data={'success':'An OTP is sent to your email'}
-            print(data)
             return JsonResponse(data)
         else:
             data={'fail':'Account not found'}
-            print(data)
             return JsonResponse(data)
 
 def register_page(request):
@@ -194,6 +192,7 @@ def add_to_cart(request, uid):
 
 
     variant = request.GET.get('variant')
+    print('Variantis',variant)
 
     product = Product.objects.get(uid = uid)
     user = request.user
@@ -324,6 +323,8 @@ def cart(request):
 
     if cart:
         cart_items = CartItem.objects.filter(cart=cart)
+        for item in cart_items:
+            print(item.product.product_name)
     else:
         cart_items = []
 
@@ -348,7 +349,7 @@ def remove_coupon(request, cart_id):
 def order_history(request):
     orders = Order.objects.annotate(
         unpaid_order_items_count=Count('order_items', filter=~Q(order_items__is_paid=True))
-    )
+    ).order_by('-created_at')
 
     paid_orders = orders.filter(unpaid_order_items_count=0, is_paid=True, user=request.user)
     failed_orders = orders.exclude(unpaid_order_items_count=0, is_paid=True).filter(user=request.user)
@@ -360,9 +361,9 @@ def order_history(request):
         if selected_value == 'all':
             orders = Order.objects.filter(user=request.user).order_by('-created_at')
         elif selected_value == 'paid':
-            orders = paid_orders.filter(user=request.user)
+            orders = paid_orders.filter(user=request.user).order_by('-created_at')
         elif selected_value == 'nonpaid':
-            orders = failed_orders.filter(user=request.user)
+            orders = failed_orders.filter(user=request.user).order_by('-created_at')
         else:
             return JsonResponse({'error': 'Invalid filter selected'})
 
@@ -370,7 +371,7 @@ def order_history(request):
         for order in orders:
             order_items = order.order_items.all()
             for item in order_items:
-                # Removed print statement
+               
                 pass
 
             order_dict = {
@@ -390,7 +391,7 @@ def order_history(request):
 
 def order_product_detail(request, uid):
     item = OrderItem.objects.get(uid = uid)
-    item_price = float(item.price)
+    item_price = float(item.price)*item.quantity
     client = razorpay.Client(auth=(RAZORPAY_API_KEY, RAZORPAY_API_SECRET_KEY))
 
     DATA = {
@@ -536,13 +537,20 @@ def save_order(request):
             mobile=address.mobile,
         )
         order_item.save()
-
-        curr_product = Product.objects.filter(product_name=cart_item.product.product_name).first()
-        if curr_product:
-            curr_product.stock_quantity = max(0, curr_product.stock_quantity - cart_item.qty)
-            curr_product.save()
+        if cart_item.edition_variant:
+            product_variant = ProductVariant.objects.filter(product=cart_item.product, variant=cart_item.edition_variant).first()
+            if product_variant:
+                product_variant.stock_quantity -= cart_item.qty
+                product_variant.save()
         else:
-            print(f"Product with name {cart_item.product.product_name} not found.")
+            curr_product = Product.objects.filter(product_name=cart_item.product.product_name).first()
+            if curr_product:
+                curr_product.stock_quantity = max(0, curr_product.stock_quantity - cart_item.qty)
+                curr_product.save()
+            else:
+                print(f"Product with name {cart_item.product.product_name} not found.")
+
+
 
     total_amount = cart.get_final_total()
     if payment_method.name == 'Wallet Payment':
@@ -781,11 +789,31 @@ def cancel_item(request):
     order_item = get_object_or_404(OrderItem, uid=item_uid)
 
     if order_item.is_active:
+        
         user = request.user
         wallet = Wallet.objects.filter(user=user).first()
-        wallet.balance += order_item.get_total()
-        wallet.refund += order_item.get_total()
-        wallet.save()
+        if wallet:
+            wallet.balance += order_item.get_total()
+            wallet.refund += order_item.get_total()
+            wallet.save()
+            transaction = Transaction.objects.create(
+                    wallet=wallet,
+                    amount=order_item.get_total(),
+                    transaction_type='credit',
+                    description='Added money to wallet',
+                )
+            transaction.save()
+        else:
+            wallet = Wallet.objects.create(user=user, balance=order_item.get_total())
+            wallet.save()
+            transaction = Transaction.objects.create(
+                    wallet=wallet,
+                    amount=order_item.get_total(),
+                    transaction_type='credit',
+                    description='Added money to wallet',
+                )
+            transaction.save()
+            
         order_item.is_active = False
         order_item.save()
 
@@ -798,6 +826,25 @@ def cancel_item(request):
         if all_items_cancelled:
             order_item.order.is_active = False
             order_item.order.save()
+
+
+        order_item.order_status = None  
+        order_item.save()
+
+        if order_item.edition_variant:
+            product = Product.objects.filter(product_name = order_item.product_name).first()
+            product_variant = ProductVariant.objects.all()
+            edition_variant = EditionVariant.objects.filter(name = order_item.edition_variant).first()
+            product_variant = ProductVariant.objects.filter(product = product, variant = edition_variant).first()
+            product_variant.stock_quantity += order_item.quantity
+            product_variant.save()
+            
+        else:
+
+            product = Product.objects.filter(product_name = order_item.product_name).first()
+            product.stock_quantity += order_item.quantity
+            product.save()
+            
 
         transaction = Transaction.objects.create(
             wallet=wallet,
@@ -873,4 +920,34 @@ def invoice(request, item_uid):
 
 
 
+def email_verify(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        email = data.get('email')
 
+        if User.objects.filter(email=email).exists():
+            otp = generate_otp()
+            request.session['otp'] = otp
+            send_otp_email(email, otp)
+            return JsonResponse({'success': 'An OTP is sent to your email'})
+        else:
+            return JsonResponse({'fail': 'Account not found'})
+        
+def confirm_email(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        otp = data.get('otp')
+
+        if not otp:
+            return JsonResponse({'error': 'OTP cannot be empty'}, status=400)
+        
+        if len(otp) != 6:
+            return JsonResponse({'error': 'OTP must be exactly 6 characters long'}, status=400)
+
+        
+        if otp == request.session.get('otp'):
+            
+            del request.session['otp']
+            return JsonResponse({'success': 'Email confirmed'})
+        else:
+            return JsonResponse({'error': 'Invalid OTP'}, status=400)

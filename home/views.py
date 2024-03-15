@@ -77,10 +77,10 @@ def profile_page(request):
             form.save()
             
             
-            messages.success(request, f'{form_type.capitalize()}  saved successfully.')
+            messages.success(request, f'Form  saved successfully.')
             return redirect('profile')
         else:
-            messages.warning(request, 'Form submission failed. Please check the form data.')
+            
             
             context['form_errors'] = form.errors
             return render(request, 'home/profile_page.html', context)

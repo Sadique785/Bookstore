@@ -67,3 +67,9 @@ admin.site.register(Product, ProductAdmin)
 admin.site.register(Audiobook, AudiobookAdmin)
 admin.site.register(Ebook, EbookAdmin)
 
+class ProductVariantAdmin(admin.ModelAdmin):
+    list_display = ['product', 'variant', 'stock_quantity']
+    list_filter = ['product', 'variant']
+    search_fields = ['product__name', 'variant__name']
+
+admin.site.register(ProductVariant, ProductVariantAdmin)

@@ -116,6 +116,8 @@
                         <a href="{% url 'admin_category' %}">Categories</a>
 
                         <a href="{% url 'admin_variance' %}">Variance</a>
+
+                        <a href="{% url 'admin_stock' %}">Stock Management</a>
                     </div>
                 </li>
                 <li class="menu-item has-submenu">
@@ -128,16 +130,7 @@
                         
                     </div>
                 </li>
-                <!-- <li class="menu-item has-submenu">
-                    <a class="menu-link" href="page-sellers-cards.html"> <i class="icon material-icons md-store"></i>
-                        <span class="text">Sellers</span>
-                    </a>
-                    <div class="submenu">
-                        <a href="page-sellers-cards.html">Sellers cards</a>
-                        <a href="page-sellers-list.html">Sellers list</a>
-                        <a href="page-seller-detail.html">Seller profile</a>
-                    </div>
-                </li> -->
+
                 <li class="menu-item has-submenu">
                     <a class="menu-link" href="page-form-product-1.html"> <i class="icon material-icons md-add_box"></i>
                         <span class="text">Coupon</span>
@@ -148,25 +141,7 @@
 
                     </div>
                 </li>
-                <!-- <li class="menu-item has-submenu">
-                    <a class="menu-link" href="page-transactions-1.html"> <i class="icon material-icons md-monetization_on"></i>
-                        <span class="text">Transactions</span>
-                    </a>
-                    <div class="submenu">
-                        <a href="page-transactions-1.html">Transaction 1</a>
-                        <a href="page-transactions-2.html">Transaction 2</a>
-                    </div>
-                </li> -->
-
-                <!-- <li class="menu-item">
-                    <a class="menu-link" href="page-reviews.html"> <i class="icon material-icons md-comment"></i>
-                        <span class="text">Reviews</span>
-                    </a>
-                </li> -->
-                <!-- <li class="menu-item">
-                    <a class="menu-link" href="page-brands.html"> <i class="icon material-icons md-stars"></i>
-                        <span class="text">Brands</span> </a>
-                </li> -->
+              
                 <li class="menu-item">
                     <a class="menu-link" disabled href="{%  url 'admin_index' %}"> <i class="icon material-icons md-pie_chart"></i>
                         <span class="text">Statistics</span>
@@ -181,22 +156,7 @@
                 </li>
             </ul>
             <hr>
-            <!-- <ul class="menu-aside">
-                <li class="menu-item has-submenu">
-                    <a class="menu-link" href="#"> <i class="icon material-icons md-settings"></i>
-                        <span class="text">Settings</span>
-                    </a>
-                    <div class="submenu">
-                        <a href="page-settings-1.html">Setting sample 1</a>
-                        <a href="page-settings-2.html">Setting sample 2</a>
-                    </div>
-                </li>
-                <li class="menu-item">
-                    <a class="menu-link" href="page-blank.html"> <i class="icon material-icons md-local_offer"></i>
-                        <span class="text"> Starter page </span>
-                    </a>
-                </li>
-            </ul> -->
+           
             <br>
             <br>
         </nav>
@@ -206,18 +166,7 @@
     <main class="main-wrap">
         <header class="main-header navbar">
             <div class="col-search">
-                <!-- <form class="searchform">
-                    <div class="input-group">
-                        <input list="search_terms" type="text" class="form-control" placeholder="Search term">
-                        <button class="btn btn-light bg" type="button"> <i class="material-icons md-search"></i></button>
-                    </div>
-                    <datalist id="search_terms">
-                        <option value="Products">
-                        <option value="New orders">
-                        <option value="Apple iphone">
-                        <option value="Ahmed Hassan">
-                    </datalist>
-                </form> -->
+              
             </div>
             <div class="col-nav">
                 <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside"> <i class="material-icons md-apps"></i> </button>
@@ -266,110 +215,7 @@
     <script>
        
 
-        function validateProductForm() {
-
-
-    var productName = document.getElementById('product_name').value;
-    var productDescription = document.getElementById('product_description').value;
-    var regularPrice = document.getElementsByName('regular_price')[0].value;
-    var promotionalPrice = document.getElementsByName('promotional_price')[0].value;
-    var taxRate = document.getElementsByName('tax_rate')[0].value;
-    var input = document.getElementById('images');
-    var category = document.getElementById('category').value;
-    var subcategory = document.getElementById('sub_category').value;
-    var stock = document.getElementById('stock').value;
-
-
-
-    var productNameError = document.getElementById('productNameError');
-    var productDescriptionError = document.getElementById('productDescriptionError');
-    var regularPriceError = document.getElementById('regularPriceError');
-    var promotionalPriceError = document.getElementById('promotionalPriceError');
-    var taxRateError = document.getElementById('taxRateError');
-    var errorSpan = document.getElementById('imageError');
-    var categoryError = document.getElementById('categoryError');
-    var subcategoryError = document.getElementById('subcategoryError');
-    var stockError = document.getElementById('stockError');
-    var validExtensions = ['jpg', 'jpeg', 'png'];
-
-    productNameError.innerHTML = '';
-    productDescriptionError.innerHTML = '';
-    regularPriceError.innerHTML = '';
-    promotionalPriceError.innerHTML = '';
-    taxRateError.innerHTML = '';
-   
-    errorSpan.innerHTML = '';
-    categoryError.innerHTML = '';
-    subcategoryError.innerHTML = '';
-    stockError.innerHTML = '';
-
-    if (productName === '') {
-        productNameError.innerHTML = 'Product name is required';
-        return false;
-    }
-
-    if (productDescription === '') {
-        productDescriptionError.innerHTML = 'Product description is required';
-        return false;
-    }
-
-    if (regularPrice === '') {
-        regularPriceError.innerHTML = 'Regular price is required';
-        return false;
-    }
-    else if (parseFloat(regularPrice) <= 0 || isNaN(parseFloat(regularPrice))) {
-        regularPriceError.innerHTML = 'Regular price must be a positive value';
-        return false;
-    }
-    if (promotionalPrice === '') {
-        promotionalPriceError.innerHTML = 'Promotional price is required';
-        return false;
-    }
-    else if (parseFloat(promotionalPrice) < 0 || isNaN(parseFloat(promotionalPrice))) {
-        promotionalPriceError.innerHTML = 'Promotional price must be a positive value';
-        return false;
-    }
-    if (taxRate === '') {
-        taxRateError.innerHTML = 'Tax rate is required';
-        return false;
-    }else if (parseFloat(taxRate) < 0 || isNaN(parseFloat(taxRate))) {
-        taxRateError.innerHTML = 'Tax rate must be must be a positive value';
-        return false;
-    }
-    if (input.files.length > 0) {
-            for (var i = 0; i < input.files.length; i++) {
-                var fileName = input.files[i].name;
-                var extension = fileName.split('.').pop().toLowerCase();
-
-                if (validExtensions.indexOf(extension) === -1) {
-                    errorSpan.innerHTML = 'Please select only JPG or PNG images.';
-                    input.value = ''; // Clear the input
-                    return;
-                }
-            }
-        }
-
-    if (category === 'Select Category') {
-        categoryError.innerHTML = 'Please select a category';
-        return false;
-    }
-    if (subcategory === 'Select Subcategory') {
-        subcategoryError.innerHTML = 'Please select a subcategory';
-        return false;
-    }
-    if (stock  === '') {
-        stockError.innerHTML = 'Stock is required';
-        return false;
-    }else if (parseFloat(stock) < 0 || isNaN(parseFloat(stock))) {
-        stockError.innerHTML = 'Tax rate must be must be a positive value';
-        return false;
-    }
-    
-
-    // Add other validation checks for promotional price, tax rate, etc. if needed
-
-    return true; // Form is valid
-}
+     
     // const existingImagesList = document.getElementById('currentImagesList');
     // const images = existingImagesList.getElementsByTagName('li');
     // let imageNames = '';

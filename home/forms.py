@@ -24,6 +24,13 @@ class InfoFirst(forms.ModelForm):
         cleaned_data = super().clean()
         first_name = cleaned_data.get('first_name')
         last_name = cleaned_data.get('last_name')
+        if not first_name.strip():
+            raise ValidationError("First name cannot be empty or contain only spaces.")
+        
+        if not last_name.strip():
+            raise ValidationError("Last name cannot be empty or contain only spaces.")
+        
+
         if first_name == last_name:
              raise ValidationError("First name and last name cannot be the same.")
              
@@ -35,6 +42,9 @@ class InfoSecond(forms.ModelForm):
 
     def clean_email(self):
         email = self.cleaned_data['email']
+
+        if not email or not email.strip():
+            raise ValidationError("Email cannot be empty or contain only spaces.")
 
         try:
             validate_email(email)
@@ -58,8 +68,17 @@ class InfoThird(forms.ModelForm):
         cleaned_data = super().clean()
         mobile = cleaned_data.get('mobile')
 
+        if not mobile or not mobile.strip():
+            raise ValidationError("Mobile number cannot be empty or contain only spaces.")
+
+        
         if not mobile.isdigit():
-                raise ValidationError("Mobile number must contain only digits.")
+            raise ValidationError("Mobile number must contain only digits.")
+
+        
+        if len(mobile) != 10:
+            raise ValidationError("Mobile number must be exactly 10 digits.")
+
 
 
 
