@@ -91,11 +91,11 @@ DATABASES = {
         'NAME': 'ecommerce',
         'USER': 'postgres',
         'PASSWORD': 'Sadhu@785',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
+        'HOST': 'localhost',  
+        'PORT': '5432',       
+    },
 
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

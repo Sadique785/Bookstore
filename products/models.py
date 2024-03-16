@@ -60,7 +60,7 @@ class Author(models.Model):
 class LanguageVariant(BaseModel):
     name = models.CharField(max_length = 100)
     price = models.IntegerField(default=0)
-    stock_quantity = models.PositiveIntegerField(default = 0)
+    
 
     def __str__(self) -> str:
         return self.name
@@ -68,7 +68,7 @@ class LanguageVariant(BaseModel):
 class EditionVariant(BaseModel):
     name = models.CharField(max_length = 100)
     price = models.IntegerField(default=0)
-    stock_quantity = models.PositiveIntegerField(default = 0)
+    
     
     def __str__(self) -> str:
         return self.name
