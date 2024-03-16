@@ -1315,7 +1315,10 @@ def admin_add_product(request):
             new_product.edition_variant.add(*selected_editions)
             new_product.save()
             for variant in selected_editions:
+                print(variant)
+                print(new_product)
                 product_variant = ProductVariant.objects.create(product = new_product, variant = variant)
+                print(product_variant)
                 product_variant.save()
 
         
