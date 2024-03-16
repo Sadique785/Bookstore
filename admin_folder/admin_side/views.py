@@ -800,16 +800,18 @@ def admin_variance(request):
             messages.success(request, 'Created Successfully')
             
             return redirect('admin_variance')
+        
+    context = {}
+    
             
     
-    languages = LanguageVariant.objects.all()
+    # languages = LanguageVariant.objects.all()
     editions = EditionVariant.objects.all()
+    if editions:
+        context['editions'] = editions
         
     
-    context = {
-        'languages':languages,
-        'editions':editions,
-    }
+    
         
         
     return render(request, 'admin_home/admin_variance.html', context)
