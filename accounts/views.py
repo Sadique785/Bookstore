@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.contrib.auth import authenticate,login, logout
-
+from django.conf import settings
 from BookStore.settings import RAZORPAY_API_KEY, RAZORPAY_API_SECRET_KEY
 from .models import Invoice, Profile, Cart, CartItem, Wallet, Transaction
 from django.contrib.auth.decorators import login_required
@@ -406,6 +406,7 @@ def order_product_detail(request, uid):
     context = {'item':item,
                'api_key':RAZORPAY_API_KEY,
                 'order_id':payment_order_id,
+                'callback_url':settings.CALLBACK_URL,
                 }
 
 
@@ -417,6 +418,8 @@ def order_product_detail(request, uid):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True, max_age=0)
 @login_required
 def checkout(request):
+    print('entered')
+    print(settings.CALLBACK_URL)
     user = request.user
     user_addresses = UserAddress.objects.filter(user=user)
     addresses = [user_address.address for user_address in user_addresses]
@@ -455,6 +458,7 @@ def checkout(request):
         'cart_uid': cart.uid,
         'api_key': RAZORPAY_API_KEY,
         'order_id': payment_order_id,
+        'callback_url': settings.CALLBACK_URL,
         'online_payment_uid': online_payment_uid,
         'wallet_payment_uid': wallet_payment_uid,
         'cash_on_delivery_uid': cash_on_delivery_uid,
@@ -638,8 +642,10 @@ def thankyou(request):
 def wallet(request):
     user = request.user
     user_id = user.id
-    context = {'user_id':user_id}
-
+    context = {
+        'user_id': user_id,
+        'callback_url': settings.CALLBACK_URL, 
+    }
     wallet = Wallet.objects.filter(user = user).first()
     if wallet:
         context['balance'] = wallet.balance
@@ -671,6 +677,8 @@ def create_razorpay_order(request):
         response_data = {
             'order_id': order_id,
             'api_key': api_key,
+            'callback_url': settings.CALLBACK_URL,
+
         }
         return JsonResponse(response_data)
 

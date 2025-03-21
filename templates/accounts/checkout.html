@@ -617,8 +617,8 @@ function saveOrder(selectedAddressUid, onlinePaymentUid, selectedCartItemUid) {
             "name": "Acme Corp", 
             "description": "Test Transaction",
             "image": "https://example.com/your_logo",
-            "order_id": "{{order_id}}", // This is a sample Order ID. Pass the `id` obtained in the response of Step 1
-            "callback_url": "https://sadique.live/accounts/payment-callback/",
+            "order_id": "{{order_id}}", 
+            "callback_url": "{{ callback_url }}/payment-callback/",  
             "prefill": {
                 "name": "V S Sadique", // Your customer's name
                 "email": "vssadique785@gmail.com",
@@ -631,6 +631,8 @@ function saveOrder(selectedAddressUid, onlinePaymentUid, selectedCartItemUid) {
                 "color": "#3399cc"
             }
         };
+        
+        
         console.log('Setting up event listeners for Razorpay');
             const rzp = new Razorpay(razorpayOptions);
             rzp.open();

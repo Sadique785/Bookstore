@@ -4,6 +4,7 @@
 {% block start %}
 
 
+
 <style>
     .notification {
     position: fixed;
@@ -120,20 +121,25 @@
           
 
 
-        {% if product.edition_variant.count %}
-    <div class="form-group col-md">
-        <label>Select Edition</label>
-        <div class="mt-1">
-            {% for edition in product.edition_variant.all %}
-            <label class="custom-control custom-radio custom-control-inline">
-              <input type="radio" onclick="get_correct_edition_price('{{edition.name}}')" name="select_edition" {% if selected_edition == edition.name %} checked {% endif %} class="custom-control-input">
-              <div class="custom-control-label">{{edition.name}}</div>
-            </label>
-            {% endfor %}
-
-        </div>
-</div> 
+            {% if product.edition_variant.count %}
+            <div class="form-group col-md">
+                <label>Select Edition</label>
+                <div class="mt-1">
+                    {% for edition in product.edition_variant.all %}
+                    <label class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" 
+                               onclick="get_correct_edition_price('{{ edition.name }}')" 
+                               name="select_edition"
+                               {% if selected_edition == edition.name %} checked {% endif %}
+                               class="custom-control-input"
+                               {% if disable_variant_selection %} disabled {% endif %}> <!-- Disable if no stock -->
+                        <div class="custom-control-label">{{ edition.name }}</div>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div> 
         {% endif %}
+        
 
       
         </div> <!-- row.// -->

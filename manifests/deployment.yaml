@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: historia-bookstore
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: historia-bookstore
+  template:
+    metadata:
+      labels:
+        app: historia-bookstore
+    spec:
+      containers:
+      - name: historia-bookstore
+        image: vssadique123/historia:latest
+        ports:
+        - containerPort: 8000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: historia-bookstore-service
+spec:
+  selector:
+    app: historia-bookstore
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: LoadBalancer

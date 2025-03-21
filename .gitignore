@@ -1,0 +1,22 @@
+# Ignore the .env file (important for security)
+.env  
+
+# Ignore compiled Python files
+*.pyc
+__pycache__/
+
+# Ignore database files (if using SQLite)
+*.sqlite3
+
+# Ignore media and static files (if generated dynamically)
+media/
+staticfiles/
+
+# Ignore virtual environment (if using venv)
+venv/
+newenv/
+
+evara-backend/
+untree.co-furni/
+
+

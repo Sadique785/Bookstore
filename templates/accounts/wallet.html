@@ -182,8 +182,7 @@ function getCookie(name) {
         return cookieValue;
     }
 
-
-        document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('DOMContentLoaded event triggered 1');
 
     var addMoneyButton = document.getElementById('add-money-button');
@@ -219,13 +218,16 @@ function getCookie(name) {
 
             const { order_id, api_key } = await response.json();
             console.log('Working');
+            const callbackBaseUrl = "{{ callback_url }}";  // Django provides this
+            const callbackUrl = `${callbackBaseUrl}/add-money/?amount=${amountValue}&userid=${userId}`;
+
 
             const razorpayOptions = {
                 "key": api_key,
                 "name": "Historia",
                 "description": "Test Transaction",
                 "order_id": order_id,
-                "callback_url": `https://sadique.live/accounts/add-money/?amount=${amountValue}&userid=${userId}`,
+                "callback_url": callbackUrl,  
                 "prefill": {
                     "name": "V S Sadique",
                     "email": "vssadique785@gmail.com",

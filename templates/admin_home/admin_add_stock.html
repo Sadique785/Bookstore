@@ -1,4 +1,5 @@
 {% extends "base/new_base.html" %}
+{% load custom_filters %}
 
 
 {% block content %}
@@ -58,24 +59,27 @@
 
 <div class="mb-4">
     <label class="form-label">Normal Stock</label>
-    <input type="number" id="normal_stock" name="normal_stock" placeholder="Normal Stock" class="form-control" min="0" >
+    <input type="number" id="normal_stock" name="normal_stock" placeholder="Normal Stock" value="{{variant_stock_data.normal_stock}}" class="form-control" min="0" >
 </div>
 <div class="form-group">
     <span id="normalstockError"></span>
 </div>
 
 
-{% if variants != None %}
-{% for variant in variants %}
-<div class="mb-4">
-    <label class="form-label">{{variant.name}} Stock</label>
-    <input type="number" id="{{variant.name}}_stock" name="{{variant.name}}_stock" placeholder="{{variant.name}} Stock" class="form-control" min="0" >
-</div>
-<div class="form-group">
-    <span id="{{variant.name}}stockError"></span>
-</div>
-{% endfor %}
-{% endif %}
+                {% if variants != None %}
+                {% for variant in variants %}
+                <div class="mb-4">
+                    <label class="form-label">{{variant.name}} Stock</label>
+                    <input type="number" id="{{variant.name}}_stock" name="{{variant.name}}_stock"
+                    placeholder="{{variant.name}} Stock"
+                    value="{{ variant_stock_data|get_value:variant.name }}"
+                    class="form-control" min="0" >
+                </div>
+                <div class="form-group">
+                    <span id="{{variant.name}}stockError"></span>
+                </div>
+                {% endfor %}
+                {% endif %}
 
 
 

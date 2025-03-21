@@ -35,6 +35,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 
 
+
 # ------------------------------------------------ACCOUNTS-------------------------------------------------------------
 def is_superuser(user):
     return user.is_authenticated and user.is_superuser
@@ -1222,10 +1223,20 @@ def admin_stock(request):
 def admin_add_stock(request, slug):
     product = Product.objects.filter(slug = slug).first()
 
+
     try:
         variants = product.edition_variant.all()
     except ObjectDoesNotExist:
         variants = None
+
+    print('variants', variants)
+    variant_stock_data = {'normal_stock':product.stock_quantity}
+    if variants:
+        for variant in variants:
+            product_variant = ProductVariant.objects.filter(product=product, variant=variant).first()
+            variant_stock_data[variant.name] = product_variant.stock_quantity if product_variant else 0
+
+    print('variant_stock_data', variant_stock_data)
 
 
     if request.method == "POST":
@@ -1263,7 +1274,9 @@ def admin_add_stock(request, slug):
     context = {
         'product':product,
         'variants':variants,
+        'variant_stock_data': variant_stock_data,
     }
+    print(context)
     
     return render(request,'admin_home/admin_add_stock.html',context)
 

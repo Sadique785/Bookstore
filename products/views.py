@@ -14,8 +14,13 @@ def get_product(request, product_slug):
     try:
         product = Product.objects.get(slug = product_slug)
         product_images = product.product_images.all()
+        disable_variant_selection = product.stock_quantity == 0
+        
         context = {'product':product,
-                   'product_images':product_images }
+                   'product_images':product_images,
+                    'disable_variant_selection': disable_variant_selection }
+        
+
         
         
         

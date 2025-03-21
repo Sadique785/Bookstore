@@ -200,13 +200,13 @@ document.addEventListener('DOMContentLoaded', function () {
         // Check if the clicked element is a Cancel button
         if (event.target && event.target.matches('.cancel-button')) {
             // Get the itemUid from the data attribute
-            itemUid = event.target.getAttribute('data-item-uid');
+            let itemUid = event.target.getAttribute('data-item-uid');
             
             // Call the cancelOrderItem function with the itemUid
             cancelOrderItem(itemUid);
         }
     });
-    
+
     function cancelOrderItem(itemUid) {
         // Make an asynchronous request to the Django view using fetch
         fetch("{% url 'cancel_item' %}", {
@@ -234,48 +234,43 @@ document.addEventListener('DOMContentLoaded', function () {
             alert('An error occurred. Please try again later.');
         });
     }
-    
-    
+
     // Razorpay integration
     const razorpayButton = document.getElementById('razorpay-button');
     if (razorpayButton) {
-        const itemUid = razorpayButton.getAttribute('data-item-uid');
-        const razorpay = new Razorpay({
-            key: '{{ api_key }}',
-            "name": "Acme Corp", 
-            "description": "Test Transaction",
-            "image": "https://example.com/your_logo",
-            order_id: '{{ order_id }}',
-            
-            "callback_url": "https://sadique.live/accounts/failed-payment/?uid=" + itemUid,
-            "prefill": {
-                "name": "V S Sadique", // Your customer's name
-                "email": "vssadique785@gmail.com",
-                "contact": "9000090000" // Provide the customer's phone number for better conversion rates 
-            },
-            "notes": {
-                "address": "Razorpay Corporate Office"
-            },
-            "theme": {
-                "color": "#3399cc"
-            },
-            
-            
-            
-            
-        });
-        
-        razorpayButton.setAttribute('data-item-uid', '{{ item.uid }}');
+        razorpayButton.setAttribute('data-item-uid', '{{ item.uid }}');  // Ensure item UID is set properly
+
         razorpayButton.addEventListener('click', function () {
             const itemUid = razorpayButton.getAttribute('data-item-uid');
             console.log('Uid of item:', itemUid);
+
+            // ✅ Use Django's callback URL dynamically
+            const callbackBaseUrl = "{{ callback_url }}";  // Django-provided base URL
+            const callbackUrl = `${callbackBaseUrl}/failed-payment/?uid=${itemUid}`;
+
+            const razorpay = new Razorpay({
+                key: '{{ api_key }}',
+                "name": "Acme Corp", 
+                "description": "Test Transaction",
+                "image": "https://example.com/your_logo",
+                order_id: '{{ order_id }}',
+                "callback_url": callbackUrl,  // ✅ Fixed callback URL
+                "prefill": {
+                    "name": "V S Sadique", // Your customer's name
+                    "email": "vssadique785@gmail.com",
+                    "contact": "9000090000" // Provide the customer's phone number for better conversion rates 
+                },
+                "notes": {
+                    "address": "Razorpay Corporate Office"
+                },
+                "theme": {
+                    "color": "#3399cc"
+                }
+            });
+
             razorpay.open();
         });
     }
-    
-    
-    
-    
 });
 
 
