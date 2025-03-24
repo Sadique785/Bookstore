@@ -176,7 +176,7 @@ EMAIL_HOST_PASSWORD = 'cope zthx rfyg alfn'
 # EMAIL_HOST_PASSWORD = 'xrphn/bncze/duojf'
 # DEFAULT_FROM_EMAIL = 'vssadique785@gmail.com'
 
-
+EMAIL_VERIFICATION_URL = os.getenv("EMAIL_VERIFICATION_URL", "http://127.0.0.1:8000/accounts/activate")
 
 
 

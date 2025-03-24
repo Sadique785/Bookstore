@@ -2,6 +2,7 @@ from django.conf import settings
 from django.core.mail import send_mail
 import random, string
 
+
 def generate_otp(length=6):
     characters = string.digits
     otp = ''.join(random.choice(characters) for _ in range(length))
@@ -22,7 +23,8 @@ def send_otp_email(email, otp):
 def send_account_activation_email(email, email_token):
     subject = "Your account need to be verified"
     email_from = settings.EMAIL_HOST_USER
-    message = f"Hi, click on the link to activate your account https://sadique.live/accounts/activate/{email_token}"
+    activation_url = f"{settings.EMAIL_VERIFICATION_URL}/{email_token}"
+    message = f"Hi, click on the link to activate your account {activation_url}"
     
 
     send_mail(subject, message, email_from, [email])
