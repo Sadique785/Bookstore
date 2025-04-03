@@ -139,7 +139,7 @@
 
 
   <!-- ------------------------------------------------------Coupon sect------------------------------------------ -->
-<form method="POST">
+<form method="POST" onsubmit="return validateCoupon(event)">
   <div class="alert-message mt-5" id="alert-message">
     {% include "base/alert.html" %}
    </div>
@@ -151,6 +151,8 @@
     </div>
     <div class="col-md-8 mb-3 mb-md-0">
       <input type="text" class="form-control py-3" name="coupon" id="coupon" placeholder="Coupon Code">
+      <small id="coupon-error" style="color: red; display: none;">Please enter a coupon code.</small>
+
     </div>
     <div class="col-md-4">
       <button class="btn btn-black" type="submit">Apply Coupon</button>
@@ -232,6 +234,24 @@
   function getCSRFToken() {
     const csrfTokenInput = document.getElementsByName('csrfmiddlewaretoken')[0];
     return csrfTokenInput ? csrfTokenInput.value : null;
+  }
+
+  function validateCoupon(event) {
+    let couponInput = document.getElementById("coupon").value.trim();
+    let errorMessage = document.getElementById("coupon-error");
+
+    if (couponInput === "") {
+      event.preventDefault(); // Prevent form submission
+      errorMessage.style.display = "block"; // Show error message
+
+      // Hide the message after 3 seconds
+      setTimeout(() => {
+        errorMessage.style.display = "none";
+      }, 3000);
+
+      return false;
+    }
+    return true;
   }
 
   
